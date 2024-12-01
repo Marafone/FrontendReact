@@ -1,0 +1,21 @@
+:root {
+  --navbar-bg-color: #a0091b;
+  --dropdown-item-hover-color: #90091b;
+}
+
+.custom-navbar {
+  background-color: var(--navbar-bg-color);
+}
+
+.custom-dropdown-item:hover {
+  background-color: var(--dropdown-item-hover-color);
+}
+
+.custom-dropdown-item:focus {
+  background-color: var(--navbar-bg-color);
+}
+
+.custom-dropdown-menu {
+  min-width: 5.2rem;
+  text-align: center;
+}
