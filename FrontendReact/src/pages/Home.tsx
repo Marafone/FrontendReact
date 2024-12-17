@@ -1,4 +1,6 @@
-import { useState } from "react";
+import axios from "axios";
+import { useEffect, useState } from "react";
+import { Link } from "react-router";
 
 enum GameType {
   Maraffa = "Maraffa",
@@ -13,6 +15,7 @@ interface gameData {
 }
 
 const Home = () => {
+  const baseUrl = import.meta.env.VITE_API_BASE_URL;
   const sampleLobbies: gameData[] = [
     { lobbyName: "lobby1", gameType: GameType.Maraffa, playersAmount: 1 },
     { lobbyName: "lobby2", gameType: GameType.Briscolla, playersAmount: 3 },
@@ -21,12 +24,30 @@ const Home = () => {
   const playersAmount = 4;
   const [page, setPage] = useState(1);
   const [lobbies, setLobbies] = useState<gameData[]>(sampleLobbies);
-  const lobbiesMenuColor = "#FAC36099";
+  const lobbiesMenuColor = "#FFC360";
+
+  useEffect(() => {
+    axios.get(`${baseUrl}/game/public`).then((response) => {
+      console.log(response.data);
+    });
+  });
 
   return (
-    <div className="d-flex justify-content-evenly align-items-center container-fluid h-100">
-      {/* news / chat div */}
-      <div className="d-flex justify-content-center align-items-center w-50">
+    <div className="d-flex justify-content-center align-items-center container-fluid h-100">
+      {/* news and creation button */}
+      <div
+        className="d-flex flex-column justify-content-evenly align-items-center w-50"
+        style={{ height: "492px" }}
+      >
+        <div className="w-75">
+          <Link
+            to="/create-game"
+            className="w-100 btn border border-black border-opacity-25 fw-bold"
+            style={{ backgroundColor: lobbiesMenuColor }}
+          >
+            Create Game
+          </Link>
+        </div>
         <div className="w-75">
           <h1>News</h1>
           <p>
@@ -50,7 +71,7 @@ const Home = () => {
       <div className="d-flex justify-content-center align-items-center w-50">
         <div
           className="d-flex flex-column w-75 border border-black border-opacity-25 border-2"
-          style={{ backgroundColor: lobbiesMenuColor }}
+          style={{ backgroundColor: lobbiesMenuColor, height: "492px" }} // max 10 lobbies at one page
         >
           {/* header */}
           <div className="d-flex justify-content-between align-items-center container-fluid border-bottom border-black border-opacity-25 border-1 p-2">
@@ -72,7 +93,7 @@ const Home = () => {
             </div>
           ))}
           {/* next page div*/}
-          <div className="d-flex justify-content-between align-items-center container-fluid p-2">
+          <div className="d-flex justify-content-between align-items-center container-fluid p-2 mt-auto border-black border-top border-opacity-25">
             <div
               className="d-flex align-items-center gap-2 text-black fw-bold"
               style={{ cursor: "pointer" }}
