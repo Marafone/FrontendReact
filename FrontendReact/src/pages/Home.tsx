@@ -9,28 +9,35 @@ enum GameType {
 }
 
 interface gameData {
-  lobbyName: string;
+  gameId: number;
+  gameName: string;
   gameType: GameType;
-  playersAmount: number;
+  joinedPlayersAmount: number;
 }
 
 const Home = () => {
   const baseUrl = import.meta.env.VITE_API_BASE_URL;
-  const sampleLobbies: gameData[] = [
-    { lobbyName: "lobby1", gameType: GameType.Maraffa, playersAmount: 1 },
-    { lobbyName: "lobby2", gameType: GameType.Briscolla, playersAmount: 3 },
-    { lobbyName: "lobby3", gameType: GameType.Trisette, playersAmount: 2 },
-  ];
   const playersAmount = 4;
   const [page, setPage] = useState(1);
-  const [lobbies, setLobbies] = useState<gameData[]>(sampleLobbies);
+  const [lobbies, setLobbies] = useState<gameData[]>([]);
+  const [loading, setLoading] = useState(true);
   const lobbiesMenuColor = "#FFC360";
 
   useEffect(() => {
-    axios.get(`${baseUrl}/game/public`).then((response) => {
-      console.log(response.data);
-    });
-  });
+    const fetchGames = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get(`${baseUrl}/game/waiting`);
+        setLobbies(response.data);
+      } catch (err) {
+        console.log(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchGames();
+  }, []);
 
   return (
     <div className="d-flex justify-content-center align-items-center container-fluid h-100">
@@ -80,18 +87,24 @@ const Home = () => {
             <p className="fw-bold m-0">Players</p>
           </div>
           {/* lobbies info */}
-          {lobbies.map((l) => (
-            <div
-              key={l.lobbyName}
-              className="d-flex justify-content-between align-items-center container-fluid border-bottom border-black border-opacity-25 border-1 p-2"
-            >
-              <p className="m-0">{l.lobbyName}</p>
-              <p className="m-0">{l.gameType}</p>
-              <p className="m-0">
-                {l.playersAmount}/{playersAmount}
-              </p>
+          {loading ? (
+            <div className="d-flex justify-content-center align-items-center container-fluid border-bottom border-black border-opacity-25 border-1 p-2">
+              <p className="m-0">Loading...</p>
             </div>
-          ))}
+          ) : (
+            lobbies.map((l) => (
+              <div
+                key={l.gameId}
+                className="d-flex justify-content-between align-items-center container-fluid border-bottom border-black border-opacity-25 border-1 p-2"
+              >
+                <p className="m-0">{l.gameName}</p>
+                <p className="m-0">{l.gameType}</p>
+                <p className="m-0">
+                  {l.joinedPlayersAmount}/{playersAmount}
+                </p>
+              </div>
+            ))
+          )}
           {/* next page div*/}
           <div className="d-flex justify-content-between align-items-center container-fluid p-2 mt-auto border-black border-top border-opacity-25">
             <div
