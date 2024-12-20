@@ -1,7 +1,7 @@
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import React, { useState } from "react";
 
-type GameType = "MARAFFA" | "BRISCOLLA" | "TRISETTE" | "";
+type GameType = "MARAFFA" | "BRISCOLLA" | "TRISETTE";
 
 interface FormData {
   gameName: string;
@@ -9,14 +9,19 @@ interface FormData {
   password: string;
 }
 
+interface Errors {
+  [key: string]: string;
+}
+
 const GameCreation = () => {
+  const baseUrl = import.meta.env.VITE_API_BASE_URL;
   const [isGamePrivate, setIsGamePrivate] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     gameName: "",
-    gameType: "",
+    gameType: "MARAFFA",
     password: "",
   });
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [errors, setErrors] = useState<Errors>({});
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -31,9 +36,14 @@ const GameCreation = () => {
     const newErrors: { [key: string]: string } = {};
 
     const gameNameTrimmed = formData.gameName.trim();
+    const minGameNameLength = 4;
+    const maxGameNameLength = 20;
 
-    if (gameNameTrimmed.length <= 3 || gameNameTrimmed.length > 20) {
-      newErrors.gameName = "Length must be between 4 and 20 characters";
+    if (
+      gameNameTrimmed.length < minGameNameLength ||
+      gameNameTrimmed.length > maxGameNameLength
+    ) {
+      newErrors.gameName = `Length must be between ${minGameNameLength} and ${maxGameNameLength} characters`;
     }
 
     if (isGamePrivate && !formData.password) {
@@ -44,18 +54,20 @@ const GameCreation = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  function createPrivateGame() {
+  function createGame() {
     if (!validateFormData()) return;
-    console.log("Private game creation.");
-    console.log(formData);
-    // TODO create private game request
-  }
-
-  function createPublicGame() {
-    if (!validateFormData()) return;
-    console.log("Public game creation.");
-    console.log(formData);
-    // TODO create public game request
+    // send request
+    axios
+      .post(`${baseUrl}/game/create`, formData)
+      .then((r) => console.log("Response: ", r))
+      .catch((e: AxiosError) => {
+        const errorResponse = e.response?.data;
+        if (errorResponse === "GAME_NAME_TAKEN") {
+          setErrors({
+            gameName: "Game name already taken. Try with the other name.",
+          });
+        }
+      });
   }
 
   return (
@@ -134,9 +146,7 @@ const GameCreation = () => {
             <button
               className="custom-btn btn fw-bold w-100 custom-form-element border border-black border-opacity-25"
               type="button"
-              onClick={() => {
-                isGamePrivate ? createPrivateGame() : createPublicGame();
-              }}
+              onClick={createGame}
             >
               Create Game
             </button>
