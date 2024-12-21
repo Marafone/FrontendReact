@@ -28,7 +28,8 @@ const Home = () => {
       try {
         setLoading(true);
         const response = await axios.get(`${baseUrl}/game/waiting`);
-        setLobbies(response.data);
+        // Ensure the response is an array
+        setLobbies(Array.isArray(response.data) ? response.data : []);
       } catch (err) {
         console.log(err);
       } finally {
