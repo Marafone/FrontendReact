@@ -1,5 +1,6 @@
 import axios, { AxiosError } from "axios";
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 type GameType = "MARAFFA" | "BRISCOLLA" | "TRISETTE";
 
@@ -22,6 +23,7 @@ const GameCreation = () => {
     password: "",
   });
   const [errors, setErrors] = useState<Errors>({});
+  const navigate = useNavigate();
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -59,7 +61,9 @@ const GameCreation = () => {
     // send request
     axios
       .post(`${baseUrl}/game/create`, formData)
-      .then((r) => console.log("Response: ", r))
+      .then((_) => {
+        navigate("/wait-for-game", { state: formData });
+      })
       .catch((e: AxiosError) => {
         const errorResponse = e.response?.data;
         if (errorResponse === "GAME_NAME_TAKEN") {
@@ -141,6 +145,7 @@ const GameCreation = () => {
               )}
             </div>
           )}
+          {/* TODO - GAME CREATED SUCCESSFULLY INFO */}
           {/* Create Game button */}
           <div>
             <button

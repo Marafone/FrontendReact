@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
+import "../styles/home-page.css";
 
 enum GameType {
   Maraffa = "Maraffa",
@@ -17,11 +18,11 @@ interface gameData {
 
 const Home = () => {
   const baseUrl = import.meta.env.VITE_API_BASE_URL;
+  const navigate = useNavigate();
   const playersAmount = 4;
   const [page, setPage] = useState(1);
   const [lobbies, setLobbies] = useState<gameData[]>([]);
   const [loading, setLoading] = useState(true);
-  const lobbiesMenuColor = "#FFC360";
 
   useEffect(() => {
     const fetchGames = async () => {
@@ -40,6 +41,20 @@ const Home = () => {
     fetchGames();
   }, []);
 
+  const handleJoinGame = (
+    gameName: string,
+    gameType: string,
+    joinedPlayersAmount: number
+  ) => {
+    const gameData = {
+      gameName,
+      gameType,
+      joinedPlayersAmount,
+    };
+
+    navigate("/wait-for-game", { state: gameData });
+  };
+
   return (
     <div className="d-flex justify-content-center align-items-center container-fluid h-100">
       {/* news and creation button */}
@@ -50,8 +65,7 @@ const Home = () => {
         <div className="w-75">
           <Link
             to="/create-game"
-            className="w-100 btn border border-black border-opacity-25 fw-bold"
-            style={{ backgroundColor: lobbiesMenuColor }}
+            className="custom-create-game-btn btn border border-black border-opacity-25 w-100 fw-bold"
           >
             Create Game
           </Link>
@@ -77,10 +91,7 @@ const Home = () => {
       </div>
       {/* lobby div */}
       <div className="d-flex justify-content-center align-items-center w-50">
-        <div
-          className="d-flex flex-column w-75 border border-black border-opacity-25 border-2"
-          style={{ backgroundColor: lobbiesMenuColor, height: "492px" }} // max 10 lobbies at one page
-        >
+        <div className="custom-lobby-div d-flex flex-column w-75 border border-black border-opacity-25 border-2">
           {/* header */}
           <div className="d-flex justify-content-between align-items-center container-fluid border-bottom border-black border-opacity-25 border-1 p-2">
             <p className="fw-bold m-0">Lobby name</p>
@@ -96,7 +107,10 @@ const Home = () => {
             lobbies.map((l) => (
               <div
                 key={l.gameId}
-                className="d-flex justify-content-between align-items-center container-fluid border-bottom border-black border-opacity-25 border-1 p-2"
+                className="custom-lobby-div-element d-flex justify-content-between align-items-center container-fluid border-bottom border-black border-opacity-25 border-1 p-2"
+                onClick={() =>
+                  handleJoinGame(l.gameName, l.gameType, l.joinedPlayersAmount)
+                }
               >
                 <p className="m-0">{l.gameName}</p>
                 <p className="m-0">{l.gameType}</p>
