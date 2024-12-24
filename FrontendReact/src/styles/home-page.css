@@ -1,0 +1,22 @@
+:root {
+  --widgets-bg-color: #ffc360;
+  --widgets-hover-bg-color: #ffcc7a;
+}
+
+.custom-lobby-div-element:hover {  
+  background-color: var(--widgets-hover-bg-color);
+  cursor: pointer;
+}
+
+.custom-lobby-div {
+  background-color: var(--widgets-bg-color);
+  height: 492px;
+}
+
+.custom-create-game-btn {
+  background-color: var(--widgets-bg-color);
+}
+
+.custom-create-game-btn:hover {
+  background-color: var(--widgets-hover-bg-color);
+}

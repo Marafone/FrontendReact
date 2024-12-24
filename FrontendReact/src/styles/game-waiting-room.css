@@ -1,0 +1,18 @@
+:root {
+  --lobby-bg-color: #f2eece;
+  --events-bg-color: #f2eece;
+  --player-hover-bg-color: #fdf9e0;
+}
+
+.custom-lobby {
+  background-color: var(--lobby-bg-color);
+}
+
+.custom-events {
+  background-color: var(--events-bg-color);
+}
+
+.custom-player:hover {
+  background-color: var(--player-hover-bg-color);
+  cursor: pointer;
+}
