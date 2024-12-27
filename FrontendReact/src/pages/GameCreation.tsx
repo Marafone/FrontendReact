@@ -2,6 +2,8 @@ import axios, { AxiosError } from "axios";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+axios.defaults.withCredentials = true;
+
 type GameType = "MARAFFA" | "BRISCOLLA" | "TRISETTE";
 
 interface FormData {
@@ -60,9 +62,12 @@ const GameCreation = () => {
     if (!validateFormData()) return;
     // send request
     axios
-      .post(`${baseUrl}/game/create`, formData)
-      .then((_) => {
-        navigate("/wait-for-game", { state: formData });
+      .post<string>(`${baseUrl}/game/create`, formData, {
+        transformResponse: [(data) => data], // disable automatic parsing
+      })
+      .then((response) => {
+        const gameId = BigInt(response.data);
+        handleNavigation(gameId);
       })
       .catch((e: AxiosError) => {
         const errorResponse = e.response?.data;
@@ -73,6 +78,13 @@ const GameCreation = () => {
         }
       });
   }
+
+  const handleNavigation = (gameId: bigint) => {
+    // navigate to waiting lobby
+    navigate("/wait-for-game", {
+      state: { gameId, ...formData, joinedPlayersAmount: 1 },
+    });
+  };
 
   return (
     <div className="d-flex justify-content-center align-items-center w-100 h-100">
@@ -151,7 +163,9 @@ const GameCreation = () => {
             <button
               className="custom-btn btn fw-bold w-100 custom-form-element border border-black border-opacity-25"
               type="button"
-              onClick={createGame}
+              onClick={() => {
+                createGame();
+              }}
             >
               Create Game
             </button>
