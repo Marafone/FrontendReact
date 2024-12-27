@@ -1,26 +1,32 @@
-import React, { useContext, useState } from "react";
-import "../styles/register-login-page.css";
 import axios from "axios";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { UserContext, UserProvider } from "../context/UserContext";
+import { useUserContext } from "../context/UserContext";
+import "../styles/register-login-page.css";
+
+axios.defaults.withCredentials = true;
 
 const Login = () => {
   const baseUrl = import.meta.env.VITE_API_BASE_URL;
   const handleLogin = () => {
     axios
       .post(`${baseUrl}/auth/login`, {
-        username: username,
-        password: password,
+        username: formUsername,
+        password: formPassword,
       })
       .then((r) => {
         console.log(r);
+        setUsername(formUsername);
         navigate(`/`);
       })
-      .catch((err) => console.log("Error: " + err));
+      .catch((err) => {
+        console.log("Error: " + err);
+      });
   };
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [formUsername, setFormUsername] = useState("");
+  const [formPassword, setFormPassword] = useState("");
   const navigate = useNavigate();
+  const { username, setUsername } = useUserContext(); // global context
 
   return (
     <div className="custom-outer-div d-flex justify-content-center align-items-center min-vw-100 min-vh-100">
@@ -30,8 +36,8 @@ const Login = () => {
           <input
             type="text"
             className="form-control"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            value={formUsername}
+            onChange={(e) => setFormUsername(e.target.value)}
           ></input>
         </div>
         <div className="mb-3">
@@ -39,8 +45,8 @@ const Login = () => {
           <input
             type="password"
             className="form-control"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            value={formPassword}
+            onChange={(e) => setFormPassword(e.target.value)}
           ></input>
         </div>
         <button type="submit" className="btn btn-primary" onClick={handleLogin}>
