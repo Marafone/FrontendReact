@@ -1,8 +1,10 @@
-import React from "react";
+import { Client, IMessage } from "@stomp/stompjs";
+import { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import "../styles/game-waiting-room.css";
 
 interface waitingRoomContent {
+  gameId: number;
   gameName: string;
   gameType: string;
   joinedPlayersAmount: number;
@@ -12,6 +14,36 @@ const GameWaitingRoom = () => {
   var maxPlayersAmount = 4;
   const location = useLocation();
   const gameContent: waitingRoomContent = location.state;
+  const baseUrl = import.meta.env.VITE_API_BASE_URL;
+
+  useEffect(() => {
+    const onMessageReceived = (msg: IMessage) => {
+      console.log("MsgReceived: " + msg.body);
+    };
+
+    const onConnected = () => {
+      client.subscribe(`/topic/game/${gameContent.gameId}`, onMessageReceived);
+      client.subscribe(`/user/queue/game/`, onMessageReceived);
+    };
+
+    const onError = () => {
+      console.log("error");
+    };
+
+    const client = new Client({
+      brokerURL: `${baseUrl}/game`,
+      // debug: (str) => console.log(str),
+      onConnect: onConnected,
+      onStompError: onError,
+    });
+
+    client.activate();
+
+    return () => {
+      client.deactivate();
+    };
+  }, []);
+
   return (
     <>
       <div
