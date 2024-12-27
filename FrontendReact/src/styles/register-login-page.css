@@ -1,0 +1,12 @@
+:root {
+  --background-color: #ffc360;
+  --window-color: #ffd99b;
+}
+
+.custom-outer-div {
+  background-color: var(--background-color);
+}
+
+.custom-user-info-window {
+  background-color: var(--window-color);
+}
