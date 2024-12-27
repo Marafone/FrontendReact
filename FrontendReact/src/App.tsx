@@ -4,10 +4,17 @@ import {
   Route,
   RouterProvider,
 } from "react-router-dom";
-import Home from "./pages/Home";
+import { UserProvider } from "./context/UserContext.tsx";
 import MainLayout from "./layouts/MainLayout";
 import GameCreation from "./pages/GameCreation";
 import GameWaitingRoom from "./pages/GameWaitingRoom";
+import Home from "./pages/Home";
+import Login from "./pages/Login.tsx";
+import Register from "./pages/Register.tsx";
+
+export interface User {
+  username: string;
+}
 
 function App() {
   const router = createBrowserRouter(
@@ -20,14 +27,16 @@ function App() {
         </Route>
         {/* Routes without MainLayout */}
         <Route path="/wait-for-game" element={<GameWaitingRoom />}></Route>
+        <Route path="/register" element={<Register />}></Route>
+        <Route path="/login" element={<Login />}></Route>
       </>
     )
   );
 
   return (
-    <div>
+    <UserProvider>
       <RouterProvider router={router} />
-    </div>
+    </UserProvider>
   );
 }
 
