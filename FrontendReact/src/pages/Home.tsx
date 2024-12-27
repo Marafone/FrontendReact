@@ -3,33 +3,34 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import "../styles/home-page.css";
 
+axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL;
+
 enum GameType {
   Maraffa = "Maraffa",
   Briscolla = "Briscolla",
   Trisette = "Trisette",
 }
 
-interface gameData {
-  gameId: number;
+interface GameData {
+  gameId: bigint;
   gameName: string;
   gameType: GameType;
   joinedPlayersAmount: number;
 }
 
 const Home = () => {
-  const baseUrl = import.meta.env.VITE_API_BASE_URL;
   const navigate = useNavigate();
   const playersAmount = 4;
   const [page, setPage] = useState(1);
-  const [lobbies, setLobbies] = useState<gameData[]>([]);
+  const [lobbies, setLobbies] = useState<GameData[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchGames = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`${baseUrl}/game/waiting`);
-        // Ensure the response is an array
+        const response = await axios.get("/game/waiting");
+        console.log(response.data);
         setLobbies(Array.isArray(response.data) ? response.data : []);
       } catch (err) {
         console.log(err);
@@ -41,18 +42,27 @@ const Home = () => {
     fetchGames();
   }, []);
 
-  const handleJoinGame = (
-    gameName: string,
-    gameType: string,
-    joinedPlayersAmount: number
+  const handleNavigation = (gameData: GameData) => {
+    // navigate to waiting lobby
+    navigate("/wait-for-game", { state: gameData });
+  };
+
+  const handleJoinRequest = (
+    gameId: bigint,
+    team: string,
+    joinGameCode: string
   ) => {
-    const gameData = {
-      gameName,
-      gameType,
-      joinedPlayersAmount,
+    const joinGameRequestData = {
+      team: team,
+      joinGameCode: joinGameCode, // TODO possibility to write joinGameCode by the user - so we have to implement option to recognize which game is private and which is not
     };
 
-    navigate("/wait-for-game", { state: gameData });
+    axios
+      .post(`/game/${gameId}/join`, joinGameRequestData)
+      .then((response) => {
+        console.log(response);
+      })
+      .catch((err) => console.log(err));
   };
 
   return (
@@ -108,9 +118,16 @@ const Home = () => {
               <div
                 key={l.gameId}
                 className="custom-lobby-div-element d-flex justify-content-between align-items-center container-fluid border-bottom border-black border-opacity-25 border-1 p-2"
-                onClick={() =>
-                  handleJoinGame(l.gameName, l.gameType, l.joinedPlayersAmount)
-                }
+                onClick={() => {
+                  handleJoinRequest(l.gameId, "RED", "");
+                  const gameData: GameData = {
+                    gameId: l.gameId,
+                    gameName: l.gameName,
+                    gameType: l.gameType,
+                    joinedPlayersAmount: l.joinedPlayersAmount,
+                  };
+                  handleNavigation(gameData);
+                }}
               >
                 <p className="m-0">{l.gameName}</p>
                 <p className="m-0">{l.gameType}</p>
