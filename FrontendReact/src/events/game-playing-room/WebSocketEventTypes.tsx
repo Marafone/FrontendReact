@@ -1,0 +1,3 @@
+interface BaseEvent {
+  eventType: string;
+}
