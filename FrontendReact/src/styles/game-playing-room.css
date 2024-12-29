@@ -1,0 +1,11 @@
+:root {
+  --background-color: #ffc058;
+}
+
+.custom-outer-div {
+  background-color: var(--background-color);
+}
+
+.custom-img {
+  max-width: 125px;
+}
