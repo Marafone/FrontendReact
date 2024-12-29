@@ -11,6 +11,7 @@ import GameWaitingRoom from "./pages/GameWaitingRoom";
 import Home from "./pages/Home";
 import Login from "./pages/Login.tsx";
 import Register from "./pages/Register.tsx";
+import GamePlayingRoom from "./pages/GamePlayingRoom.tsx";
 
 export interface User {
   username: string;
@@ -29,6 +30,7 @@ function App() {
         <Route path="/wait-for-game" element={<GameWaitingRoom />}></Route>
         <Route path="/register" element={<Register />}></Route>
         <Route path="/login" element={<Login />}></Route>
+        <Route path="/play-game" element={<GamePlayingRoom />}></Route>
       </>
     )
   );
