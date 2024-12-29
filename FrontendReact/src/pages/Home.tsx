@@ -47,8 +47,8 @@ const Home = () => {
     navigate("/wait-for-game", { state: gameData });
   };
 
-  const handleJoinRequest = (
-    gameId: bigint,
+  const handleJoinGame = (
+    gameData: GameData,
     team: string,
     joinGameCode: string
   ) => {
@@ -58,9 +58,10 @@ const Home = () => {
     };
 
     axios
-      .post(`/game/${gameId}/join`, joinGameRequestData)
+      .post(`/game/${gameData.gameId}/join`, joinGameRequestData)
       .then((response) => {
         console.log(response);
+        handleNavigation(gameData); // navigate only if join request was successful
       })
       .catch((err) => console.log(err));
   };
@@ -119,14 +120,13 @@ const Home = () => {
                 key={l.gameId}
                 className="custom-lobby-div-element d-flex justify-content-between align-items-center container-fluid border-bottom border-black border-opacity-25 border-1 p-2"
                 onClick={() => {
-                  handleJoinRequest(l.gameId, "RED", "");
                   const gameData: GameData = {
                     gameId: l.gameId,
                     gameName: l.gameName,
                     gameType: l.gameType,
                     joinedPlayersAmount: l.joinedPlayersAmount,
                   };
-                  handleNavigation(gameData);
+                  handleJoinGame(gameData, "RED", "");
                 }}
               >
                 <p className="m-0">{l.gameName}</p>
