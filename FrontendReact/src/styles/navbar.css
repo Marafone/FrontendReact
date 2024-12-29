@@ -19,3 +19,16 @@
   min-width: 5.2rem;
   text-align: center;
 }
+
+.dropdown-menu {
+  position: absolute;
+  right: 0; /* Align to the right edge */
+  left: auto;
+  transform: translateY(10px); /* Add a slight vertical offset */
+  z-index: 1050; /* Ensure it appears above other elements */
+  max-width: 90vw; /* Prevent the menu from being too wide on small screens */
+}
+
+.dropdown-item {
+  white-space: nowrap; /* Prevent text wrapping */
+}
