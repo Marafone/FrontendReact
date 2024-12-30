@@ -1,15 +1,14 @@
 import { Client, IMessage } from "@stomp/stompjs";
-import { useEffect, useState } from "react";
+import axios from "axios";
+import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { UserContext, useUserContext } from "../context/UserContext";
+import { useUserContext } from "../context/UserContext";
 import {
   GameStartedEvent,
   PlayerJoinedEvent,
-  Team,
   TeamStateEvent,
 } from "../events/game-waiting-room/WebSocketEventTypes";
 import "../styles/game-waiting-room.css";
-import axios from "axios";
 
 interface waitingRoomContent {
   gameId: bigint;
@@ -29,44 +28,52 @@ const GameWaitingRoom = () => {
   const baseUrl = import.meta.env.VITE_API_BASE_URL;
   const [teamRed, setTeamRed] = useState<string[]>([]);
   const [teamBlue, setTeamBlue] = useState<string[]>([]);
-  const [playersAmount, setPlayersAmount] = useState(1);
+  const [playersAmount, setPlayersAmount] = useState(1); // TODO repair playersAmount, it does not work correctly
   const [eventMessages, setEventMessages] = useState<string[]>([]);
   const { username, setUsername } = useUserContext();
   const navigate = useNavigate();
+  const isTeamStateUpdated = useRef(false);
+
+  // HELPER FUNCTIONS
 
   const handleStartGame = () => {
     client.publish({ destination: `/app/game/${gameContent.gameId}/start` });
   };
 
+  // WEBSOCKET FUNCTIONS
+
   const onMessageReceived = (msg: IMessage) => {
-    const event: WebSocketEventType = JSON.parse(msg.body)[0];
-    switch (event.eventType) {
-      case "TeamState":
-        handleTeamStateEvent(event);
-        break;
-      case "PlayerJoinedEvent":
-        handlePlayerJoinedEvent(event);
-        break;
-      case "GameStartedEvent":
-        navigate("/play-game", { state: { gameId: gameContent.gameId } });
-        break;
-      default:
-        break;
-    }
+    const events: WebSocketEventType[] = JSON.parse(msg.body);
+    events.forEach((event) => {
+      switch (event.eventType) {
+        case "TeamState":
+          handleTeamStateEvent(event);
+          break;
+        case "PlayerJoinedEvent":
+          handlePlayerJoinedEvent(event);
+          break;
+        case "GameStartedEvent":
+          handleGameStartedEvent();
+          break;
+        default:
+          break;
+      }
+    });
   };
 
   function handleTeamStateEvent(event: TeamStateEvent) {
     // change teams information
     const newTeamRed: string[] = [];
     const newTeamBlue: string[] = [];
-    var size = 0;
+
     Object.entries(event.teamState).forEach(([y, x]) => {
       x === "RED" ? newTeamRed.push(y) : newTeamBlue.push(y);
-      size++;
     });
     setTeamRed(newTeamRed);
     setTeamBlue(newTeamBlue);
-    setPlayersAmount(size);
+
+    // change this field in order to let game started event run
+    isTeamStateUpdated.current = true;
   }
 
   function handlePlayerJoinedEvent(event: PlayerJoinedEvent) {
@@ -74,7 +81,7 @@ const GameWaitingRoom = () => {
     const newEventMessage = event.playerName + " joined the game!";
     setEventMessages((prevMessages) => [...prevMessages, newEventMessage]);
     // edit amount of players
-    setPlayersAmount(playersAmount + 1);
+    setPlayersAmount((prevAmount) => prevAmount + 1);
     // edit displayed teams
     if (event.team === "RED") {
       setTeamRed((previousTeamRed) => [...previousTeamRed, event.playerName]);
@@ -85,6 +92,26 @@ const GameWaitingRoom = () => {
       ]);
     }
   }
+
+  function handleGameStartedEvent() {
+    if (isTeamStateUpdated.current) {
+      navigate("/play-game", {
+        state: { gameId: gameContent.gameId, teams: [teamRed, teamBlue] },
+      });
+    } else {
+      // Retry navigation until `TeamState` is processed
+      const checkTeamsInterval = setInterval(() => {
+        if (isTeamStateUpdated.current) {
+          clearInterval(checkTeamsInterval);
+          navigate("/play-game", {
+            state: { gameId: gameContent.gameId, teams: [teamRed, teamBlue] },
+          });
+        }
+      }, 50); // Check every 50ms
+    }
+  }
+
+  // USE EFFECT FUNCTION
 
   useEffect(() => {
     const createWebSocketConnection = () => {
@@ -137,7 +164,10 @@ const GameWaitingRoom = () => {
     getBeginningGameInformation();
 
     return () => {
-      if (client?.connected) client.deactivate();
+      if (client?.connected) {
+        client.unsubscribe(`/topic/game/${gameContent.gameId}`);
+        client.deactivate();
+      }
     };
   }, []);
 
