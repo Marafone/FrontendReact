@@ -3,40 +3,35 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../styles/register-login-page.css";
 
+axios.defaults.withCredentials = true;
+
 const Register = () => {
   const baseUrl = import.meta.env.VITE_API_BASE_URL;
   const navigate = useNavigate();
-
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
-  const handleRegister = async () => {
-    try {
-      const response = await axios.post(`${baseUrl}/auth/register`, {
-        username,
-        email,
-        password,
+  const handleRegister = () => {
+    axios
+      .post(`${baseUrl}/auth/register`, { username, email, password })
+      .then((response) => {
+        if (response.status === 201) {
+          navigate("/");
+        }
+      })
+      .catch((error) => {
+        setErrorMessage("Registration failed. Please try again.");
+        console.log("Error:", error);
       });
-
-      if (response.status === 201) {
-        navigate(`/`);
-      }
-    } catch (err) {
-      setErrorMessage(
-        err.response?.data?.message || "Registration failed. Please try again."
-      );
-    }
-  };
-
-  const handleCancel = () => {
-    navigate(`/`);
   };
 
   return (
-    <div className="custom-outer-div d-flex justify-content-center align-items-center min-vw-100 min-vh-100">
-      <div className="custom-user-info-window w-25 p-4 border border-black border-opacity-25">
+    <div className="custom-outer-div d-flex justify-content-center align-items-center min-vw-100 min-vh-100 p-3">
+      <div className="custom-user-info-window w-100 p-4 border border-black border-opacity-25 rounded shadow-lg" style={{ maxWidth: "400px" }}>
+        <h2 className="text-center mb-4">Register</h2>
+        {errorMessage && <p className="text-danger text-center">{errorMessage}</p>}
         <div className="mb-3">
           <label className="form-label">Username</label>
           <input
@@ -65,26 +60,13 @@ const Register = () => {
           />
         </div>
         <div className="d-flex justify-content-between">
-          <button
-            type="button"
-            className="btn btn-secondary"
-            onClick={handleCancel}
-          >
+          <button className="btn btn-secondary" onClick={() => navigate("/")}>
             Cancel
           </button>
-          <button
-            type="submit"
-            className="btn btn-primary"
-            onClick={handleRegister}
-          >
+          <button className="btn btn-primary" onClick={handleRegister}>
             Submit
           </button>
         </div>
-        {errorMessage && (
-          <div className="alert alert-danger mt-3" role="alert">
-            {errorMessage}
-          </div>
-        )}
       </div>
     </div>
   );
