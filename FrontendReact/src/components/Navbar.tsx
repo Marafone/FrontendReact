@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 
 const Navbar = () => {
@@ -11,6 +11,37 @@ const Navbar = () => {
     setIsLoggedIn(false); // Log out logic
     console.log("User logged out");
   };
+
+  const closeDropdowns = () => {
+    setDisplayLanguages(false);
+    setDisplayUserMenu(false);
+  };
+
+  const handleLanguagesClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent event bubbling to document
+    setDisplayLanguages((prev) => {
+      if (!prev) setDisplayUserMenu(false); // Close the user menu if opening the languages menu
+      return !prev;
+    });
+  };
+
+  const handleUserMenuClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent event bubbling to document
+    setDisplayUserMenu((prev) => {
+      if (!prev) setDisplayLanguages(false); // Close the languages menu if opening the user menu
+      return !prev;
+    });
+  };
+
+  useEffect(() => {
+    // Close dropdowns when clicking anywhere on the page
+    const handleClickOutside = () => closeDropdowns();
+    document.addEventListener("click", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, []);
 
   return (
     <>
@@ -38,7 +69,7 @@ const Navbar = () => {
                   role="button"
                   data-bs-toggle="dropdown"
                   aria-expanded="false"
-                  onClick={() => setDisplayLanguages(!displayLanguages)}
+                  onClick={handleLanguagesClick}
                 >
                   Language
                 </button>
@@ -73,7 +104,7 @@ const Navbar = () => {
               <li className="dropdown">
                 <i
                   className="bi bi-person-circle text-white fs-4"
-                  onClick={() => setDisplayUserMenu(!displayUserMenu)}
+                  onClick={handleUserMenuClick}
                   style={{ cursor: "pointer" }}
                 ></i>
                 <ul
