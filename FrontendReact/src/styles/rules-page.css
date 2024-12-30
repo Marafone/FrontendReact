@@ -1,0 +1,38 @@
+:root {
+    --background-color: #ffc360;
+    --window-color: #ffd99b;
+  }
+  
+  .rules-page {
+    background-color: var(--background-color);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .rules-content {
+    background-color: var(--window-color);
+    max-width: 800px;
+    width: 75%;
+    margin: 20px auto;
+    padding: 20px;
+    border-radius: 10px;
+  }
+  
+  .rules-content h1 {
+    text-align: center;
+    margin-bottom: 24px;
+  }
+  
+  .image-container {
+    text-align: center;
+    margin-top: 30px;
+  }
+  
+  .rules-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+  }

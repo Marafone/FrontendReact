@@ -1,9 +1,48 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 
 const Navbar = () => {
   const [displayLanguages, setDisplayLanguages] = useState(false);
+  const [displayUserMenu, setDisplayUserMenu] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // Manage login state here
   const languagesMenuColor = "#a0091b";
+
+  const handleLogout = () => {
+    setIsLoggedIn(false); // Log out logic
+    console.log("User logged out");
+  };
+
+  const closeDropdowns = () => {
+    setDisplayLanguages(false);
+    setDisplayUserMenu(false);
+  };
+
+  const handleLanguagesClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent event bubbling to document
+    setDisplayLanguages((prev) => {
+      if (!prev) setDisplayUserMenu(false); // Close the user menu if opening the languages menu
+      return !prev;
+    });
+  };
+
+  const handleUserMenuClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent event bubbling to document
+    setDisplayUserMenu((prev) => {
+      if (!prev) setDisplayLanguages(false); // Close the languages menu if opening the user menu
+      return !prev;
+    });
+  };
+
+  useEffect(() => {
+    // Close dropdowns when clicking anywhere on the page
+    const handleClickOutside = () => closeDropdowns();
+    document.addEventListener("click", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, []);
+
   return (
     <>
       <nav className="navbar navbar-expand custom-navbar">
@@ -17,12 +56,12 @@ const Navbar = () => {
                 </Link>
               </li>
               <li className="nav-item">
-                <Link to="/" className="nav-link text-white">
+                <Link to="/rules" className="nav-link text-white">
                   Rules
                 </Link>
               </li>
             </ul>
-            {/* languages menu */}
+            {/* Languages menu */}
             <ul className="list-group list-group-horizontal list-unstyled me-4">
               <li className="dropdown me-3 mt-1">
                 <button
@@ -30,7 +69,7 @@ const Navbar = () => {
                   role="button"
                   data-bs-toggle="dropdown"
                   aria-expanded="false"
-                  onClick={() => setDisplayLanguages(!displayLanguages)}
+                  onClick={handleLanguagesClick}
                 >
                   Language
                 </button>
@@ -55,12 +94,59 @@ const Navbar = () => {
                       IT
                     </button>
                   </li>
+                  <li>
+                    <button className="dropdown-item text-white custom-dropdown-item">
+                      RGN
+                    </button>
+                  </li>
                 </ul>
               </li>
-              <li className="">
-                <Link to="/">
-                  <i className="bi bi-person-circle text-white fs-4 "></i>
-                </Link>
+              <li className="dropdown">
+                <i
+                  className="bi bi-person-circle text-white fs-4"
+                  onClick={handleUserMenuClick}
+                  style={{ cursor: "pointer" }}
+                ></i>
+                <ul
+                  className={`dropdown-menu custom-dropdown-menu border border-black border-2 ${
+                    displayUserMenu && "show"
+                  }`}
+                  style={{
+                    backgroundColor: languagesMenuColor,
+                    right: 0, // Align the menu to the right to prevent overflow
+                    left: "auto",
+                  }}
+                >
+                  {!isLoggedIn ? (
+                    <>
+                      <li>
+                        <Link
+                          to="/register"
+                          className="dropdown-item text-white custom-dropdown-item"
+                        >
+                          Register
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          to="/login"
+                          className="dropdown-item text-white custom-dropdown-item"
+                        >
+                          Login
+                        </Link>
+                      </li>
+                    </>
+                  ) : (
+                    <li>
+                      <button
+                        onClick={handleLogout}
+                        className="dropdown-item text-white custom-dropdown-item"
+                      >
+                        Logout
+                      </button>
+                    </li>
+                  )}
+                </ul>
               </li>
             </ul>
           </div>

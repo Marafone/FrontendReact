@@ -12,6 +12,7 @@ import Home from "./pages/Home";
 import Login from "./pages/Login.tsx";
 import Register from "./pages/Register.tsx";
 import GamePlayingRoom from "./pages/GamePlayingRoom.tsx";
+import Rules from "./pages/Rules.tsx";
 
 export interface User {
   username: string;
@@ -31,6 +32,7 @@ function App() {
         <Route path="/register" element={<Register />}></Route>
         <Route path="/login" element={<Login />}></Route>
         <Route path="/play-game" element={<GamePlayingRoom />}></Route>
+        <Route path="/rules" element={<Rules />}></Route>
       </>
     )
   );

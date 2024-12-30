@@ -1,28 +1,37 @@
 import React, { useState } from "react";
-import "../styles/register-login-page.css";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import "../styles/register-login-page.css";
+
+axios.defaults.withCredentials = true;
 
 const Register = () => {
   const baseUrl = import.meta.env.VITE_API_BASE_URL;
-  const handleRegister = () => {
-    axios
-      .post(`${baseUrl}/auth/register`, {
-        username: username,
-        email: email,
-        password: password,
-      })
-      .then((r) => {
-        console.log(r);
-      })
-      .catch((err) => console.log("Error: " + err));
-  };
+  const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const handleRegister = () => {
+    axios
+      .post(`${baseUrl}/auth/register`, { username, email, password })
+      .then((response) => {
+        if (response.status === 201) {
+          navigate("/");
+        }
+      })
+      .catch((error) => {
+        setErrorMessage("Registration failed. Please try again.");
+        console.log("Error:", error);
+      });
+  };
 
   return (
-    <div className="custom-outer-div d-flex justify-content-center align-items-center min-vw-100 min-vh-100">
-      <div className="custom-user-info-window w-25 p-4 border border-black border-opacity-25">
+    <div className="custom-outer-div d-flex justify-content-center align-items-center min-vw-100 min-vh-100 p-3">
+      <div className="custom-user-info-window w-100 p-4 border border-black border-opacity-25 rounded shadow-lg" style={{ maxWidth: "400px" }}>
+        <h2 className="text-center mb-4">Register</h2>
+        {errorMessage && <p className="text-danger text-center">{errorMessage}</p>}
         <div className="mb-3">
           <label className="form-label">Username</label>
           <input
@@ -30,7 +39,7 @@ const Register = () => {
             className="form-control"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-          ></input>
+          />
         </div>
         <div className="mb-3">
           <label className="form-label">Email address</label>
@@ -39,7 +48,7 @@ const Register = () => {
             className="form-control"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-          ></input>
+          />
         </div>
         <div className="mb-3">
           <label className="form-label">Password</label>
@@ -48,15 +57,16 @@ const Register = () => {
             className="form-control"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-          ></input>
+          />
         </div>
-        <button
-          type="submit"
-          className="btn btn-primary"
-          onClick={handleRegister}
-        >
-          Submit
-        </button>
+        <div className="d-flex justify-content-between">
+          <button className="btn btn-secondary" onClick={() => navigate("/")}>
+            Cancel
+          </button>
+          <button className="btn btn-primary" onClick={handleRegister}>
+            Submit
+          </button>
+        </div>
       </div>
     </div>
   );
