@@ -8,6 +8,8 @@ export type Card = {
   suit: string;
 };
 
+type Team = "RED" | "BLUE";
+
 export interface TurnState extends BaseEvent {
   eventType: "TurnState";
   turn: Map<string, Card>; // username -> card
@@ -31,4 +33,13 @@ export interface PlayersOrderState extends BaseEvent {
 export interface TrumpSuitState extends BaseEvent {
   eventType: "TrumpSuitState";
   trumpSuit: string;
+}
+
+export interface NewRound extends BaseEvent {
+  eventType: "NewRound";
+}
+
+export interface WinnerState extends BaseEvent {
+  eventType: "WinnerState";
+  winnerTeam: Team;
 }
