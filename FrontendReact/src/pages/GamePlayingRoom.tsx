@@ -6,6 +6,7 @@ import { useLocation } from "react-router-dom";
 import axios from "axios";
 import {
   Card,
+  ErrorEvent,
   MyCardsState,
   NewRound,
   PlayersOrderState,
@@ -29,7 +30,8 @@ type WebSocketEventType =
   | PlayersOrderState
   | TrumpSuitState
   | NewRound
-  | WinnerState;
+  | WinnerState
+  | ErrorEvent;
 
 const convertCardIntoImageSrc = (card: Card): string => {
   var imageKey =
@@ -50,7 +52,7 @@ const GamePlayingRoom = () => {
   const blueTeamRef = useRef<string[]>([]);
   const [blueTeamPoints, setBlueTeamPoints] = useState<number>(0);
   const [cards, setCards] = useState<[bigint, string][]>([]);
-  const [playerCardMapCurrentRound, setPlayerCardMapCurrentRound] = useState<
+  const [playerCardMapCurrentTurn, setPlayerCardMapCurrentTurn] = useState<
     // map of cards played by players in current round
     Map<string, string | null>
   >(new Map());
@@ -60,6 +62,8 @@ const GamePlayingRoom = () => {
   const [displayedSuit, setDisplayedSuit] = useState<string>("-");
   const [displayCallSelection, setDisplayCallSelection] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [errorModalMessage, setErrorModalMessage] = useState<string>();
+  const [showErrorModal, setShowErrorModal] = useState<boolean>(false);
 
   // HELPER FUNCTIONS
 
@@ -79,11 +83,8 @@ const GamePlayingRoom = () => {
   // it removes cards that were played last in last round
   const clearBoard = () => {
     const newMap = new Map<string, string | null>();
-    newMap.set(players[0], null);
-    newMap.set(players[1], null);
-    newMap.set(players[2], null);
-    newMap.set(players[3], null);
-    setPlayerCardMapCurrentRound(new Map());
+    players.forEach((player) => newMap.set(player, null));
+    setPlayerCardMapCurrentTurn(newMap);
   };
 
   // HTTP REQUEST FUNCTIONS
@@ -139,6 +140,9 @@ const GamePlayingRoom = () => {
         case "WinnerState":
           handleWinnerStateEvent(event.winnerTeam);
           break;
+        case "ErrorEvent":
+          handleErrorEvent(event.errorMessage);
+          break;
         default:
           console.warn("Unknown event type");
           break;
@@ -147,15 +151,15 @@ const GamePlayingRoom = () => {
   };
 
   const handleTurnStateEvent = (playerCardMap: Map<string, Card>) => {
-    var newPlayerCardMapCurrentRound: Map<string, string> = new Map();
+    var newPlayerCardMapCurrentTurn: Map<string, string> = new Map();
     Object.entries(playerCardMap).forEach(([playerName, card]) => {
       if (card !== null)
-        newPlayerCardMapCurrentRound.set(
+        newPlayerCardMapCurrentTurn.set(
           playerName,
           convertCardIntoImageSrc(card)
         );
     });
-    setPlayerCardMapCurrentRound(newPlayerCardMapCurrentRound);
+    setPlayerCardMapCurrentTurn(newPlayerCardMapCurrentTurn);
   };
 
   const handleMyCardsStateEvent = (cards: Card[]) => {
@@ -194,6 +198,11 @@ const GamePlayingRoom = () => {
 
   const handleWinnerStateEvent = (team: string) => {
     console.log("team: " + team + " won!");
+  };
+
+  const handleErrorEvent = (errorMessage: string) => {
+    setErrorModalMessage(errorMessage);
+    setShowErrorModal(true);
   };
 
   // USE EFFECT HOOK
@@ -274,9 +283,29 @@ const GamePlayingRoom = () => {
   }, []);
 
   useEffect(() => {
-    if (redTeamRef.current.length > 0 && blueTeamRef.current.length > 0) setLoading(false);
+    if (redTeamRef.current.length > 0 && blueTeamRef.current.length > 0)
+      setLoading(false);
     else setLoading(true);
   }, [redTeamRef.current, blueTeamRef.current]);
+
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleOutsideClick = (event: MouseEvent) => {
+      if (
+        modalRef.current &&
+        !modalRef.current.contains(event.target as Node)
+      ) {
+        setShowErrorModal(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleOutsideClick);
+
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+    };
+  }, []);
 
   // WIDGET FUNCTIONS
 
@@ -307,6 +336,22 @@ const GamePlayingRoom = () => {
   }
   return (
     <>
+      {/* place for error modal */}
+      <div className={`modal fade ${showErrorModal ? "show d-block" : ""}`}>
+        <div className="modal-dialog modal-md mt-5" ref={modalRef}>
+          <div className="modal-content bg-danger">
+            <div className="modal-header border-black">
+              <button
+                type="button"
+                className="btn-close"
+                onClick={() => setShowErrorModal(false)}
+              ></button>
+            </div>
+            <div className="modal-body fw-bold">{errorModalMessage}</div>
+          </div>
+        </div>
+      </div>
+      {/* Main page content */}
       <div className="custom-outer-div d-flex flex-column justify-content-between p-2 min-vw-100 min-vh-100">
         {/* upper part */}
         <div className="d-flex">
@@ -335,7 +380,7 @@ const GamePlayingRoom = () => {
         <div className="d-flex flex-row align-items-center">
           {/* Cards played in current round section */}
           <div className="d-flex justify-content-center gap-4 w-50">
-            {Array.from(playerCardMapCurrentRound).map(
+            {Array.from(playerCardMapCurrentTurn).map(
               ([playerName, src]) =>
                 src && (
                   <div className="text-center" key={playerName}>
@@ -353,7 +398,8 @@ const GamePlayingRoom = () => {
               {/* points red team */}
               <div className="d-flex flex-row align-items-center justify-content-end w-100 px-2">
                 <p className="me-auto text-danger fw-bold">
-                  {redTeamRef.current[0]} <span className="text-black fw-normal">and</span>{" "}
+                  {redTeamRef.current[0]}{" "}
+                  <span className="text-black fw-normal">and</span>{" "}
                   {redTeamRef.current[1]}:{" "}
                 </p>
                 <p className="ms-auto fs-5 fw-bold">{redTeamPoints}</p>
@@ -389,15 +435,17 @@ const GamePlayingRoom = () => {
             )}
             {/* TODO handle call - player that is starting round can call sth (so we have to know who win previous turn) */}
             {/* Call select section */}
-            <div className="w-25 mt-2">
-              <p className="mb-2">Call</p>
-              <select name="" className="form-select">
-                <option value="">Knock</option>
-                <option value="">Fly</option>
-                <option value="">Slither</option>
-                <option value="">Reslither</option>
-              </select>
-            </div>
+            {displayCallSelection && (
+              <div className="w-25 mt-2">
+                <p className="mb-2">Call</p>
+                <select name="" className="form-select">
+                  <option value="">Knock</option>
+                  <option value="">Fly</option>
+                  <option value="">Slither</option>
+                  <option value="">Reslither</option>
+                </select>
+              </div>
+            )}
           </div>
         </div>
         {/* Cards */}
