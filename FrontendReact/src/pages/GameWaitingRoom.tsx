@@ -1,6 +1,6 @@
 import { Client, IMessage } from "@stomp/stompjs";
 import axios from "axios";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useUserContext } from "../context/UserContext";
 import {
@@ -28,11 +28,10 @@ const GameWaitingRoom = () => {
   const baseUrl = import.meta.env.VITE_API_BASE_URL;
   const [teamRed, setTeamRed] = useState<string[]>([]);
   const [teamBlue, setTeamBlue] = useState<string[]>([]);
-  const [playersAmount, setPlayersAmount] = useState(1); // TODO repair playersAmount, it does not work correctly
+  const [playersAmount, setPlayersAmount] = useState(1);
   const [eventMessages, setEventMessages] = useState<string[]>([]);
   const { username, setUsername } = useUserContext();
   const navigate = useNavigate();
-  const isTeamStateUpdated = useRef(false);
 
   // HELPER FUNCTIONS
 
@@ -71,9 +70,6 @@ const GameWaitingRoom = () => {
     });
     setTeamRed(newTeamRed);
     setTeamBlue(newTeamBlue);
-
-    // change this field in order to let game started event run
-    isTeamStateUpdated.current = true;
   }
 
   function handlePlayerJoinedEvent(event: PlayerJoinedEvent) {
@@ -94,21 +90,9 @@ const GameWaitingRoom = () => {
   }
 
   function handleGameStartedEvent() {
-    if (isTeamStateUpdated.current) {
-      navigate("/play-game", {
-        state: { gameId: gameContent.gameId, teams: [teamRed, teamBlue] },
-      });
-    } else {
-      // Retry navigation until `TeamState` is processed
-      const checkTeamsInterval = setInterval(() => {
-        if (isTeamStateUpdated.current) {
-          clearInterval(checkTeamsInterval);
-          navigate("/play-game", {
-            state: { gameId: gameContent.gameId, teams: [teamRed, teamBlue] },
-          });
-        }
-      }, 50); // Check every 50ms
-    }
+    navigate("/play-game", {
+      state: { gameId: gameContent.gameId },
+    });
   }
 
   // USE EFFECT FUNCTION
@@ -144,7 +128,7 @@ const GameWaitingRoom = () => {
 
     const getBeginningGameInformation = () => {
       axios
-        .post(`${baseUrl}/game/${gameContent.gameId}/teams`)
+        .get(`${baseUrl}/game/${gameContent.gameId}/teams`)
         .then((response) => {
           const newTeamRed: string[] = [];
           const newTeamBlue: string[] = [];
