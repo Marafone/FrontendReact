@@ -43,3 +43,8 @@ export interface WinnerState extends BaseEvent {
   eventType: "WinnerState";
   winnerTeam: Team;
 }
+
+export interface ErrorEvent extends BaseEvent {
+  eventType: "ErrorEvent";
+  errorMessage: string;
+}
