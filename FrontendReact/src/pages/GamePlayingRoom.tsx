@@ -1,4 +1,4 @@
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import "../styles/game-playing-room.css";
 import images from "../cards/cards_importer";
 import { Client, IMessage } from "@stomp/stompjs";
@@ -7,10 +7,12 @@ import axios from "axios";
 import {
   Card,
   MyCardsState,
+  NewRound,
   PlayersOrderState,
   PointState,
   TrumpSuitState,
   TurnState,
+  WinnerState,
 } from "../events/game-playing-room/WebSocketEventTypes";
 
 var client: Client;
@@ -25,7 +27,9 @@ type WebSocketEventType =
   | MyCardsState
   | PointState
   | PlayersOrderState
-  | TrumpSuitState;
+  | TrumpSuitState
+  | NewRound
+  | WinnerState;
 
 const convertCardIntoImageSrc = (card: Card): string => {
   var imageKey =
@@ -40,24 +44,27 @@ const GamePlayingRoom = () => {
   const baseUrl = import.meta.env.VITE_API_BASE_URL;
   const location = useLocation();
   const gameContent: PlayingRoomContent = location.state;
-  const [players, setPlayers] = useState<string[]>([]); // TODO DISPLAY COLORS OF PLAYER TEAMS
+  const [players, setPlayers] = useState<string[]>([]);
+  const redTeamRef = useRef<string[]>([]);
   const [redTeamPoints, setRedTeamPoints] = useState<number>(0);
+  const blueTeamRef = useRef<string[]>([]);
   const [blueTeamPoints, setBlueTeamPoints] = useState<number>(0);
   const [cards, setCards] = useState<[bigint, string][]>([]);
   const [playerCardMapCurrentRound, setPlayerCardMapCurrentRound] = useState<
     // map of cards played by players in current round
-    Map<string, string>
+    Map<string, string | null>
   >(new Map());
   const [suit, setSuit] = useState<string>("COINS"); // TODO wait until user selects trump and after that let him play his card (needed for user who chooses trump suit), because client.publish are asynchronous!
   const [displayTrumpSuitSelection, setDisplayTrumpSuitSelection] =
     useState(false);
   const [displayedSuit, setDisplayedSuit] = useState<string>("-");
   const [displayCallSelection, setDisplayCallSelection] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   // HELPER FUNCTIONS
 
   const findPlayerTeam = (username: string): string => {
-    return gameContent.teams[0].indexOf(username) != -1 ? "RED" : "BLUE";
+    return redTeamRef.current.includes(username) ? "RED" : "BLUE";
   };
 
   const doesUserHaveFourCoins = (cards: [bigint, string][]): boolean => {
@@ -71,7 +78,35 @@ const GamePlayingRoom = () => {
 
   // it removes cards that were played last in last round
   const clearBoard = () => {
+    const newMap = new Map<string, string | null>();
+    newMap.set(players[0], null);
+    newMap.set(players[1], null);
+    newMap.set(players[2], null);
+    newMap.set(players[3], null);
     setPlayerCardMapCurrentRound(new Map());
+  };
+
+  // HTTP REQUEST FUNCTIONS
+
+  const getPlayerCards = () => {
+    axios
+      .get<Card[]>(`${baseUrl}/gameplayer/${gameContent.gameId}/cards`)
+      .then((response) => {
+        var responseConvertedData: [bigint, string][] = response.data.map(
+          (card) => {
+            return [card.id, convertCardIntoImageSrc(card)];
+          }
+        );
+        setCards(responseConvertedData);
+        // check if user should select trump suit
+        if (
+          responseConvertedData.length === 10 &&
+          doesUserHaveFourCoins(responseConvertedData)
+        ) {
+          setDisplayTrumpSuitSelection(true);
+        }
+      })
+      .catch((error) => console.log(error));
   };
 
   // WEBSOCKET FUNCTIONS
@@ -98,6 +133,12 @@ const GamePlayingRoom = () => {
         case "TrumpSuitState":
           handleTrumpSuitStateEvent(event.trumpSuit);
           break;
+        case "NewRound":
+          handleNewRoundEvent();
+          break;
+        case "WinnerState":
+          handleWinnerStateEvent(event.winnerTeam);
+          break;
         default:
           console.warn("Unknown event type");
           break;
@@ -106,11 +147,9 @@ const GamePlayingRoom = () => {
   };
 
   const handleTurnStateEvent = (playerCardMap: Map<string, Card>) => {
-    var newPlayerCardMapCurrentRound: Map<string, string> = new Map(
-      playerCardMapCurrentRound
-    );
+    var newPlayerCardMapCurrentRound: Map<string, string> = new Map();
     Object.entries(playerCardMap).forEach(([playerName, card]) => {
-      if (!newPlayerCardMapCurrentRound.has(playerName) && card !== null)
+      if (card !== null)
         newPlayerCardMapCurrentRound.set(
           playerName,
           convertCardIntoImageSrc(card)
@@ -120,7 +159,6 @@ const GamePlayingRoom = () => {
   };
 
   const handleMyCardsStateEvent = (cards: Card[]) => {
-    // TODO probably need changes in subscription to websocketevents
     const newCards: [bigint, string][] = [];
     cards.map((card) => {
       newCards.push([card.id, convertCardIntoImageSrc(card)]);
@@ -129,11 +167,10 @@ const GamePlayingRoom = () => {
   };
 
   const handlePointStateEvent = (playerPointsMap: Map<string, number>) => {
-    var newRedTeamPoints = redTeamPoints;
-    var newBlueTeamPoints = blueTeamPoints;
+    var newRedTeamPoints = 0;
+    var newBlueTeamPoints = 0;
     Object.entries(playerPointsMap).forEach(([playerName, playerPoints]) => {
-      console.log("playerName, playerPoints:", playerName, playerPoints);
-      if (findPlayerTeam(playerName) === "RED") {
+      if (findPlayerTeam(playerName) == "RED") {
         newRedTeamPoints += playerPoints;
       } else {
         newBlueTeamPoints += playerPoints;
@@ -151,12 +188,17 @@ const GamePlayingRoom = () => {
     setDisplayedSuit(trumpSuit);
   };
 
-  // USE EFFECT FUNCTION
+  const handleNewRoundEvent = () => {
+    getPlayerCards();
+  };
+
+  const handleWinnerStateEvent = (team: string) => {
+    console.log("team: " + team + " won!");
+  };
+
+  // USE EFFECT HOOK
 
   useEffect(() => {
-    // TODO don't pass teamRed and teamBlue as location state, use get request instead
-    console.log(gameContent.teams);
-    console.log(gameContent.gameId);
     if (client?.connected) {
       client.deactivate(); // if connection still remains after previous connection
     }
@@ -190,30 +232,7 @@ const GamePlayingRoom = () => {
 
     // get data of actual game
 
-    const getPlayerCards = () => {
-      axios
-        .get<Card[]>(`${baseUrl}/gameplayer/${gameContent.gameId}/cards`)
-        .then((response) => {
-          var responseConvertedData: [bigint, string][] = response.data.map(
-            (card) => {
-              return [card.id, convertCardIntoImageSrc(card)];
-            }
-          );
-          console.log(responseConvertedData);
-          setCards(responseConvertedData);
-          // check if user should select trump suit
-          if (
-            responseConvertedData.length === 10 &&
-            doesUserHaveFourCoins(responseConvertedData)
-          ) {
-            setDisplayTrumpSuitSelection(true);
-          }
-        })
-        .catch((error) => console.log(error));
-    };
-
     const getPlayersOrder = () => {
-      // TODO BACKEND - ORDER OF PLAYERS AT THE BEGINNING IS WRONG, CHECK WHEN IT IS SET
       axios
         .get<string[]>(`${baseUrl}/game/${gameContent.gameId}/players/order`)
         .then((response) => {
@@ -224,9 +243,27 @@ const GamePlayingRoom = () => {
         });
     };
 
+    const getTeams = () => {
+      axios
+        .get(`${baseUrl}/game/${gameContent.gameId}/teams`)
+        .then((response) => {
+          var newRedTeam: string[] = response.data.RED.map(
+            (x: any) => x.user.username
+          );
+          var newBlueTeam: string[] = response.data.BLUE.map(
+            (x: any) => x.user.username
+          );
+
+          redTeamRef.current = newRedTeam;
+          blueTeamRef.current = newBlueTeam;
+        })
+        .catch((error) => console.log(error));
+    };
+
     const getGameState = () => {
       getPlayerCards();
       getPlayersOrder();
+      getTeams();
     };
 
     getGameState();
@@ -235,6 +272,11 @@ const GamePlayingRoom = () => {
       if (client?.connected) client.deactivate();
     };
   }, []);
+
+  useEffect(() => {
+    if (redTeamRef.current.length > 0 && blueTeamRef.current.length > 0) setLoading(false);
+    else setLoading(true);
+  }, [redTeamRef.current, blueTeamRef.current]);
 
   // WIDGET FUNCTIONS
 
@@ -256,6 +298,13 @@ const GamePlayingRoom = () => {
     setSuit(event.target.value);
   }
 
+  if (loading) {
+    return (
+      <div className="d-flex justify-content-center align-items-center min-vh-100">
+        <p className="fs-4 fw-bold">Loading game data...</p>
+      </div>
+    );
+  }
   return (
     <>
       <div className="custom-outer-div d-flex flex-column justify-content-between p-2 min-vw-100 min-vh-100">
@@ -274,7 +323,7 @@ const GamePlayingRoom = () => {
                   className={`${
                     findPlayerTeam(player) === "RED"
                       ? "text-danger"
-                      : "text-info"
+                      : "text-primary"
                   }`}
                 >
                   {player}
@@ -303,15 +352,18 @@ const GamePlayingRoom = () => {
               <p className="fw-bold fs-4">Points</p>
               {/* points red team */}
               <div className="d-flex flex-row align-items-center justify-content-end w-100 px-2">
-                <p className="me-auto">
-                  {gameContent.teams[0][0]} and {gameContent.teams[0][1]}:{" "}
+                <p className="me-auto text-danger fw-bold">
+                  {redTeamRef.current[0]} <span className="text-black fw-normal">and</span>{" "}
+                  {redTeamRef.current[1]}:{" "}
                 </p>
                 <p className="ms-auto fs-5 fw-bold">{redTeamPoints}</p>
               </div>
               {/* points blue team */}
               <div className="d-flex flex-row align-items-center justify-content-end w-100 px-2">
-                <p className="w-100">
-                  {gameContent.teams[1][0]} and {gameContent.teams[1][1]}:{" "}
+                <p className="w-100 text-primary fw-bold">
+                  {blueTeamRef.current[0]}{" "}
+                  <span className="text-black fw-normal">and</span>{" "}
+                  {blueTeamRef.current[1]}:{" "}
                 </p>
                 <p className="ms-auto fs-5 fw-bold">{blueTeamPoints}</p>
               </div>
@@ -356,9 +408,7 @@ const GamePlayingRoom = () => {
               src={src}
               className="custom-img"
               onClick={() => {
-                console.log("CARD PLAYED!");
                 if (displayTrumpSuitSelection) {
-                  console.warn("Yes, I was here!");
                   handleSelectSuit(suit);
                   setDisplayTrumpSuitSelection(false);
                 }
