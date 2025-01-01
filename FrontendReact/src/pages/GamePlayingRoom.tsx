@@ -11,6 +11,7 @@ import {
   NewRound,
   PlayersOrderState,
   PointState,
+  TeamStateEvent,
   TrumpSuitState,
   TurnState,
   WinnerState,
@@ -31,8 +32,9 @@ type WebSocketEventType =
   | TrumpSuitState
   | NewRound
   | WinnerState
-  | ErrorEvent;
-
+  | ErrorEvent
+  | TeamStateEvent;
+// TODO, when user refresh page after turn is ended, he gets all the cards that were visible at the board
 const convertCardIntoImageSrc = (card: Card): string => {
   var imageKey =
     card.suit.charAt(0).toUpperCase() +
@@ -62,8 +64,15 @@ const GamePlayingRoom = () => {
   const [displayedSuit, setDisplayedSuit] = useState<string>("-");
   const [displayCallSelection, setDisplayCallSelection] = useState(false);
   const [loading, setLoading] = useState(true);
+  // errors part
   const [errorModalMessage, setErrorModalMessage] = useState<string>();
   const [showErrorModal, setShowErrorModal] = useState<boolean>(false);
+  // timer part
+  const totalTime = 10;
+  const [isUserTurn, setIsUserTurn] = useState<boolean>(false);
+  const [isTimerRunning, setIsTimerRunning] = useState<boolean>(false);
+  const [timeLeft, setTimeLeft] = useState<number>(totalTime);
+  const [percentage, setPercentage] = useState<number>(100);
 
   // HELPER FUNCTIONS
 
@@ -80,34 +89,21 @@ const GamePlayingRoom = () => {
     }
   };
 
+  const onTimeUp = () => {
+    if (!isTimerRunning) return;
+    // TODO if it is player that has to select trump suit - select random trump suit then
+    client.publish({
+      destination: `/app/game/${gameContent.gameId}/timeout`,
+    });
+    // set values of variables responsible for timeout management
+    setIsUserTurn(false);
+  };
+
   // it removes cards that were played last in last round
   const clearBoard = () => {
     const newMap = new Map<string, string | null>();
     players.forEach((player) => newMap.set(player, null));
     setPlayerCardMapCurrentTurn(newMap);
-  };
-
-  // HTTP REQUEST FUNCTIONS
-
-  const getPlayerCards = () => {
-    axios
-      .get<Card[]>(`${baseUrl}/gameplayer/${gameContent.gameId}/cards`)
-      .then((response) => {
-        var responseConvertedData: [bigint, string][] = response.data.map(
-          (card) => {
-            return [card.id, convertCardIntoImageSrc(card)];
-          }
-        );
-        setCards(responseConvertedData);
-        // check if user should select trump suit
-        if (
-          responseConvertedData.length === 10 &&
-          doesUserHaveFourCoins(responseConvertedData)
-        ) {
-          setDisplayTrumpSuitSelection(true);
-        }
-      })
-      .catch((error) => console.log(error));
   };
 
   // WEBSOCKET FUNCTIONS
@@ -143,6 +139,9 @@ const GamePlayingRoom = () => {
         case "ErrorEvent":
           handleErrorEvent(event.errorMessage);
           break;
+        case "TeamState":
+          handleTeamStateEvent(event.redTeam, event.blueTeam);
+          break;
         default:
           console.warn("Unknown event type");
           break;
@@ -167,6 +166,8 @@ const GamePlayingRoom = () => {
     cards.map((card) => {
       newCards.push([card.id, convertCardIntoImageSrc(card)]);
     });
+    if (newCards.length === 10 && doesUserHaveFourCoins(newCards))
+      setDisplayTrumpSuitSelection(true);
     setCards(newCards);
   };
 
@@ -193,7 +194,8 @@ const GamePlayingRoom = () => {
   };
 
   const handleNewRoundEvent = () => {
-    getPlayerCards();
+    // TODO this event is unnecessary?
+    // getPlayerCards();
   };
 
   const handleWinnerStateEvent = (team: string) => {
@@ -205,7 +207,12 @@ const GamePlayingRoom = () => {
     setShowErrorModal(true);
   };
 
-  // USE EFFECT HOOK
+  const handleTeamStateEvent = (redTeam: string[], blueTeam: string[]) => {
+    redTeamRef.current = redTeam;
+    blueTeamRef.current = blueTeam;
+  };
+
+  // USE EFFECT HOOKS
 
   useEffect(() => {
     if (client?.connected) {
@@ -230,6 +237,9 @@ const GamePlayingRoom = () => {
           onMessageReceived
         );
         client.subscribe(`/user/queue/game`, onMessageReceived);
+        client.publish({
+          destination: `/app/game/${gameContent.gameId}/reconnect`,
+        });
       }
     };
 
@@ -239,54 +249,51 @@ const GamePlayingRoom = () => {
 
     createWebSocketConnection();
 
-    // get data of actual game
-
-    const getPlayersOrder = () => {
-      axios
-        .get<string[]>(`${baseUrl}/game/${gameContent.gameId}/players/order`)
-        .then((response) => {
-          setPlayers(response.data);
-        })
-        .catch((error) => {
-          console.log("Error: " + error);
-        });
-    };
-
-    const getTeams = () => {
-      axios
-        .get(`${baseUrl}/game/${gameContent.gameId}/teams`)
-        .then((response) => {
-          var newRedTeam: string[] = response.data.RED.map(
-            (x: any) => x.user.username
-          );
-          var newBlueTeam: string[] = response.data.BLUE.map(
-            (x: any) => x.user.username
-          );
-
-          redTeamRef.current = newRedTeam;
-          blueTeamRef.current = newBlueTeam;
-        })
-        .catch((error) => console.log(error));
-    };
-
-    const getGameState = () => {
-      getPlayerCards();
-      getPlayersOrder();
-      getTeams();
-    };
-
-    getGameState();
-
     return () => {
       if (client?.connected) client.deactivate();
     };
   }, []);
+
+  // time use effect
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout | undefined;
+
+    if (isUserTurn && !isTimerRunning) {
+      setIsTimerRunning(true);
+      timer = setInterval(() => {
+        setTimeLeft((prevTime) => {
+          if (prevTime <= 1) {
+            clearInterval(timer);
+            onTimeUp();
+            return 0;
+          }
+          return prevTime - 1;
+        });
+      }, 1000);
+    } else if (!isUserTurn && isTimerRunning) {
+      if (timer) {
+        clearInterval(timer);
+      }
+      setIsTimerRunning(false);
+    }
+
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [isUserTurn, isTimerRunning]);
+
+  useEffect(() => {
+    setPercentage((timeLeft / totalTime) * 100);
+  }, [timeLeft, totalTime]);
 
   useEffect(() => {
     if (redTeamRef.current.length > 0 && blueTeamRef.current.length > 0)
       setLoading(false);
     else setLoading(true);
   }, [redTeamRef.current, blueTeamRef.current]);
+
+  // modal error use effect
 
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -376,6 +383,15 @@ const GamePlayingRoom = () => {
               ))}
             </ul>
           </div>
+          {/* timeout bar */}
+          {isUserTurn && (
+            <div className="d-flex align-items-center w-25">
+              <div
+                className="d-flex bg-primary ms-auto border border-black border-3 h-50"
+                style={{ width: `${percentage}%` }}
+              ></div>
+            </div>
+          )}
         </div>
         <div className="d-flex flex-row align-items-center">
           {/* Cards played in current round section */}
@@ -461,6 +477,7 @@ const GamePlayingRoom = () => {
                   setDisplayTrumpSuitSelection(false);
                 }
                 handleSelectCard(id);
+                setIsUserTurn(false);
               }}
             />
           ))}
