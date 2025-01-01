@@ -18,3 +18,8 @@ export interface PlayerJoinedEvent extends BaseEvent {
 export interface GameStartedEvent extends BaseEvent {
   eventType: "GameStartedEvent";
 }
+
+export interface PlayerLeftEvent extends BaseEvent {
+  eventType: "PlayerLeftEvent";
+  playerName: string;
+}
