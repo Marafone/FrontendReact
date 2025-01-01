@@ -48,3 +48,9 @@ export interface ErrorEvent extends BaseEvent {
   eventType: "ErrorEvent";
   errorMessage: string;
 }
+
+export interface TeamStateEvent extends BaseEvent {
+  eventType: "TeamState";
+  redTeam: string[];
+  blueTeam: string[];
+}
