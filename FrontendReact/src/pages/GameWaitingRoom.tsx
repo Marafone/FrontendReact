@@ -47,8 +47,18 @@ const GameWaitingRoom = () => {
   const handleLeaveGame = () => {
     axios
       .post(`${baseUrl}/game/${gameContent.gameId}/leave`)
-      .then((response) => {
+      .then(() => {
         navigate("/", { replace: true });
+      })
+      .catch((error) => console.log(error));
+  };
+
+  const handleChangeTeam = (team: string) => {
+    axios
+      .post(`${baseUrl}/game/${gameContent.gameId}/team/change`, team, {
+        headers: {
+          "Content-Type": "text/plain",
+        },
       })
       .catch((error) => console.log(error));
   };
@@ -60,7 +70,7 @@ const GameWaitingRoom = () => {
     events.forEach((event) => {
       switch (event.eventType) {
         case "TeamState":
-          handleTeamStateEvent(event);
+          handleTeamStateEvent(event.redTeam, event.blueTeam);
           break;
         case "PlayerJoinedEvent":
           handlePlayerJoinedEvent(event);
@@ -77,16 +87,10 @@ const GameWaitingRoom = () => {
     });
   };
 
-  function handleTeamStateEvent(event: TeamStateEvent) {
+  function handleTeamStateEvent(redTeam: string[], blueTeam: string[]) {
     // change teams information
-    const newTeamRed: string[] = [];
-    const newTeamBlue: string[] = [];
-
-    Object.entries(event.teamState).forEach(([y, x]) => {
-      x === "RED" ? newTeamRed.push(y) : newTeamBlue.push(y);
-    });
-    setTeamRed(newTeamRed);
-    setTeamBlue(newTeamBlue);
+    setTeamRed(redTeam);
+    setTeamBlue(blueTeam);
   }
 
   function handlePlayerJoinedEvent(event: PlayerJoinedEvent) {
@@ -131,7 +135,7 @@ const GameWaitingRoom = () => {
     );
   }
 
-  // USE EFFECT FUNCTION
+  // USE EFFECT HOOK
 
   useEffect(() => {
     const createWebSocketConnection = () => {
@@ -216,7 +220,12 @@ const GameWaitingRoom = () => {
           {/* TODO - MANAGE PLAYERS OPTIONS */}
           <div className="d-flex justify-content-evenly">
             <div className="d-flex flex-column align-items-center">
-              <button className="btn btn-danger fw-bold mb-4">Red</button>
+              <button
+                className="btn btn-danger fw-bold mb-4"
+                onClick={() => handleChangeTeam("RED")}
+              >
+                Red
+              </button>
               {teamRed.map((player) => (
                 <p
                   key={player}
@@ -229,7 +238,12 @@ const GameWaitingRoom = () => {
               ))}
             </div>
             <div className="d-flex flex-column align-items-center">
-              <button className="btn btn-primary fw-bold mb-4">Blue</button>
+              <button
+                className="btn btn-primary fw-bold mb-4"
+                onClick={() => handleChangeTeam("BLUE")}
+              >
+                Blue
+              </button>
               {teamBlue.map((player) => (
                 <p
                   key={player}
@@ -263,8 +277,6 @@ const GameWaitingRoom = () => {
         {/* Events */}
         <div className="custom-events d-flex flex-column align-items-center w-50 px-3 py-2">
           {" "}
-          {/* TODO FIXED SIZE OF CHAT */}
-          {/* TODO ADD NOTIFICATIONS WHEN USER JOINS AND LEFT */}
           <h2>Events</h2>
           <hr className="border border-black border-2 opacity-50 mt-0 w-100" />
           <div className="custom-event-messages-container w-100 overflow-auto">
