@@ -16,3 +16,7 @@
   background-color: var(--player-hover-bg-color);
   cursor: pointer;
 }
+
+.custom-event-messages-container {
+  height: 120px;
+}
