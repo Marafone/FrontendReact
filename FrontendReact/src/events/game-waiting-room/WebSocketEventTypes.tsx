@@ -6,7 +6,8 @@ export type Team = "RED" | "BLUE";
 
 export interface TeamStateEvent extends BaseEvent {
   eventType: "TeamState";
-  teamState: Map<string, Team>;
+  redTeam: string[];
+  blueTeam: string[];
 }
 
 export interface PlayerJoinedEvent extends BaseEvent {
