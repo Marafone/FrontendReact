@@ -1,11 +1,12 @@
 import { Client, IMessage } from "@stomp/stompjs";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useUserContext } from "../context/UserContext";
 import {
   GameStartedEvent,
   PlayerJoinedEvent,
+  PlayerLeftEvent,
   TeamStateEvent,
 } from "../events/game-waiting-room/WebSocketEventTypes";
 import "../styles/game-waiting-room.css";
@@ -17,7 +18,11 @@ interface waitingRoomContent {
   joinedPlayersAmount: number;
 }
 
-type WebSocketEventType = TeamStateEvent | PlayerJoinedEvent | GameStartedEvent;
+type WebSocketEventType =
+  | TeamStateEvent
+  | PlayerJoinedEvent
+  | PlayerLeftEvent
+  | GameStartedEvent;
 
 var client: Client;
 
@@ -29,7 +34,7 @@ const GameWaitingRoom = () => {
   const [teamRed, setTeamRed] = useState<string[]>([]);
   const [teamBlue, setTeamBlue] = useState<string[]>([]);
   const [playersAmount, setPlayersAmount] = useState(1);
-  const [eventMessages, setEventMessages] = useState<string[]>([]);
+  const [eventMessages, setEventMessages] = useState<string[]>(["Have fun!"]);
   const { username, setUsername } = useUserContext();
   const navigate = useNavigate();
 
@@ -37,6 +42,15 @@ const GameWaitingRoom = () => {
 
   const handleStartGame = () => {
     client.publish({ destination: `/app/game/${gameContent.gameId}/start` });
+  };
+
+  const handleLeaveGame = () => {
+    axios
+      .post(`${baseUrl}/game/${gameContent.gameId}/leave`)
+      .then((response) => {
+        navigate("/", { replace: true });
+      })
+      .catch((error) => console.log(error));
   };
 
   // WEBSOCKET FUNCTIONS
@@ -53,6 +67,9 @@ const GameWaitingRoom = () => {
           break;
         case "GameStartedEvent":
           handleGameStartedEvent();
+          break;
+        case "PlayerLeftEvent":
+          handlePlayerLeftEvent(event.playerName);
           break;
         default:
           break;
@@ -89,10 +106,29 @@ const GameWaitingRoom = () => {
     }
   }
 
-  function handleGameStartedEvent() {
+  const handleGameStartedEvent = () => {
     navigate("/play-game", {
       state: { gameId: gameContent.gameId },
     });
+  };
+
+  function handlePlayerLeftEvent(playerName: string) {
+    // edit event messages
+    const newEventMessage = playerName + " left the game!";
+    setEventMessages((prevMessages) => [...prevMessages, newEventMessage]);
+    // edit amount of players
+    setPlayersAmount((prev) => prev - 1);
+    // edit displayed teams
+    setTeamRed((prevTeamRed) =>
+      prevTeamRed.filter(
+        (teamRedPlayerName) => teamRedPlayerName !== playerName
+      )
+    );
+    setTeamBlue((prevTeamBlue) =>
+      prevTeamBlue.filter(
+        (teamBluePlayerName) => teamBluePlayerName !== playerName
+      )
+    );
   }
 
   // USE EFFECT FUNCTION
@@ -101,7 +137,7 @@ const GameWaitingRoom = () => {
     const createWebSocketConnection = () => {
       client = new Client({
         brokerURL: `${baseUrl}/game`,
-        debug: (str) => console.log(str),
+        // debug: (str) => console.log(str),
         onConnect: onConnected,
         onStompError: onError,
       });
@@ -167,9 +203,12 @@ const GameWaitingRoom = () => {
           <div>
             <div className="d-flex flex-row justify-content-between align-items-center px-3 py-2">
               <h2>{gameContent.gameName}</h2>
-              <Link to="/" className="btn btn-danger fw-bold">
+              <button
+                className="btn btn-danger fw-bold"
+                onClick={handleLeaveGame}
+              >
                 Exit
-              </Link>
+              </button>
             </div>
             <hr className="border border-black border-2 opacity-50 mt-0 mx-3" />
           </div>
@@ -228,11 +267,13 @@ const GameWaitingRoom = () => {
           {/* TODO ADD NOTIFICATIONS WHEN USER JOINS AND LEFT */}
           <h2>Events</h2>
           <hr className="border border-black border-2 opacity-50 mt-0 w-100" />
-          {eventMessages.map((message) => (
-            <p key={message} className="me-auto">
-              {message}
-            </p>
-          ))}
+          <div className="custom-event-messages-container w-100 overflow-auto">
+            {eventMessages.map((message, index) => (
+              <p key={index} className="me-auto">
+                {message}
+              </p>
+            ))}
+          </div>
         </div>
       </div>
     </>
