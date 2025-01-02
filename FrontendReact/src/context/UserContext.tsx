@@ -5,6 +5,12 @@ interface UserData {
   setUsername: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
+// Provide default value
+const defaultValue: UserData = {
+  username: "",
+  setUsername: () => {},
+};
+
 export const UserContext = createContext<UserData | undefined>(undefined);
 
 export const UserProvider: React.FC<any> = ({ children }) => {

@@ -1,7 +1,8 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../styles/home-page.css";
+import { LanguageContext } from "../context/LanguageContext";
 
 axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL;
 
@@ -25,12 +26,19 @@ const Home = () => {
   const [lobbies, setLobbies] = useState<GameData[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const context = useContext(LanguageContext);
+
+  if (!context) {
+    throw new Error("LanguageContext must be used within a LanguageProvider.");
+  }
+
+  const { t } = context; // Now `context` is guaranteed to be defined
+
   useEffect(() => {
     const fetchGames = async () => {
       try {
         setLoading(true);
         const response = await axios.get("/game/waiting");
-        console.log(response.data);
         setLobbies(Array.isArray(response.data) ? response.data : []);
       } catch (err) {
         console.log(err);
@@ -55,7 +63,6 @@ const Home = () => {
     axios
       .post(`/game/${gameData.gameId}/join`, joinGameRequestData)
       .then((response) => {
-        console.log(response);
         handleNavigation(gameData);
       })
       .catch((err) => console.log(err));
@@ -69,7 +76,7 @@ const Home = () => {
           to="/create-game"
           className="custom-create-game-btn btn btn-primary border border-black border-opacity-25 w-100 w-md-auto fw-bold"
         >
-          Create Game
+          {t("home.createGameBtn")} {/* Translated Create Game Button */}
         </Link>
       </div>
 
@@ -78,13 +85,8 @@ const Home = () => {
         <div className="col-12 col-md-4 mb-3">
           {/* News Section */}
           <div>
-            <h1>News</h1>
-            <p>
-              Lorem ipsum dolor sit amet consectetur adipisicing elit.
-              Perspiciatis, quo itaque praesentium cupiditate facere
-              necessitatibus? Qui veniam fuga ipsa accusamus unde impedit soluta,
-              magnam sed blanditiis facilis est magni aperiam tempore.
-            </p>
+            <h1>{t("home.newsTitle")}</h1> {/* Translated News Title */}
+            <p>{t("home.newsContent")}</p> {/* Translated News Content */}
           </div>
         </div>
 
@@ -93,14 +95,14 @@ const Home = () => {
           <div className="custom-lobby-div d-flex flex-column w-100 border border-black border-opacity-25 border-2">
             {/* Header */}
             <div className="d-flex justify-content-between align-items-center container-fluid border-bottom border-black border-opacity-25 border-1 p-2">
-              <p className="fw-bold m-0">Lobby name</p>
-              <p className="fw-bold m-0">Game type</p>
-              <p className="fw-bold m-0">Players</p>
+              <p className="fw-bold m-0">{t("home.lobbyName")}</p> {/* Translated Lobby Name */}
+              <p className="fw-bold m-0">{t("home.gameType")}</p> {/* Translated Game Type */}
+              <p className="fw-bold m-0">{t("home.players")}</p> {/* Translated Players */}
             </div>
             {/* Lobbies Info */}
             {loading ? (
               <div className="d-flex justify-content-center align-items-center container-fluid border-bottom border-black border-opacity-25 border-1 p-2">
-                <p className="m-0">Loading...</p>
+                <p className="m-0">{t("home.loading")}</p> {/* Translated Loading */}
               </div>
             ) : (
               lobbies.map((l) => (
@@ -135,9 +137,9 @@ const Home = () => {
                 }}
               >
                 <i className="bi bi-arrow-left"></i>
-                <p className="m-0">Prev</p>
+                <p className="m-0">{t("home.prevPage")}</p> {/* Translated Prev */}
               </div>
-              <p className="fw-bold m-0">Page {page}</p>
+              <p className="fw-bold m-0">{t("home.pageText")} {page}</p> {/* Translated Page Text */}
               <div
                 className="d-flex align-items-center gap-2 text-black fw-bold"
                 style={{ cursor: "pointer" }}
@@ -145,7 +147,7 @@ const Home = () => {
                   setPage(page + 1);
                 }}
               >
-                <p className="m-0">Next</p>
+                <p className="m-0">{t("home.nextPage")}</p> {/* Translated Next */}
                 <i className="bi bi-arrow-right"></i>
               </div>
             </div>
