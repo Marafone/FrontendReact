@@ -1,9 +1,7 @@
-import { ChangeEvent, useEffect, useRef, useState } from "react";
-import "../styles/game-playing-room.css";
-import images from "../cards/cards_importer";
 import { Client, IMessage } from "@stomp/stompjs";
-import { useLocation } from "react-router-dom";
-import axios from "axios";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import images from "../cards/cards_importer";
 import {
   Card,
   ErrorEvent,
@@ -16,6 +14,8 @@ import {
   TurnState,
   WinnerState,
 } from "../events/game-playing-room/WebSocketEventTypes";
+import "../styles/game-playing-room.css";
+import axios from "axios";
 
 var client: Client;
 
@@ -34,7 +34,7 @@ type WebSocketEventType =
   | WinnerState
   | ErrorEvent
   | TeamStateEvent;
-// TODO, when user refresh page after turn is ended, he gets all the cards that were visible at the board
+// TODO, when user refresh page after turn is ended, he gets all the cards that were visible at the board, repair it
 const convertCardIntoImageSrc = (card: Card): string => {
   var imageKey =
     card.suit.charAt(0).toUpperCase() +
@@ -58,21 +58,29 @@ const GamePlayingRoom = () => {
     // map of cards played by players in current round
     Map<string, string | null>
   >(new Map());
+  // trump suit part
   const [suit, setSuit] = useState<string>("COINS"); // TODO wait until user selects trump and after that let him play his card (needed for user who chooses trump suit), because client.publish are asynchronous!
   const [displayTrumpSuitSelection, setDisplayTrumpSuitSelection] =
     useState(false);
   const [displayedSuit, setDisplayedSuit] = useState<string>("-");
+  // call part
+  const [call, setCall] = useState<string>("KNOCK");
   const [displayCallSelection, setDisplayCallSelection] = useState(false);
+  const [showCallModal, setShowCallModal] = useState(false);
   const [loading, setLoading] = useState(true);
   // errors part
   const [errorModalMessage, setErrorModalMessage] = useState<string>();
   const [showErrorModal, setShowErrorModal] = useState<boolean>(false);
   // timer part
-  const totalTime = 10;
-  const [isUserTurn, setIsUserTurn] = useState<boolean>(false);
+  const totalTime = 20;
   const [isTimerRunning, setIsTimerRunning] = useState<boolean>(false);
   const [timeLeft, setTimeLeft] = useState<number>(totalTime);
   const [percentage, setPercentage] = useState<number>(100);
+  // username part
+  const usernameRef = useRef<string>();
+  // result of the game modal
+  const [showResultModal, setShowResultModal] = useState(false);
+  const [winnerTeam, setWinnerTeam] = useState<string>("");
 
   // HELPER FUNCTIONS
 
@@ -91,31 +99,48 @@ const GamePlayingRoom = () => {
 
   const onTimeUp = () => {
     if (!isTimerRunning) return;
-    // TODO if it is player that has to select trump suit - select random trump suit then
+    console.log("I am sending request to check timeout");
     client.publish({
       destination: `/app/game/${gameContent.gameId}/timeout`,
     });
     // set values of variables responsible for timeout management
-    setIsUserTurn(false);
+    setIsTimerRunning(false);
   };
 
-  // it removes cards that were played last in last round
+  // it removes cards that were played in last turn
   const clearBoard = () => {
     const newMap = new Map<string, string | null>();
     players.forEach((player) => newMap.set(player, null));
     setPlayerCardMapCurrentTurn(newMap);
   };
 
+  const handleStartTimer = () => {
+    setIsTimerRunning(true);
+    setTimeLeft(totalTime);
+  };
+
+  const handleStopTimer = () => {
+    setIsTimerRunning(false);
+    setTimeLeft(0);
+  };
+
+  const capitalizeWord = (word: string): string | null => {
+    if (!word) return null;
+    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+  };
+
   // WEBSOCKET FUNCTIONS
 
   const onMessageReceived = (msg: IMessage) => {
-    console.log("MESSAGE RECEIVED, BODY:");
-    console.log(msg.body);
+    // console.log("MESSAGE RECEIVED, BODY:");
+    // console.log(msg.body);
     const events: WebSocketEventType[] = JSON.parse(msg.body);
     events.forEach((event) => {
       switch (event.eventType) {
         case "TurnState":
+          handleStopTimer();
           handleTurnStateEvent(event.turn);
+          handleStartTimer();
           break;
         case "MyCardsState":
           handleMyCardsStateEvent(event.myCards);
@@ -194,12 +219,15 @@ const GamePlayingRoom = () => {
   };
 
   const handleNewRoundEvent = () => {
-    // TODO this event is unnecessary?
-    // getPlayerCards();
+    // TODO is it necessary event?
+    // setPlayerCardMapCurrentTurn(new Map());
+    // setRedTeamPoints(0);
+    // setBlueTeamPoints(0);
   };
 
   const handleWinnerStateEvent = (team: string) => {
-    console.log("team: " + team + " won!");
+    setWinnerTeam(team);
+    setShowResultModal(true);
   };
 
   const handleErrorEvent = (errorMessage: string) => {
@@ -254,13 +282,23 @@ const GamePlayingRoom = () => {
     };
   }, []);
 
+  // user data hook
+
+  useEffect(() => {
+    axios
+      .get(`${baseUrl}/user/info`)
+      .then((response) => {
+        usernameRef.current = response.data.username;
+      })
+      .catch((error) => console.log(error));
+  }, []);
+
   // time use effect
 
   useEffect(() => {
     let timer: NodeJS.Timeout | undefined;
 
-    if (isUserTurn && !isTimerRunning) {
-      setIsTimerRunning(true);
+    if (isTimerRunning) {
       timer = setInterval(() => {
         setTimeLeft((prevTime) => {
           if (prevTime <= 1) {
@@ -271,17 +309,12 @@ const GamePlayingRoom = () => {
           return prevTime - 1;
         });
       }, 1000);
-    } else if (!isUserTurn && isTimerRunning) {
-      if (timer) {
-        clearInterval(timer);
-      }
-      setIsTimerRunning(false);
     }
 
     return () => {
       if (timer) clearInterval(timer);
     };
-  }, [isUserTurn, isTimerRunning]);
+  }, [isTimerRunning]);
 
   useEffect(() => {
     setPercentage((timeLeft / totalTime) * 100);
@@ -293,24 +326,45 @@ const GamePlayingRoom = () => {
     else setLoading(true);
   }, [redTeamRef.current, blueTeamRef.current]);
 
-  // modal error use effect
+  // error modal use effect
 
-  const modalRef = useRef<HTMLDivElement>(null);
+  const errorModalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const handleOutsideClick = (event: MouseEvent) => {
+    const handleOutsideErrorModalClick = (event: MouseEvent) => {
       if (
-        modalRef.current &&
-        !modalRef.current.contains(event.target as Node)
+        errorModalRef.current &&
+        !errorModalRef.current.contains(event.target as Node)
       ) {
         setShowErrorModal(false);
       }
     };
 
-    document.addEventListener("mousedown", handleOutsideClick);
+    document.addEventListener("mousedown", handleOutsideErrorModalClick);
 
     return () => {
-      document.removeEventListener("mousedown", handleOutsideClick);
+      document.removeEventListener("mousedown", handleOutsideErrorModalClick);
+    };
+  }, []);
+
+  // call modal use effect
+
+  const callModalRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleOutsideCallModalClick = (event: MouseEvent) => {
+      if (
+        callModalRef.current &&
+        !callModalRef.current.contains(event.target as Node)
+      ) {
+        setShowCallModal(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleOutsideCallModalClick);
+
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideCallModalClick);
     };
   }, []);
 
@@ -330,9 +384,19 @@ const GamePlayingRoom = () => {
     });
   }
 
-  function handleSuitChange(event: ChangeEvent<HTMLSelectElement>): void {
+  const handleSuitChange = (event: ChangeEvent<HTMLSelectElement>) => {
     setSuit(event.target.value);
-  }
+  };
+
+  const handleCallChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    setCall(event.target.value);
+  };
+
+  const navigate = useNavigate();
+
+  const handleQuitGame = () => {
+    navigate("/", { replace: true });
+  };
 
   if (loading) {
     return (
@@ -345,7 +409,7 @@ const GamePlayingRoom = () => {
     <>
       {/* place for error modal */}
       <div className={`modal fade ${showErrorModal ? "show d-block" : ""}`}>
-        <div className="modal-dialog modal-md mt-5" ref={modalRef}>
+        <div className="modal-dialog modal-md mt-5" ref={errorModalRef}>
           <div className="modal-content bg-danger">
             <div className="modal-header border-black">
               <button
@@ -358,12 +422,64 @@ const GamePlayingRoom = () => {
           </div>
         </div>
       </div>
+      {/* place for call modal */}
+      <div className={`modal fade ${showCallModal ? "show d-block" : ""}`}>
+        <div className="modal-dialog modal-sm mt-5" ref={callModalRef}>
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title">Call</h5>
+              <button
+                type="button"
+                className="btn-close"
+                onClick={() => setShowCallModal(false)}
+              ></button>
+            </div>
+            <div className="modal-body text-center fw-bold">{call}</div>
+          </div>
+        </div>
+      </div>
+      {/* place for result modal */}
+      <div
+        className={`modal bg-dark bg-opacity-25 align-items-center fade ${
+          showResultModal ? "show d-block" : ""
+        }`}
+      >
+        <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h1 className="modal-title fs-4">Result</h1>
+              <button
+                type="button"
+                className="btn-close"
+                onClick={() => setShowResultModal(false)}
+              ></button>
+            </div>
+            <div className="modal-body text-center">
+              <p
+                className={`fw-bold mt-3 ${
+                  winnerTeam === "RED" ? "text-danger" : "text-primary"
+                }`}
+              >
+                {capitalizeWord(winnerTeam)} team won!
+              </p>
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-secondary" onClick={handleQuitGame}>
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
       {/* Main page content */}
       <div className="custom-outer-div d-flex flex-column justify-content-between p-2 min-vw-100 min-vh-100">
         {/* upper part */}
         <div className="d-flex">
           <div className="w-25">
-            <button className="btn btn-danger fw-bold btn-lg rounded-0">
+            <button
+              className="btn btn-danger fw-bold btn-lg rounded-0"
+              onClick={handleQuitGame}
+            >
               Exit
             </button>
           </div>
@@ -384,7 +500,7 @@ const GamePlayingRoom = () => {
             </ul>
           </div>
           {/* timeout bar */}
-          {isUserTurn && (
+          {isTimerRunning && (
             <div className="d-flex align-items-center w-25">
               <div
                 className="d-flex bg-primary ms-auto border border-black border-3 h-50"
@@ -449,16 +565,19 @@ const GamePlayingRoom = () => {
                 </select>
               </div>
             )}
-            {/* TODO handle call - player that is starting round can call sth (so we have to know who win previous turn) */}
             {/* Call select section */}
             {displayCallSelection && (
               <div className="w-25 mt-2">
                 <p className="mb-2">Call</p>
-                <select name="" className="form-select">
-                  <option value="">Knock</option>
-                  <option value="">Fly</option>
-                  <option value="">Slither</option>
-                  <option value="">Reslither</option>
+                <select
+                  className="form-select"
+                  value={call}
+                  onChange={handleCallChange}
+                >
+                  <option value="KNOCK">Knock</option>
+                  <option value="FLY">Fly</option>
+                  <option value="SLITHER">Slither</option>
+                  <option value="RESLITHER">Reslither</option>
                 </select>
               </div>
             )}
@@ -477,7 +596,6 @@ const GamePlayingRoom = () => {
                   setDisplayTrumpSuitSelection(false);
                 }
                 handleSelectCard(id);
-                setIsUserTurn(false);
               }}
             />
           ))}
