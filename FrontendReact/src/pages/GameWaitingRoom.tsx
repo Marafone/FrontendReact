@@ -2,7 +2,6 @@ import { Client, IMessage } from "@stomp/stompjs";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useUserContext } from "../context/UserContext";
 import {
   GameStartedEvent,
   PlayerJoinedEvent,
@@ -35,7 +34,7 @@ const GameWaitingRoom = () => {
   const [teamBlue, setTeamBlue] = useState<string[]>([]);
   const [playersAmount, setPlayersAmount] = useState(1);
   const [eventMessages, setEventMessages] = useState<string[]>(["Have fun!"]);
-  const { username, setUsername } = useUserContext();
+  const [username, setUsername] = useState<string>();
   const navigate = useNavigate();
 
   // HELPER FUNCTIONS
@@ -91,6 +90,7 @@ const GameWaitingRoom = () => {
     // change teams information
     setTeamRed(redTeam);
     setTeamBlue(blueTeam);
+    setPlayersAmount(redTeam.length + blueTeam.length);
   }
 
   function handlePlayerJoinedEvent(event: PlayerJoinedEvent) {
@@ -150,12 +150,16 @@ const GameWaitingRoom = () => {
     };
 
     const onConnected = () => {
-      if (client && client.connected)
+      if (client && client.connected) {
         client.subscribe(
           `/topic/game/${gameContent.gameId}`,
           onMessageReceived
         );
-      else console.log("STOMP Connection is not established yet!");
+
+        client.publish({
+          destination: `/app/game/${gameContent.gameId}/reconnect`,
+        });
+      }
     };
 
     const onError = (err: any) => {
@@ -164,35 +168,23 @@ const GameWaitingRoom = () => {
 
     createWebSocketConnection();
 
-    // function to get all the information necessary for user when joining game
-
-    const getBeginningGameInformation = () => {
-      axios
-        .get(`${baseUrl}/game/${gameContent.gameId}/teams`)
-        .then((response) => {
-          const newTeamRed: string[] = [];
-          const newTeamBlue: string[] = [];
-          response.data.RED.forEach((x: any) =>
-            newTeamRed.push(x.user.username)
-          );
-          response.data.BLUE.forEach((x: any) =>
-            newTeamBlue.push(x.user.username)
-          );
-          setTeamRed(newTeamRed);
-          setTeamBlue(newTeamBlue);
-          setPlayersAmount(newTeamRed.length + newTeamBlue.length);
-        })
-        .catch((error) => console.log(error));
-    };
-
-    getBeginningGameInformation();
-
     return () => {
       if (client?.connected) {
         client.unsubscribe(`/topic/game/${gameContent.gameId}`);
         client.deactivate();
       }
     };
+  }, []);
+
+  // user data hook
+
+  useEffect(() => {
+    axios
+      .get(`${baseUrl}/user/info`)
+      .then((response) => {
+        setUsername(response.data.username);
+      })
+      .catch((error) => console.log(error));
   }, []);
 
   return (
