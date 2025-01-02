@@ -1,3 +1,31 @@
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: #f4f4f4; /* Replace with your desired background color */
+}
+
+/* Other styles for the Home page */
+.custom-create-game-btn {
+  background-color: #007bff; /* Adjust as needed */
+  color: #fff;
+}
+
+.custom-lobby-div {
+  background-color: #ffffff;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.custom-lobby-div-element {
+  cursor: pointer;
+}
+
+.custom-lobby-div-element:hover {
+  background-color: #f0f0f0;
+}
+
 :root {
   --widgets-bg-color: #ffc360;
   --widgets-hover-bg-color: #ffcc7a;
@@ -10,7 +38,7 @@
 
 .custom-lobby-div {
   background-color: var(--widgets-bg-color);
-  height: 492px;
+  height: 400px;
 }
 
 .custom-create-game-btn {

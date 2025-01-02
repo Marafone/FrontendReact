@@ -80,10 +80,10 @@ const Home = () => {
           <div>
             <h1>News</h1>
             <p>
-              Lorem ipsum dolor sit amet consectetur adipisicing elit.
-              Perspiciatis, quo itaque praesentium cupiditate facere
-              necessitatibus? Qui veniam fuga ipsa accusamus unde impedit soluta,
-              magnam sed blanditiis facilis est magni aperiam tempore.
+              We are currently working hard to improve the app! A new iOS version
+              is in development, which will bring smoother gameplay and additional
+              features for iPhone users. Stay tuned for updates as we roll out new
+              enhancements for all platforms.
             </p>
           </div>
         </div>

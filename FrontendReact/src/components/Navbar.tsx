@@ -1,14 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { Link } from "react-router-dom";
+import { UserContext } from "../context/UserContext"; // Import UserContext
 
 const Navbar = () => {
   const [displayLanguages, setDisplayLanguages] = useState(false);
   const [displayUserMenu, setDisplayUserMenu] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Manage login state here
+  const { username, setUsername } = useContext(UserContext); // Access username from context
   const languagesMenuColor = "#a0091b";
 
   const handleLogout = () => {
-    setIsLoggedIn(false); // Log out logic
+    setUsername(null); // Clear username in context
+    localStorage.removeItem("username"); // Remove username from localStorage
+    
     console.log("User logged out");
   };
 
@@ -117,7 +120,7 @@ const Navbar = () => {
                     left: "auto",
                   }}
                 >
-                  {!isLoggedIn ? (
+                  {!username ? (
                     <>
                       <li>
                         <Link

@@ -30,7 +30,7 @@ const Register = () => {
   return (
     <div className="custom-outer-div d-flex justify-content-center align-items-center min-vw-100 min-vh-100 p-3">
       <div className="custom-user-info-window w-100 p-4 border border-black border-opacity-25 rounded shadow-lg" style={{ maxWidth: "400px" }}>
-        <h2 className="text-center mb-4">Register</h2>
+        <h3 className="text-center mb-4">Register</h3>
         {errorMessage && <p className="text-danger text-center">{errorMessage}</p>}
         <div className="mb-3">
           <label className="form-label">Username</label>
