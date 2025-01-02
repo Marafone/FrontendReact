@@ -38,7 +38,7 @@ body {
 
 .custom-lobby-div {
   background-color: var(--widgets-bg-color);
-  height: 400px;
+  height: 380px;
 }
 
 .custom-create-game-btn {

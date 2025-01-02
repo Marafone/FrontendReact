@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../styles/register-login-page.css";
+import { LanguageContext } from "../context/LanguageContext";
 
 axios.defaults.withCredentials = true;
 
@@ -11,6 +12,14 @@ const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+
+  const context = useContext(LanguageContext);
+
+  if (!context) {
+    throw new Error("LanguageContext must be used within a LanguageProvider.");
+  }
+
+  const { t } = context; // Now `context` is guaranteed to be defined
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault(); // Prevent the default form submission
@@ -22,7 +31,7 @@ const Login = () => {
         navigate("/login-success");
       }
     } catch (error) {
-      setErrorMessage("Login failed. Please check your credentials.");
+      setErrorMessage(t("login.loginFailed")); // Translated error message
       console.log("Error:", error);
     }
   };
@@ -33,15 +42,15 @@ const Login = () => {
         className="custom-user-info-window w-100 p-4 border border-black border-opacity-25 rounded shadow-lg"
         style={{ maxWidth: "400px" }}
       >
-        <h3 className="text-center mb-4">Login</h3>
+        <h3 className="text-center mb-4">{t("login.title")}</h3> {/* Translated Login Title */}
         {errorMessage && (
-          <p className="text-danger text-center">{errorMessage}</p>
+          <p className="text-danger text-center">{errorMessage}</p> 
         )}
-        <form id="form" onSubmit={handleLogin}> {/* Add form tag */}
+        <form id="form" onSubmit={handleLogin}>
           <div className="mb-3">
-            <label className="form-label">Username</label>
+            <label className="form-label">{t("login.username")}</label> {/* Translated Username label */}
             <input
-              id="username" // Ensure the ID is set correctly
+              id="username"
               type="text"
               className="form-control"
               value={username}
@@ -49,9 +58,9 @@ const Login = () => {
             />
           </div>
           <div className="mb-3">
-            <label className="form-label">Password</label>
+            <label className="form-label">{t("login.password")}</label> {/* Translated Password label */}
             <input
-              id="password" // Ensure the ID is set correctly
+              id="password"
               type="password"
               className="form-control"
               value={password}
@@ -60,10 +69,10 @@ const Login = () => {
           </div>
           <div className="d-flex justify-content-between">
             <button className="btn btn-secondary" onClick={() => navigate("/")}>
-              Cancel
+              {t("login.cancel")} {/* Translated Cancel button */}
             </button>
             <button className="btn btn-primary" type="submit">
-              Submit
+              {t("login.submit")} {/* Translated Submit button */}
             </button>
           </div>
         </form>

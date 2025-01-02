@@ -4,16 +4,21 @@ import {
   Route,
   RouterProvider,
 } from "react-router-dom";
-import { UserProvider } from "./context/UserContext.tsx";
+
+import { UserProvider } from "./context/UserContext";
+import { LanguageProvider } from "./context/LanguageContext";
+
+// Pages
 import MainLayout from "./layouts/MainLayout";
 import GameCreation from "./pages/GameCreation";
 import GameWaitingRoom from "./pages/GameWaitingRoom";
 import Home from "./pages/Home";
-import Login from "./pages/Login.tsx";
-import Register from "./pages/Register.tsx";
-import GamePlayingRoom from "./pages/GamePlayingRoom.tsx";
-import Rules from "./pages/Rules.tsx";
-import LoginSuccess from "./pages/LoginSuccess.tsx"
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import GamePlayingRoom from "./pages/GamePlayingRoom";
+import Rules from "./pages/Rules";
+import LoginSuccess from "./pages/LoginSuccess";
+
 
 export interface User {
   username: string;
@@ -29,19 +34,21 @@ function App() {
           <Route path="create-game" element={<GameCreation />} />
         </Route>
         {/* Routes without MainLayout */}
-        <Route path="/wait-for-game" element={<GameWaitingRoom />}></Route>
-        <Route path="/register" element={<Register />}></Route>
-        <Route path="/login" element={<Login />}></Route>
+        <Route path="/wait-for-game" element={<GameWaitingRoom />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/login-success" element={<LoginSuccess />} />
-        <Route path="/play-game" element={<GamePlayingRoom />}></Route>
-        <Route path="/rules" element={<Rules />}></Route>
+        <Route path="/play-game" element={<GamePlayingRoom />} />
+        <Route path="/rules" element={<Rules />} />
       </>
     )
   );
 
   return (
     <UserProvider>
-      <RouterProvider router={router} />
+      <LanguageProvider>
+        <RouterProvider router={router} />
+      </LanguageProvider>
     </UserProvider>
   );
 }
