@@ -18,6 +18,8 @@ import Register from "./pages/Register";
 import GamePlayingRoom from "./pages/GamePlayingRoom";
 import Rules from "./pages/Rules";
 import LoginSuccess from "./pages/LoginSuccess";
+import axios from 'axios';
+import {useState, useEffect, createContext, useContext} from "react";
 
 
 export interface User {
@@ -25,6 +27,18 @@ export interface User {
 }
 
 function App() {
+
+  useEffect(() => {
+    async function fetchData(){
+      const csrfToken = await axios.get("/csrf",{
+        withCredentials: true
+      });
+      axios.defaults.headers.common['X-XSRF-TOKEN'] = csrfToken.data.token.toString();
+    }
+    fetchData();
+  }
+  ,[])
+
   const router = createBrowserRouter(
     createRoutesFromElements(
       <>
