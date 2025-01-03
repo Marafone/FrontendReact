@@ -46,9 +46,6 @@ export interface Translations {
         imageAlt: string;
       };
     };
-    PL: {
-      // Define PL translations here
-    };
 }
 
 export const translations = {
@@ -98,6 +95,24 @@ export const translations = {
         handConclusion: "At the end of each hand, the points are tallied, and the player who led the first trick becomes the new dealer. It is not allowed to talk during the game.",
         loadingImage: "Loading image...",
         imageAlt: "All cards used in Marafon"
+      },
+      gameWaitingRoom: {
+        events: {
+          "defaultMessage": "Have fun!",
+          "playerJoined": "{{playerName}} joined the game!",
+          "playerLeft": "{{playerName}} left the game!",
+          "title": "Events"
+        },
+        buttons: {
+          "exit": "Exit",
+          "redTeam": "Red",
+          "blueTeam": "Blue",
+          "startGame": "Start game"
+        },
+        labels: {
+          "gameType": "Game Type",
+          "players": "Players"
+        }
       },
     },
     PL: {
@@ -155,6 +170,24 @@ export const translations = {
         loadingImage: "Ładowanie obrazu...",
         imageAlt: "Wszystkie karty używane w grze Marafon",
       },
+      gameWaitingRoom: {
+        events: {
+          defaultMessage: "Baw się dobrze!",
+          playerJoined: "{{playerName}} dołączył do gry!",
+          playerLeft: "{{playerName}} opuścił grę!",
+          title: "Wydarzenia"
+        },
+        buttons: {
+          exit: "Wyjdź",
+          redTeam: "Czerwoni",
+          blueTeam: "Niebiescy",
+          startGame: "Rozpocznij grę"
+        },
+        labels: {
+          gameType: "Typ gry",
+          players: "Gracze"
+        }
+      },
     },
     IT:{
       home: {
@@ -210,6 +243,24 @@ export const translations = {
           "Alla fine di ogni mano, i punti vengono contati e il giocatore che ha guidato la prima presa diventa il nuovo mazziere.",
         loadingImage: "Caricamento immagine...",
         imageAlt: "Tutte le carte utilizzate nel Marafon"
+      },
+      gameWaitingRoom: {
+        events: {
+          defaultMessage: "Divertiti!",
+          playerJoined: "{{playerName}} si è unito al gioco!",
+          playerLeft: "{{playerName}} ha lasciato il gioco!",
+          title: "Eventi"
+        },
+        buttons: {
+          exit: "Esci",
+          redTeam: "Rosso",
+          blueTeam: "Blu",
+          startGame: "Inizia gioco"
+        },
+        labels: {
+          gameType: "Tipo di gioco",
+          players: "Giocatori"
+        }
       }
     },
     RGN: {
@@ -266,6 +317,24 @@ export const translations = {
           "A la fin ad ogni mà, i punti i s'conten, e chi ha guidà la prima mà la dvèinta e' nôv dàl carteur.",
         loadingImage: "A s'cârica la imâggin...",
         imageAlt: "Tot i carte adoperè int la Maraffò"
+      },
+      gameWaitingRoom: {
+        events: {
+          defaultMessage: "Divirtèt!",
+          playerJoined: "{{playerName}} l'è vnì in tla zóca!",
+          playerLeft: "{{playerName}} l'è andè fura da la zóca!",
+          title: "Evenmént"
+        },
+        buttons: {
+          exit: "Esci",
+          redTeam: "Russ",
+          blueTeam: "Blu",
+          startGame: "Cuminsa la zóca"
+        },
+        labels: {
+          gameType: "Tìp ad zóca",
+          players: "Zugadòur"
+        }
       }
     }
   };

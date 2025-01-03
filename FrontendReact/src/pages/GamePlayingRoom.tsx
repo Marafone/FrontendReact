@@ -334,6 +334,12 @@ const GamePlayingRoom = () => {
     setSuit(event.target.value);
   }
 
+  const [isOptionsVisible, setIsOptionsVisible] = useState<boolean>(true);
+
+  const toggleOptionsVisibility = () => {
+    setIsOptionsVisible((prev) => !prev);
+  };
+
   if (loading) {
     return (
       <div className="d-flex justify-content-center align-items-center min-vh-100">
@@ -341,6 +347,7 @@ const GamePlayingRoom = () => {
       </div>
     );
   }
+
   return (
     <>
       {/* place for error modal */}
@@ -361,14 +368,14 @@ const GamePlayingRoom = () => {
       {/* Main page content */}
       <div className="custom-outer-div d-flex flex-column justify-content-between p-2 min-vw-100 min-vh-100">
         {/* upper part */}
-        <div className="d-flex">
-          <div className="w-25">
-            <button className="btn btn-danger fw-bold btn-lg rounded-0">
+        <div className="d-flex custom-upper-part">
+          <div className="custom-exit-container">
+            <button className="btn btn-danger fw-bold custom-exit-button">
               Exit
             </button>
           </div>
-          <div className="d-flex justify-content-start align-items-center w-75 text-center">
-            <ul className="d-flex list-unstyled gap-5 fs-5 fw-bold m-0 ms-5">
+          <div className="d-flex justify-content-start align-items-center custom-players-container">
+            <ul className="d-flex list-unstyled custom-players-list">
               {players.map((player) => (
                 <li
                   key={player}
@@ -383,19 +390,11 @@ const GamePlayingRoom = () => {
               ))}
             </ul>
           </div>
-          {/* timeout bar */}
-          {isUserTurn && (
-            <div className="d-flex align-items-center w-25">
-              <div
-                className="d-flex bg-primary ms-auto border border-black border-3 h-50"
-                style={{ width: `${percentage}%` }}
-              ></div>
-            </div>
-          )}
         </div>
+
+        {/* Center Cards Section */}
         <div className="d-flex flex-row align-items-center">
-          {/* Cards played in current round section */}
-          <div className="d-flex justify-content-center gap-4 w-50">
+          <div className="d-flex justify-content-center gap-4 w-100">
             {Array.from(playerCardMapCurrentTurn).map(
               ([playerName, src]) =>
                 src && (
@@ -406,36 +405,50 @@ const GamePlayingRoom = () => {
                 )
             )}
           </div>
-          {/* Points and other options */}
-          <div className="d-flex flex-column w-50 align-items-center">
-            {/* Points section */}
-            <div className="d-flex flex-column align-items-center w-25 bg-white rounded-4 p-2">
-              <p className="fw-bold fs-4">Points</p>
-              {/* points red team */}
-              <div className="d-flex flex-row align-items-center justify-content-end w-100 px-2">
-                <p className="me-auto text-danger fw-bold">
-                  {redTeamRef.current[0]}{" "}
-                  <span className="text-black fw-normal">and</span>{" "}
-                  {redTeamRef.current[1]}:{" "}
-                </p>
-                <p className="ms-auto fs-5 fw-bold">{redTeamPoints}</p>
-              </div>
-              {/* points blue team */}
-              <div className="d-flex flex-row align-items-center justify-content-end w-100 px-2">
-                <p className="w-100 text-primary fw-bold">
-                  {blueTeamRef.current[0]}{" "}
-                  <span className="text-black fw-normal">and</span>{" "}
-                  {blueTeamRef.current[1]}:{" "}
-                </p>
-                <p className="ms-auto fs-5 fw-bold">{blueTeamPoints}</p>
-              </div>
-              {/* Trump Suit display section */}
-              <p className="fw-bold fs-4 mt-3">Trump Suit</p>
-              <p className="fw-bold">{displayedSuit}</p>
+        </div>
+
+        {/* Toggle Button */}
+        <button
+          className="btn btn-primary position-fixed"
+          style={{
+            top: "50%",
+            right: "10px",
+            transform: "translateY(-50%)",
+            zIndex: 1050,
+          }}
+          onClick={toggleOptionsVisibility}
+        >
+          {isOptionsVisible ? "Hide" : "Show"}
+        </button>
+
+        {/* Points and other options */}
+        <div
+          className={`options-container ${
+            isOptionsVisible ? "visible" : "hidden"
+          }`}
+        >
+          <div className="d-flex flex-column align-items-center bg-white rounded-4 p-2">
+            <p className="fw-bold fs-4">Points</p>
+            <div className="d-flex flex-row align-items-center justify-content-end w-100 px-2">
+              <p className="me-auto text-danger fw-bold">
+                {redTeamRef.current[0]}{" "}
+                <span className="text-black fw-normal">and</span>{" "}
+                {redTeamRef.current[1]}:{" "}
+              </p>
+              <p className="ms-auto fs-5 fw-bold">{redTeamPoints}</p>
             </div>
-            {/* Trump Suit select section */}
+            <div className="d-flex flex-row align-items-center justify-content-end w-100 px-2">
+              <p className="w-100 text-primary fw-bold">
+                {blueTeamRef.current[0]}{" "}
+                <span className="text-black fw-normal">and</span>{" "}
+                {blueTeamRef.current[1]}:{" "}
+              </p>
+              <p className="ms-auto fs-5 fw-bold">{blueTeamPoints}</p>
+            </div>
+            <p className="fw-bold fs-4 mt-3">Trump Suit</p>
+            <p className="fw-bold">{displayedSuit}</p>
             {displayTrumpSuitSelection && (
-              <div className="w-25 mt-2">
+              <div className="mt-2">
                 <p className="mb-2">Trump suit</p>
                 <select
                   className="form-select"
@@ -449,21 +462,9 @@ const GamePlayingRoom = () => {
                 </select>
               </div>
             )}
-            {/* TODO handle call - player that is starting round can call sth (so we have to know who win previous turn) */}
-            {/* Call select section */}
-            {displayCallSelection && (
-              <div className="w-25 mt-2">
-                <p className="mb-2">Call</p>
-                <select name="" className="form-select">
-                  <option value="">Knock</option>
-                  <option value="">Fly</option>
-                  <option value="">Slither</option>
-                  <option value="">Reslither</option>
-                </select>
-              </div>
-            )}
           </div>
         </div>
+
         {/* Cards */}
         <div className="d-flex flex-wrap gap-2 custom-cards-container">
           {cards.map(([id, src]) => (
