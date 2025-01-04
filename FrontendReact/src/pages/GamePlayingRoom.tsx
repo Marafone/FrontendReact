@@ -120,6 +120,7 @@ const GamePlayingRoom = () => {
   };
 
   const handleStartTimer = () => {
+    console.log("Timer started!");
     setIsTimerRunning(true);
     setTimeLeft(totalTime);
   };
@@ -619,7 +620,7 @@ const GamePlayingRoom = () => {
             )}
             {/* Call select section */}
             {displayCallSelection && (
-              <div className="w-25 mt-2">
+              <div className="mt-2">
                 <p className="mb-2">Call</p>
                 <select
                   className="form-select"
