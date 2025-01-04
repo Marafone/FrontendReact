@@ -155,7 +155,7 @@ const GameWaitingRoom = () => {
           `/topic/game/${gameContent.gameId}`,
           onMessageReceived
         );
-
+        client.subscribe(`/user/queue/game`, onMessageReceived);
         client.publish({
           destination: `/app/game/${gameContent.gameId}/reconnect`,
         });
@@ -171,12 +171,14 @@ const GameWaitingRoom = () => {
     return () => {
       if (client?.connected) {
         client.unsubscribe(`/topic/game/${gameContent.gameId}`);
+        client.unsubscribe(`/user/queue/game`);
         client.deactivate();
       }
     };
   }, []);
 
   // user data hook
+  // TODO maybe I have to remove it to make it work?
 
   useEffect(() => {
     axios
