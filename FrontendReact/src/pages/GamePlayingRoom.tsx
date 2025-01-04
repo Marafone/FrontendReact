@@ -3,10 +3,13 @@ import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import images from "../cards/cards_importer";
 import {
+  Call,
+  CallState,
   Card,
   ErrorEvent,
   MyCardsState,
   NewRound,
+  NextPlayerState,
   PlayersOrderState,
   PointState,
   TeamStateEvent,
@@ -33,9 +36,12 @@ type WebSocketEventType =
   | NewRound
   | WinnerState
   | ErrorEvent
-  | TeamStateEvent;
+  | TeamStateEvent
+  | NextPlayerState
+  | CallState;
 // TODO, when user refresh page after turn is ended, he gets all the cards that were visible at the board, repair it
-const convertCardIntoImageSrc = (card: Card): string => {
+const convertCardIntoImageSrc = (card: Card | null): string | null => {
+  if (card == null) return null;
   var imageKey =
     card.suit.charAt(0).toUpperCase() +
     card.suit.slice(1).toLowerCase() +
@@ -58,6 +64,7 @@ const GamePlayingRoom = () => {
     // map of cards played by players in current round
     Map<string, string | null>
   >(new Map());
+  const [loading, setLoading] = useState(true);
   // trump suit part
   const [suit, setSuit] = useState<string>("COINS"); // TODO wait until user selects trump and after that let him play his card (needed for user who chooses trump suit), because client.publish are asynchronous!
   const [displayTrumpSuitSelection, setDisplayTrumpSuitSelection] =
@@ -67,7 +74,6 @@ const GamePlayingRoom = () => {
   const [call, setCall] = useState<string>("KNOCK");
   const [displayCallSelection, setDisplayCallSelection] = useState(false);
   const [showCallModal, setShowCallModal] = useState(false);
-  const [loading, setLoading] = useState(true);
   // errors part
   const [errorModalMessage, setErrorModalMessage] = useState<string>();
   const [showErrorModal, setShowErrorModal] = useState<boolean>(false);
@@ -99,7 +105,6 @@ const GamePlayingRoom = () => {
 
   const onTimeUp = () => {
     if (!isTimerRunning) return;
-    console.log("I am sending request to check timeout");
     client.publish({
       destination: `/app/game/${gameContent.gameId}/timeout`,
     });
@@ -138,9 +143,7 @@ const GamePlayingRoom = () => {
     events.forEach((event) => {
       switch (event.eventType) {
         case "TurnState":
-          handleStopTimer();
           handleTurnStateEvent(event.turn);
-          handleStartTimer();
           break;
         case "MyCardsState":
           handleMyCardsStateEvent(event.myCards);
@@ -167,6 +170,12 @@ const GamePlayingRoom = () => {
         case "TeamState":
           handleTeamStateEvent(event.redTeam, event.blueTeam);
           break;
+        case "NextPlayerState":
+          handleNextPlayerStateEvent(event.playerName, event.isFirstPlayer);
+          break;
+        case "CallState":
+          handleCallStateEvent(event.call);
+          break;
         default:
           console.warn("Unknown event type");
           break;
@@ -175,13 +184,12 @@ const GamePlayingRoom = () => {
   };
 
   const handleTurnStateEvent = (playerCardMap: Map<string, Card>) => {
-    var newPlayerCardMapCurrentTurn: Map<string, string> = new Map();
+    var newPlayerCardMapCurrentTurn: Map<string, string | null> = new Map();
     Object.entries(playerCardMap).forEach(([playerName, card]) => {
-      if (card !== null)
-        newPlayerCardMapCurrentTurn.set(
-          playerName,
-          convertCardIntoImageSrc(card)
-        );
+      newPlayerCardMapCurrentTurn.set(
+        playerName,
+        convertCardIntoImageSrc(card)
+      );
     });
     setPlayerCardMapCurrentTurn(newPlayerCardMapCurrentTurn);
   };
@@ -189,10 +197,12 @@ const GamePlayingRoom = () => {
   const handleMyCardsStateEvent = (cards: Card[]) => {
     const newCards: [bigint, string][] = [];
     cards.map((card) => {
-      newCards.push([card.id, convertCardIntoImageSrc(card)]);
+      newCards.push([card.id, convertCardIntoImageSrc(card) ?? ""]); // result would never be null, because of passed card would never be null
     });
-    if (newCards.length === 10 && doesUserHaveFourCoins(newCards))
+    if (newCards.length === 10 && doesUserHaveFourCoins(newCards)) {
+      setDisplayCallSelection(true);
       setDisplayTrumpSuitSelection(true);
+    }
     setCards(newCards);
   };
 
@@ -220,9 +230,6 @@ const GamePlayingRoom = () => {
 
   const handleNewRoundEvent = () => {
     // TODO is it necessary event?
-    // setPlayerCardMapCurrentTurn(new Map());
-    // setRedTeamPoints(0);
-    // setBlueTeamPoints(0);
   };
 
   const handleWinnerStateEvent = (team: string) => {
@@ -238,6 +245,22 @@ const GamePlayingRoom = () => {
   const handleTeamStateEvent = (redTeam: string[], blueTeam: string[]) => {
     redTeamRef.current = redTeam;
     blueTeamRef.current = blueTeam;
+  };
+
+  const handleNextPlayerStateEvent = (
+    playerName: string,
+    isFirstPlayer: boolean
+  ) => {
+    if (usernameRef.current === playerName && isFirstPlayer)
+      setDisplayCallSelection(true);
+    else setDisplayCallSelection(false);
+    handleStopTimer();
+    handleStartTimer();
+  };
+
+  const handleCallStateEvent = (call: Call) => {
+    setCall(call);
+    setShowCallModal(true);
   };
 
   // USE EFFECT HOOKS
@@ -370,19 +393,26 @@ const GamePlayingRoom = () => {
 
   // WIDGET FUNCTIONS
 
-  function handleSelectCard(id: bigint): void {
+  const handleSelectCard = (id: bigint) => {
     client.publish({
       destination: `/app/game/${gameContent.gameId}/card`,
       body: JSON.stringify({ cardId: id }),
     });
-  }
+  };
 
-  function handleSelectSuit(suit: string) {
+  const handleSelectSuit = (suit: string) => {
     client.publish({
       destination: `/app/game/${gameContent.gameId}/suit`,
       body: JSON.stringify({ trumpSuit: suit }),
     });
-  }
+  };
+
+  const handleSelectCall = (call: string) => {
+    client.publish({
+      destination: `/app/game/${gameContent.gameId}/call`,
+      body: JSON.stringify(call),
+    });
+  };
 
   const handleSuitChange = (event: ChangeEvent<HTMLSelectElement>) => {
     setSuit(event.target.value);
@@ -427,7 +457,7 @@ const GamePlayingRoom = () => {
         <div className="modal-dialog modal-sm mt-5" ref={callModalRef}>
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title">Call</h5>
+              <h5 className="modal-title">{players[0] + " call"}</h5>
               <button
                 type="button"
                 className="btn-close"
@@ -596,6 +626,10 @@ const GamePlayingRoom = () => {
                   setDisplayTrumpSuitSelection(false);
                 }
                 handleSelectCard(id);
+                if (displayCallSelection) {
+                  handleSelectCall(call);
+                  setDisplayCallSelection(false);
+                }
               }}
             />
           ))}

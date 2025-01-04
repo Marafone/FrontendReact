@@ -8,6 +8,8 @@ export type Card = {
   suit: string;
 };
 
+export type Call = "KNOCK" | "FLY" | "SLITHER" | "RESLITHER";
+
 type Team = "RED" | "BLUE";
 
 export interface TurnState extends BaseEvent {
@@ -53,4 +55,15 @@ export interface TeamStateEvent extends BaseEvent {
   eventType: "TeamState";
   redTeam: string[];
   blueTeam: string[];
+}
+
+export interface NextPlayerState extends BaseEvent {
+  eventType: "NextPlayerState";
+  playerName: string;
+  isFirstPlayer: boolean;
+}
+
+export interface CallState extends BaseEvent {
+  eventType: "CallState";
+  call: Call;
 }
