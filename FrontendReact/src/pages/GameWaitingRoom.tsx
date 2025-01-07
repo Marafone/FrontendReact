@@ -5,7 +5,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import {
   ErrorEvent,
   GameStartedEvent,
-  NewOwnerEvent,
   OwnerEvent,
   PlayerJoinedEvent,
   PlayerLeftEvent,
