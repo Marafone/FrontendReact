@@ -3,12 +3,14 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
+  ErrorEvent,
   GameStartedEvent,
   PlayerJoinedEvent,
   PlayerLeftEvent,
   TeamStateEvent,
 } from "../events/game-waiting-room/WebSocketEventTypes";
 import "../styles/game-waiting-room.css";
+import ErrorModal from "../components/ErrorModal";
 
 interface waitingRoomContent {
   gameId: bigint;
@@ -21,7 +23,8 @@ type WebSocketEventType =
   | TeamStateEvent
   | PlayerJoinedEvent
   | PlayerLeftEvent
-  | GameStartedEvent;
+  | GameStartedEvent
+  | ErrorEvent;
 
 var client: Client;
 
@@ -36,6 +39,9 @@ const GameWaitingRoom = () => {
   const [eventMessages, setEventMessages] = useState<string[]>(["Have fun!"]);
   const [username, setUsername] = useState<string>();
   const navigate = useNavigate();
+  // error modal
+  const [error, setError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   // HELPER FUNCTIONS
 
@@ -79,6 +85,9 @@ const GameWaitingRoom = () => {
           break;
         case "PlayerLeftEvent":
           handlePlayerLeftEvent(event.playerName);
+          break;
+        case "ErrorEvent":
+          handleErrorEvent(event.errorMessage);
           break;
         default:
           break;
@@ -134,6 +143,11 @@ const GameWaitingRoom = () => {
       )
     );
   }
+
+  const handleErrorEvent = (errorMessage: string) => {
+    setError(true);
+    setErrorMessage(errorMessage);
+  };
 
   // USE EFFECT HOOK
 
@@ -191,6 +205,15 @@ const GameWaitingRoom = () => {
 
   return (
     <>
+      {error && (
+        <ErrorModal
+          message={errorMessage}
+          onClose={() => {
+            setErrorMessage("");
+            setError(false);
+          }}
+        />
+      )}
       <div
         className="d-flex flex-column justify-content-evenly align-items-center min-vh-100 min-vw-100"
         style={{ backgroundColor: "#FFC058" }}
