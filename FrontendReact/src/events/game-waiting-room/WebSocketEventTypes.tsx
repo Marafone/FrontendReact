@@ -29,3 +29,9 @@ export interface ErrorEvent extends BaseEvent {
   eventType: "ErrorEvent";
   errorMessage: string;
 }
+
+export interface OwnerEvent extends BaseEvent {
+  eventType: "OwnerEvent";
+  newOwnerName: string;
+  isNew: boolean;
+}
