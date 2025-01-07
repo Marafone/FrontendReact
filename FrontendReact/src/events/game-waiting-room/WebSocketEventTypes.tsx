@@ -24,3 +24,8 @@ export interface PlayerLeftEvent extends BaseEvent {
   eventType: "PlayerLeftEvent";
   playerName: string;
 }
+
+export interface ErrorEvent extends BaseEvent {
+  eventType: "ErrorEvent";
+  errorMessage: string;
+}
