@@ -5,12 +5,15 @@ import { useLocation, useNavigate } from "react-router-dom";
 import {
   ErrorEvent,
   GameStartedEvent,
+  NewOwnerEvent,
+  OwnerEvent,
   PlayerJoinedEvent,
   PlayerLeftEvent,
   TeamStateEvent,
 } from "../events/game-waiting-room/WebSocketEventTypes";
 import "../styles/game-waiting-room.css";
 import ErrorModal from "../components/ErrorModal";
+import InfoModal from "../components/InfoModal";
 
 interface waitingRoomContent {
   gameId: bigint;
@@ -24,7 +27,8 @@ type WebSocketEventType =
   | PlayerJoinedEvent
   | PlayerLeftEvent
   | GameStartedEvent
-  | ErrorEvent;
+  | ErrorEvent
+  | OwnerEvent;
 
 var client: Client;
 
@@ -39,9 +43,15 @@ const GameWaitingRoom = () => {
   const [eventMessages, setEventMessages] = useState<string[]>(["Have fun!"]);
   const [username, setUsername] = useState<string>();
   const navigate = useNavigate();
+  // owner info
+  const [ownerName, setOwnerName] = useState("");
   // error modal
   const [error, setError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  // information modal
+  const [info, setInfo] = useState(false);
+  const [infoTitle, setInfoTitle] = useState("");
+  const [infoMessage, setInfoMessage] = useState("");
 
   // HELPER FUNCTIONS
 
@@ -88,6 +98,9 @@ const GameWaitingRoom = () => {
           break;
         case "ErrorEvent":
           handleErrorEvent(event.errorMessage);
+          break;
+        case "OwnerEvent":
+          handleOwnerEvent(event.newOwnerName, event.isNew);
           break;
         default:
           break;
@@ -149,6 +162,16 @@ const GameWaitingRoom = () => {
     setErrorMessage(errorMessage);
   };
 
+  const handleOwnerEvent = (newOwnerName: string, isNew: boolean) => {
+    setOwnerName(newOwnerName);
+    if (!isNew) return;
+    setInfo(true);
+    setInfoTitle("New Game Owner Selected");
+    setInfoMessage(
+      `The previous owner has left the game. ${newOwnerName} is now the owner.`
+    );
+  };
+
   // USE EFFECT HOOK
 
   useEffect(() => {
@@ -192,7 +215,6 @@ const GameWaitingRoom = () => {
   }, []);
 
   // user data hook
-  // TODO maybe I have to remove it to make it work?
 
   useEffect(() => {
     axios
@@ -211,6 +233,17 @@ const GameWaitingRoom = () => {
           onClose={() => {
             setErrorMessage("");
             setError(false);
+          }}
+        />
+      )}
+      {info && (
+        <InfoModal
+          title={infoTitle}
+          message={infoMessage}
+          onClose={() => {
+            setInfoTitle("");
+            setInfoMessage("");
+            setInfo(false);
           }}
         />
       )}
@@ -250,6 +283,9 @@ const GameWaitingRoom = () => {
                     username === player ? "fw-bold" : ""
                   }`}
                 >
+                  {player == ownerName && (
+                    <i className="bi bi-person-badge px-1" />
+                  )}
                   {player}
                 </p>
               ))}
@@ -268,6 +304,9 @@ const GameWaitingRoom = () => {
                     username === player ? "fw-bold" : ""
                   }`}
                 >
+                  {player == ownerName && (
+                    <i className="bi bi-person-badge px-1" />
+                  )}
                   {player}
                 </p>
               ))}
