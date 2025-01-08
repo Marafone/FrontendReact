@@ -73,7 +73,7 @@ const GamePlayingRoom = () => {
     useState(false);
   const [displayedSuit, setDisplayedSuit] = useState<string>("-");
   // call part
-  const [call, setCall] = useState<string>("KNOCK");
+  const [call, setCall] = useState<string>("");
   const [displayCallSelection, setDisplayCallSelection] = useState(false);
   const [showCallModal, setShowCallModal] = useState(false);
   // errors part
@@ -368,6 +368,8 @@ const GamePlayingRoom = () => {
   };
 
   const handleSelectCall = (call: string) => {
+    if (call == "") // empty call means that user does not want to make a call
+      return;
     client.publish({
       destination: `/app/game/${gameContent.gameId}/call`,
       body: JSON.stringify(call),
@@ -575,6 +577,7 @@ const GamePlayingRoom = () => {
                   value={call}
                   onChange={handleCallChange}
                 >
+                  <option value="">None</option>
                   <option value="KNOCK">Knock</option>
                   <option value="FLY">Fly</option>
                   <option value="SLITHER">Slither</option>
