@@ -1,7 +1,10 @@
 import { Client, IMessage } from "@stomp/stompjs";
+import axios from "axios";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import images from "../cards/cards_importer";
+import CallModal from "../components/CallModal";
+import ErrorModal from "../components/ErrorModal";
 import {
   Call,
   CallState,
@@ -18,7 +21,6 @@ import {
   WinnerState,
 } from "../events/game-playing-room/WebSocketEventTypes";
 import "../styles/game-playing-room.css";
-import axios from "axios";
 
 var client: Client;
 
@@ -75,7 +77,7 @@ const GamePlayingRoom = () => {
   const [displayCallSelection, setDisplayCallSelection] = useState(false);
   const [showCallModal, setShowCallModal] = useState(false);
   // errors part
-  const [errorModalMessage, setErrorModalMessage] = useState<string>();
+  const [errorModalMessage, setErrorModalMessage] = useState<string>("");
   const [showErrorModal, setShowErrorModal] = useState<boolean>(false);
   // timer part
   const totalTime = 20;
@@ -120,7 +122,6 @@ const GamePlayingRoom = () => {
   };
 
   const handleStartTimer = () => {
-    console.log("Timer started!");
     setIsTimerRunning(true);
     setTimeLeft(totalTime);
   };
@@ -350,48 +351,6 @@ const GamePlayingRoom = () => {
     else setLoading(true);
   }, [redTeamRef.current, blueTeamRef.current]);
 
-  // error modal use effect
-
-  const errorModalRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleOutsideErrorModalClick = (event: MouseEvent) => {
-      if (
-        errorModalRef.current &&
-        !errorModalRef.current.contains(event.target as Node)
-      ) {
-        setShowErrorModal(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleOutsideErrorModalClick);
-
-    return () => {
-      document.removeEventListener("mousedown", handleOutsideErrorModalClick);
-    };
-  }, []);
-
-  // call modal use effect
-
-  const callModalRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleOutsideCallModalClick = (event: MouseEvent) => {
-      if (
-        callModalRef.current &&
-        !callModalRef.current.contains(event.target as Node)
-      ) {
-        setShowCallModal(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleOutsideCallModalClick);
-
-    return () => {
-      document.removeEventListener("mousedown", handleOutsideCallModalClick);
-    };
-  }, []);
-
   // WIDGET FUNCTIONS
 
   const handleSelectCard = (id: bigint) => {
@@ -445,37 +404,26 @@ const GamePlayingRoom = () => {
 
   return (
     <>
-      {/* place for error modal */}
-      <div className={`modal fade ${showErrorModal ? "show d-block" : ""}`}>
-        <div className="modal-dialog modal-md mt-5" ref={errorModalRef}>
-          <div className="modal-content bg-danger">
-            <div className="modal-header border-black">
-              <button
-                type="button"
-                className="btn-close"
-                onClick={() => setShowErrorModal(false)}
-              ></button>
-            </div>
-            <div className="modal-body fw-bold">{errorModalMessage}</div>
-          </div>
-        </div>
-      </div>
-      {/* place for call modal */}
-      <div className={`modal fade ${showCallModal ? "show d-block" : ""}`}>
-        <div className="modal-dialog modal-sm mt-5" ref={callModalRef}>
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title">{players[0] + " call"}</h5>
-              <button
-                type="button"
-                className="btn-close"
-                onClick={() => setShowCallModal(false)}
-              ></button>
-            </div>
-            <div className="modal-body text-center fw-bold">{call}</div>
-          </div>
-        </div>
-      </div>
+      {/* Error Modal */}
+      {showErrorModal && (
+        <ErrorModal
+          message={errorModalMessage}
+          onClose={() => {
+            setShowErrorModal(false);
+            setErrorModalMessage("");
+          }}
+        />
+      )}
+      {/* Call Modal */}
+      {showCallModal && (
+        <CallModal
+          title={players[0] + " call"}
+          message={call}
+          onClose={() => {
+            setShowCallModal(false);
+          }}
+        />
+      )}
       {/* place for result modal */}
       <div
         className={`modal bg-dark bg-opacity-25 align-items-center fade ${
