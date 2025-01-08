@@ -497,14 +497,14 @@ const GamePlayingRoom = () => {
         </div>
 
         {/* Center Cards Section */}
-        <div className="d-flex flex-row align-items-center">
-          <div className="d-flex justify-content-center gap-4 w-100">
+        <div className="d-flex justify-contents-center align-items-center">
+          <div className="d-flex flex-row justify-content-start gap-4 w-100 flex-wrap custom-center-cards">
             {Array.from(playerCardMapCurrentTurn).map(
-              ([playerName, src]) =>
+              ([playerName, src], index) =>
                 src && (
-                  <div className="text-center" key={playerName}>
+                  <div className="text-center custom-card" key={playerName + index}>
                     <p className="fw-bold fs-5">{playerName}</p>
-                    <img className="custom-img" src={src} />
+                    <img className="custom-img" src={src} alt={`${playerName}'s card`} />
                   </div>
                 )
             )}
@@ -515,7 +515,7 @@ const GamePlayingRoom = () => {
         <button
           className="btn btn-primary position-fixed"
           style={{
-            top: "50%",
+            top: "70%",
             right: "10px",
             transform: "translateY(-50%)",
             zIndex: 1050,

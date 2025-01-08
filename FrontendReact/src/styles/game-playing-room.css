@@ -21,7 +21,7 @@ body, html {
   top: 10%;
   bottom: 10%;
   right: 0;
-  height: 35%;
+  height: 50%;
   width: 15%;
   background: #fff;
   box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
@@ -162,5 +162,28 @@ body, html {
     gap: calc(0.5rem + 0.3vw); /* Further reduce gap */
     font-size: calc(0.8rem + 0.5vw); /* Further scale down font size */
     font-weight: bold;
+  }
+}
+
+.custom-center-cards {
+  display: flex;
+  flex-direction: row; /* Ensure cards are laid out horizontally */
+  justify-content: center; /* Center the cards in the container */
+  align-items: center; /* Vertically center the cards */
+  gap: 1rem; /* Space between the cards */
+  flex-wrap: nowrap; /* Prevent wrapping to a new row */
+  overflow-x: auto; /* Enable horizontal scrolling for overflow */
+  padding: 0 1rem; /* Add padding on left and right */
+}
+
+.custom-card {
+  flex: 0 0 auto; /* Keep each card's size fixed */
+  white-space: nowrap; /* Ensure name and card stay together */
+}
+
+/* Adjust layout for smaller screens */
+@media (max-width: 768px) {
+  .custom-center-cards {
+    gap: 0.5rem; /* Reduce spacing between cards */
   }
 }
