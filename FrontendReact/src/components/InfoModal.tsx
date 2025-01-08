@@ -1,13 +1,13 @@
 import React from "react";
 import { Button, Modal } from "react-bootstrap";
 
-interface ErrorModalProps {
+interface InfoModalProps {
   title?: string;
   message: string;
   onClose: () => void;
 }
 
-const ErrorModal: React.FC<ErrorModalProps> = ({ title, message, onClose }) => {
+const InfoModal: React.FC<InfoModalProps> = ({ title, message, onClose }) => {
   return (
     <Modal show onHide={onClose}>
       <Modal.Header closeButton>
@@ -25,4 +25,4 @@ const ErrorModal: React.FC<ErrorModalProps> = ({ title, message, onClose }) => {
   );
 };
 
-export default ErrorModal;
+export default InfoModal;
