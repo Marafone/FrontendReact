@@ -45,7 +45,7 @@ html {
   top: 10%;
   bottom: 10%;
   right: 0;
-  height: 50%;
+  height: 45%;
   width: 15%;
   background: #fff;
   box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
@@ -197,6 +197,7 @@ html {
   gap: 1rem; /* Space between the cards */
   flex-wrap: nowrap; /* Prevent wrapping to a new row */
   overflow-x: auto; /* Enable horizontal scrolling for overflow */
+  margin: 0 auto; /* Center the entire container */
   padding: 0 1rem; /* Add padding on left and right */
 }
 
@@ -209,5 +210,6 @@ html {
 @media (max-width: 768px) {
   .custom-center-cards {
     gap: 0.5rem; /* Reduce spacing between cards */
+    padding: 0 0.5rem; /* Adjust padding for smaller screens */
   }
 }
