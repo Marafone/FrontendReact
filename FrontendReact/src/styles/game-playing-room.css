@@ -1,5 +1,6 @@
 /* Ensure the background covers the entire screen */
-body, html {
+body,
+html {
   margin: 0;
   padding: 0;
   min-height: 100vh;
@@ -14,6 +15,29 @@ body, html {
 .custom-img {
   max-width: 125px;
   max-height: 250px;
+}
+
+.last-turn-img {
+  max-width: 50px;
+  max-height: 100px;
+}
+
+.last-turn-cards-container {
+  position: fixed;
+  top: 15%;
+  height: 25%;
+  left: 0%;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
+  overflow-y: auto;
+  transition: transform 0.3s ease-in-out;
+}
+
+.last-turn-cards-container.hidden {
+  transform: translateX(-100%);
+}
+
+.last-turn-cards-container.visible {
+  transform: translateX(0%);
 }
 
 .options-container {
@@ -41,7 +65,7 @@ body, html {
 @media (min-width: 768px) {
   .options-container {
     display: block !important; /* Always visible for screens > 768px */
-    width:20%
+    width: 20%;
   }
 }
 
