@@ -37,6 +37,10 @@ export interface TrumpSuitState extends BaseEvent {
   trumpSuit: string;
 }
 
+export interface NewTurn extends BaseEvent {
+  eventType: "NewTurn";
+}
+
 export interface NewRound extends BaseEvent {
   eventType: "NewRound";
 }
