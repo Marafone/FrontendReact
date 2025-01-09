@@ -12,6 +12,7 @@ import {
   ErrorEvent,
   MyCardsState,
   NewRound,
+  NewTurn,
   NextPlayerState,
   PlayersOrderState,
   PointState,
@@ -35,6 +36,7 @@ type WebSocketEventType =
   | PointState
   | PlayersOrderState
   | TrumpSuitState
+  | NewTurn
   | NewRound
   | WinnerState
   | ErrorEvent
@@ -89,6 +91,14 @@ const GamePlayingRoom = () => {
   // result of the game modal
   const [showResultModal, setShowResultModal] = useState(false);
   const [winnerTeam, setWinnerTeam] = useState<string>("");
+  // cards played last turn part
+  const [playerCardMapLastTurn, setPlayerCardMapLastTurn] = useState<
+    Map<string, string | null>
+  >(new Map()); // username -> played card
+  const [isPlayerCardMapLastTurnVisible, setIsPlayerCardMapLastTurnVisible] =
+    useState(true);
+  // timer to let cards be on board for a while before new round starts
+  const paused = useRef(false);
 
   // HELPER FUNCTIONS
 
@@ -114,13 +124,6 @@ const GamePlayingRoom = () => {
     setIsTimerRunning(false);
   };
 
-  // it removes cards that were played in last turn
-  const clearBoard = () => {
-    const newMap = new Map<string, string | null>();
-    players.forEach((player) => newMap.set(player, null));
-    setPlayerCardMapCurrentTurn(newMap);
-  };
-
   const handleStartTimer = () => {
     setIsTimerRunning(true);
     setTimeLeft(totalTime);
@@ -136,71 +139,59 @@ const GamePlayingRoom = () => {
     return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
   };
 
+  async function waitUntilResumed() {
+    return new Promise((resolve: Function) => {
+      const intervalId = setInterval(() => {
+        if (!paused.current) {
+          clearInterval(intervalId);
+          resolve();
+        }
+      }, 334);
+    });
+  }
+
   // WEBSOCKET FUNCTIONS
 
-  const onMessageReceived = (msg: IMessage) => {
-    // console.log("MESSAGE RECEIVED, BODY:");
-    // console.log(msg.body);
-    const events: WebSocketEventType[] = JSON.parse(msg.body);
-    events.forEach((event) => {
-      switch (event.eventType) {
-        case "TurnState":
-          handleTurnStateEvent(event.turn);
-          break;
-        case "MyCardsState":
-          handleMyCardsStateEvent(event.myCards);
-          break;
-        case "PointState":
-          handlePointStateEvent(event.playerPointState);
-          clearBoard();
-          break;
-        case "PlayersOrderState":
-          handlePlayersOrderStateEvent(event.playersOrder);
-          break;
-        case "TrumpSuitState":
-          handleTrumpSuitStateEvent(event.trumpSuit);
-          break;
-        case "NewRound":
-          handleNewRoundEvent();
-          break;
-        case "WinnerState":
-          handleWinnerStateEvent(event.winnerTeam);
-          break;
-        case "ErrorEvent":
-          handleErrorEvent(event.errorMessage);
-          break;
-        case "TeamState":
-          handleTeamStateEvent(event.redTeam, event.blueTeam);
-          break;
-        case "NextPlayerState":
-          handleNextPlayerStateEvent(event.playerName, event.isFirstPlayer);
-          break;
-        case "CallState":
-          handleCallStateEvent(event.call);
-          break;
-        default:
-          console.warn("Unknown event type");
-          break;
-      }
-    });
-  };
-
   const handleTurnStateEvent = (playerCardMap: Map<string, Card>) => {
-    var newPlayerCardMapCurrentTurn: Map<string, string | null> = new Map();
-    Object.entries(playerCardMap).forEach(([playerName, card]) => {
-      newPlayerCardMapCurrentTurn.set(
-        playerName,
-        convertCardIntoImageSrc(card)
-      );
+    setPlayerCardMapCurrentTurn((prevMap) => {
+      // go through each player in playerCardMap from the event
+      Object.entries(playerCardMap).forEach(([playerName, card]) => {
+        prevMap.set(playerName, convertCardIntoImageSrc(card));
+      });
+      // return new version of prev map
+      return prevMap;
     });
-    setPlayerCardMapCurrentTurn(newPlayerCardMapCurrentTurn);
   };
 
   const handleMyCardsStateEvent = (cards: Card[]) => {
-    const newCards: [bigint, string][] = [];
+    const clubsCards: [bigint, string][] = [];
+    const coinsCards: [bigint, string][] = [];
+    const cupsCards: [bigint, string][] = [];
+    const swordsCards: [bigint, string][] = [];
     cards.map((card) => {
-      newCards.push([card.id, convertCardIntoImageSrc(card) ?? ""]); // result would never be null, because of passed card would never be null
+      const valueToAdd: [bigint, string] = [
+        card.id,
+        convertCardIntoImageSrc(card) ?? "",
+      ];
+      switch (card.suit) {
+        case "CLUBS":
+          clubsCards.push(valueToAdd);
+          break;
+        case "CUPS":
+          cupsCards.push(valueToAdd);
+          break;
+        case "SWORDS":
+          swordsCards.push(valueToAdd);
+          break;
+        case "COINS":
+          coinsCards.push(valueToAdd);
+          break;
+      }
     });
+    const newCards: [bigint, string][] = clubsCards
+      .concat(coinsCards)
+      .concat(cupsCards)
+      .concat(swordsCards);
     if (newCards.length === 10 && doesUserHaveFourCoins(newCards)) {
       setDisplayCallSelection(true);
       setDisplayTrumpSuitSelection(true);
@@ -224,14 +215,33 @@ const GamePlayingRoom = () => {
 
   const handlePlayersOrderStateEvent = (playersOrder: string[]) => {
     setPlayers(playersOrder);
+    // set map to display the cards on the board in the correct order
+    const newMap = new Map();
+    playersOrder.forEach((player) => {
+      newMap.set(player, null);
+    });
+    setPlayerCardMapCurrentTurn(newMap);
   };
 
   const handleTrumpSuitStateEvent = (trumpSuit: string) => {
     setDisplayedSuit(trumpSuit);
   };
 
+  const handleNewTurnEvent = () => {
+    paused.current = true;
+    setTimeout(() => {
+      // clear board and move all the cards played in this turn to proper map
+      setPlayerCardMapCurrentTurn((prevMap) => {
+        setPlayerCardMapLastTurn(prevMap);
+        return new Map();
+      });
+      paused.current = false;
+    }, 1000);
+  };
+
   const handleNewRoundEvent = () => {
-    // TODO is it necessary event?
+    setDisplayedSuit("None");
+    setSuit("COINS");
   };
 
   const handleWinnerStateEvent = (team: string) => {
@@ -263,6 +273,58 @@ const GamePlayingRoom = () => {
   const handleCallStateEvent = (call: Call) => {
     setCall(call);
     setShowCallModal(true);
+  };
+
+  const onMessageReceived = async (msg: IMessage) => {
+    const events: WebSocketEventType[] = JSON.parse(msg.body);
+
+    for (let i = 0; i < events.length; i++) {
+      const event = events[i];
+
+      if (paused.current) await waitUntilResumed();
+
+      switch (event.eventType) {
+        case "TurnState":
+          handleTurnStateEvent(event.turn);
+          break;
+        case "MyCardsState":
+          handleMyCardsStateEvent(event.myCards);
+          break;
+        case "PointState":
+          handlePointStateEvent(event.playerPointState);
+          break;
+        case "PlayersOrderState":
+          handlePlayersOrderStateEvent(event.playersOrder);
+          break;
+        case "TrumpSuitState":
+          handleTrumpSuitStateEvent(event.trumpSuit);
+          break;
+        case "NewTurn":
+          handleNewTurnEvent();
+          break;
+        case "NewRound":
+          handleNewRoundEvent();
+          break;
+        case "WinnerState":
+          handleWinnerStateEvent(event.winnerTeam);
+          break;
+        case "ErrorEvent":
+          handleErrorEvent(event.errorMessage);
+          break;
+        case "TeamState":
+          handleTeamStateEvent(event.redTeam, event.blueTeam);
+          break;
+        case "NextPlayerState":
+          handleNextPlayerStateEvent(event.playerName, event.isFirstPlayer);
+          break;
+        case "CallState":
+          handleCallStateEvent(event.call);
+          break;
+        default:
+          console.warn("Unknown event type");
+          break;
+      }
+    }
   };
 
   // USE EFFECT HOOKS
@@ -368,7 +430,8 @@ const GamePlayingRoom = () => {
   };
 
   const handleSelectCall = (call: string) => {
-    if (call == "") // empty call means that user does not want to make a call
+    if (call == "")
+      // empty call means that user does not want to make a call
       return;
     client.publish({
       destination: `/app/game/${gameContent.gameId}/call`,
@@ -498,6 +561,40 @@ const GamePlayingRoom = () => {
           )}
         </div>
 
+        {/* Toggle Button */}
+        <button
+          className="btn btn-primary position-fixed"
+          style={{
+            top: "42%",
+            left: "10px",
+          }}
+          onClick={() =>
+            setIsPlayerCardMapLastTurnVisible(!isPlayerCardMapLastTurnVisible)
+          }
+        >
+          {isPlayerCardMapLastTurnVisible ? "Hide" : "Show"}
+        </button>
+
+        {/* Cards Played In Last Turn */}
+        <div
+          className={`last-turn-cards-container d-flex flex-column justify-content-start align-items-center w-25 bg-white p-3 ${
+            isPlayerCardMapLastTurnVisible ? "visible" : "hidden"
+          }`}
+        >
+          <p className="fs-5 fw-bold">Last Turn Cards</p>
+          <div className="d-flex flex-wrap justify-content-center gap-3">
+            {Array.from(playerCardMapLastTurn).map(
+              ([playerName, src]) =>
+                src && (
+                  <div className="text-center" key={playerName}>
+                    <p className="fw-semibold mb-0">{playerName}</p>
+                    <img className="last-turn-img" src={src} />
+                  </div>
+                )
+            )}
+          </div>
+        </div>
+
         {/* Center Cards Section */}
         <div className="d-flex flex-row align-items-center">
           <div className="d-flex justify-content-center gap-4 w-100">
@@ -552,7 +649,7 @@ const GamePlayingRoom = () => {
               <p className="ms-auto fs-5 fw-bold">{blueTeamPoints}</p>
             </div>
             <p className="fw-bold fs-4 mt-3">Trump Suit</p>
-            <p className="fw-bold">{displayedSuit}</p>
+            <p className="fw-bold">{displayedSuit || "None"}</p>
             {displayTrumpSuitSelection && (
               <div className="mt-2">
                 <p className="mb-2">Trump suit</p>
