@@ -43,6 +43,7 @@ export interface NewTurn extends BaseEvent {
 
 export interface NewRound extends BaseEvent {
   eventType: "NewRound";
+  firstPlayerName: string;
 }
 
 export interface WinnerState extends BaseEvent {
