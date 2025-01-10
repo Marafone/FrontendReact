@@ -239,9 +239,16 @@ const GamePlayingRoom = () => {
     }, 1000);
   };
 
-  const handleNewRoundEvent = () => {
+  const handleNewRoundEvent = (firstPlayerName: string) => {
     setDisplayedSuit("None");
-    setSuit("COINS");
+    if (usernameRef.current == firstPlayerName) {
+      setSuit("COINS");
+      setDisplayTrumpSuitSelection(true);
+      setDisplayCallSelection(true);
+    } else {
+      setDisplayTrumpSuitSelection(false);
+      setDisplayCallSelection(false);
+    }
   };
 
   const handleWinnerStateEvent = (team: string) => {
@@ -303,7 +310,7 @@ const GamePlayingRoom = () => {
           handleNewTurnEvent();
           break;
         case "NewRound":
-          handleNewRoundEvent();
+          handleNewRoundEvent(event.firstPlayerName);
           break;
         case "WinnerState":
           handleWinnerStateEvent(event.winnerTeam);
@@ -601,9 +608,16 @@ const GamePlayingRoom = () => {
             {Array.from(playerCardMapCurrentTurn).map(
               ([playerName, src], index) =>
                 src && (
-                  <div className="text-center custom-card" key={playerName + index}>
+                  <div
+                    className="text-center custom-card"
+                    key={playerName + index}
+                  >
                     <p className="fw-bold fs-5">{playerName}</p>
-                    <img className="custom-img" src={src} alt={`${playerName}'s card`} />
+                    <img
+                      className="custom-img"
+                      src={src}
+                      alt={`${playerName}'s card`}
+                    />
                   </div>
                 )
             )}
