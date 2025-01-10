@@ -561,7 +561,7 @@ const GamePlayingRoom = () => {
           {isTimerRunning && (
             <div className="d-flex align-items-center w-25">
               <div
-                className="d-flex bg-primary ms-auto border border-black border-3 h-50"
+                className="d-flex bg-primary ms-auto border border-black border-3 h-50 mt-3"
                 style={{ width: `${percentage}%` }}
               ></div>
             </div>
@@ -572,8 +572,10 @@ const GamePlayingRoom = () => {
         <button
           className="btn btn-primary position-fixed"
           style={{
-            top: "42%",
+            top: "60%",
             left: "10px",
+            transform: "translateY(-50%)",
+            zIndex: 1050,
           }}
           onClick={() =>
             setIsPlayerCardMapLastTurnVisible(!isPlayerCardMapLastTurnVisible)
@@ -604,7 +606,7 @@ const GamePlayingRoom = () => {
 
         {/* Center Cards Section */}
         <div className="d-flex justify-contents-center align-items-center">
-          <div className="d-flex flex-row justify-content-start gap-4 w-100 flex-wrap custom-center-cards">
+          <div className="custom-center-cards">
             {Array.from(playerCardMapCurrentTurn).map(
               ([playerName, src], index) =>
                 src && (
@@ -628,7 +630,7 @@ const GamePlayingRoom = () => {
         <button
           className="btn btn-primary position-fixed"
           style={{
-            top: "70%",
+            top: "60%",
             right: "10px",
             transform: "translateY(-50%)",
             zIndex: 1050,
