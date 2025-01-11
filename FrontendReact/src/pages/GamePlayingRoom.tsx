@@ -22,6 +22,7 @@ import {
   WinnerState,
 } from "../events/game-playing-room/WebSocketEventTypes";
 import "../styles/game-playing-room.css";
+import ResultModal from "../components/ResultModal";
 
 var client: Client;
 
@@ -43,7 +44,7 @@ type WebSocketEventType =
   | TeamStateEvent
   | NextPlayerState
   | CallState;
-// TODO, when user refresh page after turn is ended, he gets all the cards that were visible at the board, repair it
+
 const convertCardIntoImageSrc = (card: Card | null): string | null => {
   if (card == null) return null;
   var imageKey =
@@ -60,9 +61,9 @@ const GamePlayingRoom = () => {
   const gameContent: PlayingRoomContent = location.state;
   const [players, setPlayers] = useState<string[]>([]);
   const redTeamRef = useRef<string[]>([]);
-  const [redTeamPoints, setRedTeamPoints] = useState<number>(0);
+  const [redTeamPoints, setRedTeamPoints] = useState<string>("");
   const blueTeamRef = useRef<string[]>([]);
-  const [blueTeamPoints, setBlueTeamPoints] = useState<number>(0);
+  const [blueTeamPoints, setBlueTeamPoints] = useState<string>("");
   const [cards, setCards] = useState<[bigint, string][]>([]);
   const [playerCardMapCurrentTurn, setPlayerCardMapCurrentTurn] = useState<
     // map of cards played by players in current round
@@ -150,6 +151,21 @@ const GamePlayingRoom = () => {
     });
   }
 
+  const convertToFraction = (value: number) => {
+    const epsilon = 1e-6;
+    const fractions = [
+      { value: 0, fraction: "0" },
+      { value: 1 / 3, fraction: "¹/₃" },
+      { value: 2 / 3, fraction: "²/₃" },
+    ];
+
+    for (const fraction of fractions) {
+      if (Math.abs(value - fraction.value) < epsilon) return fraction.fraction;
+    }
+
+    throw new Error("Value does not match expected fractions");
+  };
+
   // WEBSOCKET FUNCTIONS
 
   const handleTurnStateEvent = (playerCardMap: Map<string, Card>) => {
@@ -209,8 +225,26 @@ const GamePlayingRoom = () => {
         newBlueTeamPoints += playerPoints;
       }
     });
-    setRedTeamPoints(newRedTeamPoints);
-    setBlueTeamPoints(newBlueTeamPoints);
+    newRedTeamPoints = Number(newRedTeamPoints / 3);
+    newBlueTeamPoints = Number(newBlueTeamPoints / 3);
+    // find what is a fraction (no fraction, 1/3 or 2/3)
+    var redTeamFraction: string = convertToFraction(
+      newRedTeamPoints - Math.floor(newRedTeamPoints)
+    );
+    var blueTeamFraction: string = convertToFraction(
+      newBlueTeamPoints - Math.floor(newBlueTeamPoints)
+    );
+    // we want to display integer part with fraction part
+    var redTeamInteger: string = Math.floor(newRedTeamPoints).toString();
+    var blueTeamInteger: string = Math.floor(newBlueTeamPoints).toString();
+
+    if (redTeamFraction == "0") setRedTeamPoints(redTeamInteger);
+    else if (redTeamInteger == "0") setRedTeamPoints(redTeamFraction);
+    else setRedTeamPoints(redTeamInteger + redTeamFraction);
+
+    if (blueTeamFraction == "0") setBlueTeamPoints(blueTeamInteger);
+    else if (blueTeamInteger == "0") setBlueTeamPoints(blueTeamFraction);
+    else setBlueTeamPoints(blueTeamInteger + blueTeamFraction);
   };
 
   const handlePlayersOrderStateEvent = (playersOrder: string[]) => {
@@ -225,6 +259,9 @@ const GamePlayingRoom = () => {
 
   const handleTrumpSuitStateEvent = (trumpSuit: string) => {
     setDisplayedSuit(trumpSuit);
+    if (trumpSuit != null)
+      // if trump suit was already selected, do not display trump suit selection option
+      setDisplayTrumpSuitSelection(false);
   };
 
   const handleNewTurnEvent = () => {
@@ -240,6 +277,14 @@ const GamePlayingRoom = () => {
   };
 
   const handleNewRoundEvent = (firstPlayerName: string) => {
+    // reset timer
+    handleStopTimer();
+    handleStartTimer();
+
+    // clear board and move cards to last turn cards section
+    handleNewTurnEvent();
+
+    // handle suit and call
     setDisplayedSuit("None");
     if (usernameRef.current == firstPlayerName) {
       setSuit("COINS");
@@ -252,6 +297,7 @@ const GamePlayingRoom = () => {
   };
 
   const handleWinnerStateEvent = (team: string) => {
+    handleStopTimer();
     setWinnerTeam(team);
     setShowResultModal(true);
   };
@@ -493,42 +539,20 @@ const GamePlayingRoom = () => {
           message={call}
           onClose={() => {
             setShowCallModal(false);
+            setCall("");
           }}
         />
       )}
       {/* place for result modal */}
-      <div
-        className={`modal bg-dark bg-opacity-25 align-items-center fade ${
-          showResultModal ? "show d-block" : ""
-        }`}
-      >
-        <div className="modal-dialog modal-dialog-centered">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h1 className="modal-title fs-4">Result</h1>
-              <button
-                type="button"
-                className="btn-close"
-                onClick={() => setShowResultModal(false)}
-              ></button>
-            </div>
-            <div className="modal-body text-center">
-              <p
-                className={`fw-bold mt-3 ${
-                  winnerTeam === "RED" ? "text-danger" : "text-primary"
-                }`}
-              >
-                {capitalizeWord(winnerTeam)} team won!
-              </p>
-            </div>
-            <div className="modal-footer">
-              <button className="btn btn-secondary" onClick={handleQuitGame}>
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+      {showResultModal && (
+        <ResultModal
+          title="Game Over"
+          message={`${capitalizeWord(winnerTeam)} team won!`}
+          winnerTeam={winnerTeam}
+          onClose={handleQuitGame}
+        />
+      )}
+
       {/* Main page content */}
       <div className="custom-outer-div d-flex flex-column justify-content-between p-2 min-vw-100 min-vh-100">
         {/* upper part */}
@@ -654,15 +678,15 @@ const GamePlayingRoom = () => {
                 <span className="text-black fw-normal">and</span>{" "}
                 {redTeamRef.current[1]}:{" "}
               </p>
-              <p className="ms-auto fs-5 fw-bold">{redTeamPoints}</p>
+              <p className="ms-auto fs-4 fw-bold">{redTeamPoints}</p>
             </div>
             <div className="d-flex flex-row align-items-center justify-content-end w-100 px-2">
-              <p className="w-100 text-primary fw-bold">
+              <p className="me-auto text-primary fw-bold">
                 {blueTeamRef.current[0]}{" "}
                 <span className="text-black fw-normal">and</span>{" "}
                 {blueTeamRef.current[1]}:{" "}
               </p>
-              <p className="ms-auto fs-5 fw-bold">{blueTeamPoints}</p>
+              <p className="ms-auto fs-4 fw-bold">{blueTeamPoints}</p>
             </div>
             <p className="fw-bold fs-4 mt-3">Trump Suit</p>
             <p className="fw-bold">{displayedSuit || "None"}</p>
@@ -711,7 +735,6 @@ const GamePlayingRoom = () => {
               onClick={() => {
                 if (displayTrumpSuitSelection) {
                   handleSelectSuit(suit);
-                  setDisplayTrumpSuitSelection(false);
                 }
                 handleSelectCard(id);
                 if (displayCallSelection) {
