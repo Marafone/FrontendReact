@@ -196,7 +196,6 @@ html {
   align-items: center; /* Vertically center the cards */
   gap: 1rem; /* Space between the cards */
   flex-wrap: nowrap; /* Prevent wrapping to a new row */
-  overflow-x: auto; /* Enable horizontal scrolling for overflow */
   margin: 0 auto; /* Center the entire container */
   padding: 0 1rem; /* Add padding on left and right */
 }
