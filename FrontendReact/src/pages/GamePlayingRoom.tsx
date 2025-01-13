@@ -273,7 +273,7 @@ const GamePlayingRoom = () => {
         return new Map();
       });
       paused.current = false;
-    }, 1000);
+    }, 2000);
   };
 
   const handleNewRoundEvent = (firstPlayerName: string) => {
