@@ -51,6 +51,19 @@ html {
   box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
   overflow-y: auto;
   transition: transform 0.3s ease-in-out;
+  font-size: clamp(0.8rem, 1.5vw, 1.2rem); /* Scales font size between 0.8rem and 1.2rem */
+}
+
+.options-container .fw-bold {
+  font-size: clamp(1rem, 2vw, 1.5rem); /* Slightly larger for bold text */
+}
+
+.options-container p {
+  line-height: 1.3; /* Adjust spacing for smaller text */
+}
+
+.options-container select {
+  font-size: clamp(0.8rem, 1.5vw, 1rem); /* Scale dropdown font size */
 }
 
 .options-container.hidden {

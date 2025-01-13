@@ -614,14 +614,14 @@ const GamePlayingRoom = () => {
             isPlayerCardMapLastTurnVisible ? "visible" : "hidden"
           }`}
         >
-          <p className="fs-5 fw-bold">Last Turn Cards</p>
+          <p className="fs-5 fw-bold text-center">Last Turn Cards</p>
           <div className="d-flex flex-wrap justify-content-center gap-3">
             {Array.from(playerCardMapLastTurn).map(
               ([playerName, src]) =>
                 src && (
                   <div className="text-center" key={playerName}>
                     <p className="fw-semibold mb-0">{playerName}</p>
-                    <img className="last-turn-img" src={src} />
+                    <img className="last-turn-img" src={src} alt={`${playerName}'s card`} />
                   </div>
                 )
             )}
@@ -678,7 +678,12 @@ const GamePlayingRoom = () => {
                 <span className="text-black fw-normal">and</span>{" "}
                 {redTeamRef.current[1]}:{" "}
               </p>
-              <p className="ms-auto fs-4 fw-bold">{redTeamPoints}</p>
+              <p
+                className="ms-auto fs-4 fw-bold"
+                style={{ whiteSpace: "nowrap" }}
+              >
+                {redTeamPoints}
+              </p>
             </div>
             <div className="d-flex flex-row align-items-center justify-content-end w-100 px-2">
               <p className="me-auto text-primary fw-bold">
@@ -686,7 +691,12 @@ const GamePlayingRoom = () => {
                 <span className="text-black fw-normal">and</span>{" "}
                 {blueTeamRef.current[1]}:{" "}
               </p>
-              <p className="ms-auto fs-4 fw-bold">{blueTeamPoints}</p>
+              <p
+                className="ms-auto fs-4 fw-bold"
+                style={{ whiteSpace: "nowrap" }}
+              >
+                {blueTeamPoints}
+              </p>
             </div>
             <p className="fw-bold fs-4 mt-3">Trump Suit</p>
             <p className="fw-bold">{displayedSuit || "None"}</p>
