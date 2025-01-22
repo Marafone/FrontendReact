@@ -40,6 +40,13 @@ html {
   transform: translateX(0%);
 }
 
+@media (max-width: 768px) {
+  .last-turn-cards-container {
+    top: 10%;
+    height: 45%;
+  }
+}
+
 .options-container {
   position: fixed;
   top: 10%;
