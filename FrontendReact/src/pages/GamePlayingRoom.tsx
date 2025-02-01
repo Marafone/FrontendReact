@@ -522,7 +522,7 @@ const GamePlayingRoom = () => {
       {showCallModal && (
         <CallModal
           title={`${players[0]} ${t("call")}`}
-          message={t(call.toLowerCase()) || t("none")}
+          message={call ? t(call.toLowerCase()) : t("none")}
           onClose={() => {
             setShowCallModal(false);
             setCall("");
@@ -685,7 +685,7 @@ const GamePlayingRoom = () => {
               </p>
             </div>
             <p className="fw-bold fs-4 mt-3">{t("trumpSuit")}</p>
-            <p className="fw-bold">{t(displayedSuit.toLowerCase()) || t("none")}</p>
+            <p className="fw-bold">{displayedSuit ? t(displayedSuit.toLowerCase()) : t("none")}</p>
             {displayTrumpSuitSelection && (
               <div className="mt-2">
                 <p className="mb-2">{t("trumpSuit")}</p>
