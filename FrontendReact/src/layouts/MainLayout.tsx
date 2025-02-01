@@ -1,19 +1,27 @@
 import { Outlet } from "react-router-dom";
 import Navbar from "../components/Navbar";
-
-const containerColor = "#FFC058";
+import { useEffect} from "react";
+import "../styles/main-layout.css";
+import { useTheme } from "../context/ThemeContext";
 
 const MainLayout = () => {
+
+  const { theme, toggleTheme } = useTheme();
+  
+  useEffect(() => {
+      document.documentElement.setAttribute("data-theme", theme);
+    }, [theme]);
+
   return (
-    <>
+    <div>
       <Navbar />
       <div
-        className="container-fluid"
-        style={{ height: "92vh", background: containerColor }}
+        className="main-layout"
+        style={{ height: "92vh"}}
       >
         <Outlet />
       </div>
-    </>
+    </div>
   );
 };
 

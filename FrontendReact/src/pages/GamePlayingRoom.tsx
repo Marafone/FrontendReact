@@ -24,6 +24,7 @@ import {
 import "../styles/game-playing-room.css";
 import ResultModal from "../components/ResultModal";
 import { LanguageContext } from "../context/LanguageContext";
+import { useTheme } from "../context/ThemeContext";
 
 var client: Client;
 
@@ -453,6 +454,12 @@ const GamePlayingRoom = () => {
       setLoading(false);
     else setLoading(true);
   }, [redTeamRef.current, blueTeamRef.current]);
+
+  const { theme, toggleTheme } = useTheme();
+  
+  useEffect(() => {
+      document.documentElement.setAttribute("data-theme", theme);
+    }, [theme]);
 
   // WIDGET FUNCTIONS
 

@@ -1,15 +1,30 @@
 :root {
-  --lobby-bg-color: #f2eece;
+  --window-color: #f2eece;
   --events-bg-color: #f2eece;
   --player-hover-bg-color: #fdf9e0;
 }
 
+[data-theme="dark"] {
+  --background-color: #121212;
+  --text-color: #ffffff;
+  --window-color: #282828;
+  --border-color: #333333;
+  --events-bg-color: #575757;
+  --player-hover-bg-color: #8b8a81;
+}
+
+.main-container {
+  background-color: var(--background-color);
+}
+
 .custom-lobby {
-  background-color: var(--lobby-bg-color);
+  background-color: var(--window-color);
+  color: var(--text-color);
 }
 
 .custom-events {
-  background-color: var(--events-bg-color);
+  background-color: var(--window-color);
+  color: var(--text-color);
 }
 
 .custom-player:hover {
@@ -18,5 +33,6 @@
 }
 
 .custom-event-messages-container {
+  background-color: var(--window-color);
   height: 120px;
 }

@@ -2,6 +2,7 @@ import { useState, useEffect, useContext } from "react";
 import { Link } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
 import { LanguageContext } from "../context/LanguageContext";
+import { useTheme } from "../context/ThemeContext";
 
 const Navbar = () => {
   const [displayLanguages, setDisplayLanguages] = useState(false);
@@ -9,6 +10,8 @@ const Navbar = () => {
   
   const { username, setUsername } = useContext(UserContext);
   const { language, setLanguage } = useContext(LanguageContext); // Access language context
+
+  const { theme, toggleTheme } = useTheme();
 
   const languagesMenuColor = "#a0091b";
 
@@ -62,6 +65,9 @@ const Navbar = () => {
               </Link>
             </li>
           </ul>
+          <button role="button" onClick={toggleTheme}>
+           {theme === "light" ? "Dark" : "Light"} Mode
+          </button>
           <ul className="list-group list-group-horizontal list-unstyled me-4">
             <li className="dropdown me-3 mt-1">
               <button
