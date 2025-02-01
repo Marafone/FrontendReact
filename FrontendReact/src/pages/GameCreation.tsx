@@ -1,6 +1,7 @@
 import axios, { AxiosError } from "axios";
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { LanguageContext } from "../context/LanguageContext";
 
 axios.defaults.withCredentials = true;
 
@@ -27,6 +28,9 @@ const GameCreation = () => {
   const [errors, setErrors] = useState<Errors>({});
   const navigate = useNavigate();
 
+  // Use the LanguageContext
+  const { t } = useContext(LanguageContext)!;
+
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
@@ -47,11 +51,11 @@ const GameCreation = () => {
       gameNameTrimmed.length < minGameNameLength ||
       gameNameTrimmed.length > maxGameNameLength
     ) {
-      newErrors.gameName = `Length must be between ${minGameNameLength} and ${maxGameNameLength} characters`;
+      newErrors.gameName = t("errors.gameNameLength"); // Use translation for error message
     }
 
     if (isGamePrivate && !formData.password) {
-      newErrors.password = "Password cannot be empty";
+      newErrors.password = t("errors.passwordEmpty"); // Use translation for error message
     }
 
     setErrors(newErrors);
@@ -73,7 +77,7 @@ const GameCreation = () => {
         const errorResponse = e.response?.data;
         if (errorResponse === "GAME_NAME_TAKEN") {
           setErrors({
-            gameName: "Game name already taken. Try with the other name.",
+            gameName: t("errors.gameNameTaken"), // Use translation for error message
           });
         }
       });
@@ -89,17 +93,17 @@ const GameCreation = () => {
   return (
     <div className="d-flex justify-content-center align-items-center w-100 h-100">
       <div className="custom-game-creation-div d-flex flex-column justify-content-center align-items-center w-75 h-75 border border-black border-opacity-50 p-3">
-        <p className="fs-2 fw-bold">Create Game</p>
+        <p className="fs-2 fw-bold">{t("home.createGameBtn")}</p> {/* Use translation */}
         <form className="d-flex flex-column gap-4">
           {/* Game Name input group */}
           <div className="input-group position-relative">
             <span className="fw-medium input-group-text border border-black border-opacity-50 custom-form-element">
-              Game Name
+              {t("home.lobbyName")} {/* Use translation */}
             </span>
             <input
               type="text"
               className="form-control border border-black border-opacity-25 custom-input custom-form-element"
-              placeholder="SampleName123"
+              placeholder={t("placeholders.gameName")}
               name="gameName"
               value={formData?.gameName}
               onChange={handleChange}
@@ -114,7 +118,7 @@ const GameCreation = () => {
           {/* Game Type input group */}
           <div className="input-group">
             <span className="fw-medium input-group-text border border-black border-opacity-50 custom-form-element">
-              Game Type
+              {t("home.gameType")} {/* Use translation */}
             </span>
             <select
               className="form-control border border-black border-opacity-25 custom-input custom-form-element"
@@ -122,9 +126,9 @@ const GameCreation = () => {
               value={formData?.gameType}
               onChange={handleChange}
             >
-              <option value="MARAFFA">Maraffa</option>
-              <option value="BRISCOLLA">Briscolla</option>
-              <option value="TRISETTE">Trisette</option>
+              <option value="MARAFFA">{t("gameTypes.marafone")}</option> {/* Use translation */}
+              <option value="BRISCOLLA">{t("gameTypes.briscola")}</option> {/* Use translation */}
+              <option value="TRISETTE">{t("gameTypes.tresette")}</option> {/* Use translation */}
             </select>
           </div>
           {/* Private input group */}
@@ -134,18 +138,20 @@ const GameCreation = () => {
               type="checkbox"
               onClick={() => setIsGamePrivate(!isGamePrivate)}
             />
-            <label className="fw-medium form-check-label">Private</label>
+            <label className="fw-medium form-check-label">
+              {t("labels.private")} {/* Use translation */}
+            </label>
           </div>
           {/* Password input group */}
           {isGamePrivate && (
             <div className="input-group">
               <span className="fw-medium input-group-text border border-black border-opacity-50 custom-form-element">
-                Password
+                {t("login.password")} {/* Use translation */}
               </span>
               <input
                 type="password"
                 className="form-control border border-black border-opacity-25 custom-input custom-form-element"
-                placeholder="password123"
+                placeholder={t("placeholders.password")}
                 name="password"
                 value={formData?.password}
                 onChange={handleChange}
@@ -157,7 +163,6 @@ const GameCreation = () => {
               )}
             </div>
           )}
-          {/* TODO - GAME CREATED SUCCESSFULLY INFO */}
           {/* Create Game button */}
           <div>
             <button
@@ -167,7 +172,7 @@ const GameCreation = () => {
                 createGame();
               }}
             >
-              Create Game
+              {t("home.createGameBtn")} {/* Use translation */}
             </button>
           </div>
         </form>

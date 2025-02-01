@@ -1,6 +1,6 @@
 import { Client, IMessage } from "@stomp/stompjs";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   ErrorEvent,
@@ -13,6 +13,7 @@ import {
 import "../styles/game-waiting-room.css";
 import ErrorModal from "../components/ErrorModal";
 import InfoModal from "../components/InfoModal";
+import { LanguageContext } from "../context/LanguageContext";
 
 interface waitingRoomContent {
   gameId: bigint;
@@ -32,6 +33,10 @@ type WebSocketEventType =
 var client: Client;
 
 const GameWaitingRoom = () => {
+
+    // Use the LanguageContext
+    const { t } = useContext(LanguageContext)!;
+
   var maxPlayersAmount = 4;
   const location = useLocation();
   const gameContent: waitingRoomContent = location.state;
@@ -39,7 +44,9 @@ const GameWaitingRoom = () => {
   const [teamRed, setTeamRed] = useState<string[]>([]);
   const [teamBlue, setTeamBlue] = useState<string[]>([]);
   const [playersAmount, setPlayersAmount] = useState(1);
-  const [eventMessages, setEventMessages] = useState<string[]>(["Have fun!"]);
+  const [eventMessages, setEventMessages] = useState<string[]>([
+    t("gameWaitingRoom.events.defaultMessage"), // Use translation
+  ]);
   const [username, setUsername] = useState<string>();
   const navigate = useNavigate();
   // owner info
@@ -115,8 +122,8 @@ const GameWaitingRoom = () => {
   }
 
   function handlePlayerJoinedEvent(event: PlayerJoinedEvent) {
-    // edit event messages
-    const newEventMessage = event.playerName + " joined the game!";
+    // Append player name to the translated message
+    const newEventMessage = `${event.playerName} ${t("gameWaitingRoom.events.playerJoined")}`;
     setEventMessages((prevMessages) => [...prevMessages, newEventMessage]);
     // edit amount of players
     setPlayersAmount((prevAmount) => prevAmount + 1);
@@ -138,8 +145,8 @@ const GameWaitingRoom = () => {
   };
 
   function handlePlayerLeftEvent(playerName: string) {
-    // edit event messages
-    const newEventMessage = playerName + " left the game!";
+    // Append player name to the translated message
+    const newEventMessage = `${playerName} ${t("gameWaitingRoom.events.playerLeft")}`;
     setEventMessages((prevMessages) => [...prevMessages, newEventMessage]);
     // edit amount of players
     setPlayersAmount((prev) => prev - 1);
@@ -165,9 +172,9 @@ const GameWaitingRoom = () => {
     setOwnerName(newOwnerName);
     if (!isNew) return;
     setInfo(true);
-    setInfoTitle("New Game Owner Selected");
+    setInfoTitle(t("gameWaitingRoom.info.newOwnerTitle")); // Use translation
     setInfoMessage(
-      `The previous owner has left the game. ${newOwnerName} is now the owner.`
+      '${ownerName} ${t("gameWaitingRoom.info.newOwnerMessage")}' // Use translation with dynamic value
     );
   };
 
@@ -260,20 +267,19 @@ const GameWaitingRoom = () => {
                 className="btn btn-danger fw-bold"
                 onClick={handleLeaveGame}
               >
-                Exit
+                {t("gameWaitingRoom.buttons.exit")} {/* Use translation */}
               </button>
             </div>
             <hr className="border border-black border-2 opacity-50 mt-0 mx-3" />
           </div>
           {/* teams */}
-          {/* TODO - MANAGE PLAYERS OPTIONS */}
           <div className="d-flex justify-content-evenly">
             <div className="d-flex flex-column align-items-center">
               <button
                 className="btn btn-danger fw-bold mb-4"
                 onClick={() => handleChangeTeam("RED")}
               >
-                Red
+                {t("gameWaitingRoom.buttons.redTeam")} {/* Use translation */}
               </button>
               {teamRed.map((player) => (
                 <p
@@ -294,7 +300,7 @@ const GameWaitingRoom = () => {
                 className="btn btn-primary fw-bold mb-4"
                 onClick={() => handleChangeTeam("BLUE")}
               >
-                Blue
+                {t("gameWaitingRoom.buttons.blueTeam")} {/* Use translation */}
               </button>
               {teamBlue.map((player) => (
                 <p
@@ -314,25 +320,24 @@ const GameWaitingRoom = () => {
           {/* game info */}
           <div className="d-flex flex-column align-items-center mt-3">
             <p>
-              <span className="fw-bold">Game Type: </span>
+              <span className="fw-bold">{t("gameWaitingRoom.labels.gameType")}: </span> {/* Use translation */}
               {gameContent.gameType}
             </p>
             <p>
-              <span className="fw-bold">Players: </span>
+              <span className="fw-bold">{t("gameWaitingRoom.labels.players")}: </span> {/* Use translation */}
               {playersAmount}/{maxPlayersAmount}
             </p>
             <button
               className="btn btn-success fw-bold border border-black border-opacity-25"
               onClick={handleStartGame}
             >
-              Start game
+              {t("gameWaitingRoom.buttons.startGame")} {/* Use translation */}
             </button>
           </div>
         </div>
         {/* Events */}
         <div className="custom-events d-flex flex-column align-items-center w-50 px-3 py-2">
-          {" "}
-          <h2>Events</h2>
+          <h2>{t("gameWaitingRoom.events.title")}</h2> {/* Use translation */}
           <hr className="border border-black border-2 opacity-50 mt-0 w-100" />
           <div className="custom-event-messages-container w-100 overflow-auto">
             {eventMessages.map((message, index) => (

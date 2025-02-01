@@ -1,3 +1,5 @@
+import GameCreation from "./pages/GameCreation";
+
 export interface Translations {
     EN: {
       home: {
@@ -96,23 +98,44 @@ export const translations = {
         loadingImage: "Loading image...",
         imageAlt: "All cards used in Marafon"
       },
+      errors: {
+        gameNameLength: "Length must be between 4 and 20 characters",
+        passwordEmpty: "Password cannot be empty",
+        gameNameTaken: "Game name already taken. Try with the other name.",
+      },
+      placeholders: {
+        gameName: "SampleName123",
+        password: "password123",
+      },
+      labels: {
+        private: "Private",
+      },
+      gameTypes: {
+        marafone: "Marafone",
+        briscola: "Briscola",
+        tresette: "Tresette",
+      },   
       gameWaitingRoom: {
         events: {
-          "defaultMessage": "Have fun!",
-          "playerJoined": "{{playerName}} joined the game!",
-          "playerLeft": "{{playerName}} left the game!",
-          "title": "Events"
+          defaultMessage: "Have fun!",
+          playerJoined: "joined the game!",
+          playerLeft: "left the game!",
+          title: "Events",
         },
         buttons: {
-          "exit": "Exit",
-          "redTeam": "Red",
-          "blueTeam": "Blue",
-          "startGame": "Start game"
+          exit: "Exit",
+          redTeam: "Red",
+          blueTeam: "Blue",
+          startGame: "Start game",
         },
         labels: {
-          "gameType": "Game Type",
-          "players": "Players"
-        }
+          gameType: "Game Type",
+          players: "Players",
+        },
+        info: {
+          newOwnerTitle: "New Game Owner Selected",
+          newOwnerMessage: "{{ownerName}} is now the owner. The previous owner has left the game.",
+        },
       },
     },
     PL: {
@@ -170,24 +193,45 @@ export const translations = {
         loadingImage: "Ładowanie obrazu...",
         imageAlt: "Wszystkie karty używane w grze Marafon",
       },
-      gameWaitingRoom: {
-        events: {
-          defaultMessage: "Baw się dobrze!",
-          playerJoined: "{{playerName}} dołączył do gry!",
-          playerLeft: "{{playerName}} opuścił grę!",
-          title: "Wydarzenia"
-        },
-        buttons: {
-          exit: "Wyjdź",
-          redTeam: "Czerwoni",
-          blueTeam: "Niebiescy",
-          startGame: "Rozpocznij grę"
-        },
-        labels: {
-          gameType: "Typ gry",
-          players: "Gracze"
-        }
+      errors: {
+        gameNameLength: "Długość musi wynosić od 4 do 20 znaków",
+        passwordEmpty: "Hasło nie może być puste",
+        gameNameTaken: "Nazwa gry jest już zajęta. Spróbuj inną nazwę."
       },
+      placeholders: {
+        gameName: "PrzykładowaNazwa123",
+        password: "haslo123"
+      },
+      labels: {
+        private: "Prywatna"
+      },
+      gameTypes: {
+        marafone: "Marafone",
+        briscola: "Briscola",
+        tresette: "Tresette"
+      },
+      gameWaitingRoom: {  
+        events: {  
+            defaultMessage: "Baw się dobrze!",  
+            playerJoined: "dołączył do gry!",  
+            playerLeft: "opuścił grę!",  
+            title: "Zdarzenia",  
+        },  
+        buttons: {  
+            exit: "Wyjdź",  
+            redTeam: "Czerwony",  
+            blueTeam: "Niebieski",  
+            startGame: "Rozpocznij grę",  
+        },  
+        labels: {  
+            gameType: "Typ gry",  
+            players: "Gracze",  
+        },  
+        info: {  
+            newOwnerTitle: "Nowy właściciel gry",  
+            newOwnerMessage: "{{ownerName}} jest teraz właścicielem. Poprzedni właściciel opuścił grę.",  
+        },  
+    },  
     },
     IT:{
       home: {
@@ -244,24 +288,45 @@ export const translations = {
         loadingImage: "Caricamento immagine...",
         imageAlt: "Tutte le carte utilizzate nel Marafon"
       },
-      gameWaitingRoom: {
-        events: {
-          defaultMessage: "Divertiti!",
-          playerJoined: "{{playerName}} si è unito al gioco!",
-          playerLeft: "{{playerName}} ha lasciato il gioco!",
-          title: "Eventi"
-        },
-        buttons: {
-          exit: "Esci",
-          redTeam: "Rosso",
-          blueTeam: "Blu",
-          startGame: "Inizia gioco"
-        },
-        labels: {
-          gameType: "Tipo di gioco",
-          players: "Giocatori"
-        }
-      }
+      errors: {  
+        gameNameLength: "La lunghezza deve essere tra 4 e 20 caratteri",  
+        passwordEmpty: "La password non può essere vuota",  
+        gameNameTaken: "Nome della partita già preso. Prova con un altro nome.",  
+      },  
+      placeholders: {  
+          gameName: "NomeEsempio123",  
+          password: "password123",  
+      },  
+      labels: {  
+          private: "Privata",  
+      },  
+      gameTypes: {  
+          marafone: "Marafone",  
+          briscola: "Briscola",  
+          tresette: "Tresette",  
+      },  
+      gameWaitingRoom: {  
+        events: {  
+            defaultMessage: "Divertiti!",  
+            playerJoined: "si è unito al gioco!",  
+            playerLeft: "ha lasciato il gioco!",  
+            title: "Eventi",  
+        },  
+        buttons: {  
+            exit: "Esci",  
+            redTeam: "Rosso",  
+            blueTeam: "Blu",  
+            startGame: "Inizia partita",  
+        },  
+        labels: {  
+            gameType: "Tipo di gioco",  
+            players: "Giocatori",  
+        },  
+        info: {  
+            newOwnerTitle: "Nuovo proprietario della partita",  
+            newOwnerMessage: "{{ownerName}} è ora il proprietario. Il precedente proprietario ha lasciato il gioco.",  
+        },  
+    },  
     },
     RGN: {
       home: {
@@ -318,23 +383,44 @@ export const translations = {
         loadingImage: "A s'cârica la imâggin...",
         imageAlt: "Tot i carte adoperè int la Maraffò"
       },
-      gameWaitingRoom: {
-        events: {
-          defaultMessage: "Divirtèt!",
-          playerJoined: "{{playerName}} l'è vnì in tla zóca!",
-          playerLeft: "{{playerName}} l'è andè fura da la zóca!",
-          title: "Evenmént"
-        },
-        buttons: {
-          exit: "Esci",
-          redTeam: "Russ",
-          blueTeam: "Blu",
-          startGame: "Cuminsa la zóca"
-        },
-        labels: {
-          gameType: "Tìp ad zóca",
-          players: "Zugadòur"
-        }
-      }
+      errors: {  
+        gameNameLength: "La lunghezza dvès èsar tra 4 e 20 caràter",  
+        passwordEmpty: "La parola segreta la pò n'èsar vòida",  
+        gameNameTaken: "Al nóm dla zógh l'é zà ciapê. Pròva un nóm diffarènt.",  
+      },  
+      placeholders: {  
+          gameName: "EsempiNòm123",  
+          password: "parolasegreta123",  
+      },  
+      labels: {  
+          private: "Privê",  
+      },  
+      gameTypes: {  
+          marafone: "Marafone",  
+          briscola: "Briscola",  
+          tresette: "Tresette",  
+      },  
+      gameWaitingRoom: {  
+        events: {  
+            defaultMessage: "Divartit!",  
+            playerJoined: "l'è intrê in tla zógh!",  
+            playerLeft: "l'ha lassê la zógh!",  
+            title: "Event",  
+        },  
+        buttons: {  
+            exit: "Své",  
+            redTeam: "Rôs",  
+            blueTeam: "Blê",  
+            startGame: "Cuminsa la zógh",  
+        },  
+        labels: {  
+            gameType: "Tìp ed zógh",  
+            players: "Zughadôr",  
+        },  
+        info: {  
+            newOwnerTitle: "Nuov parun dla zógh",  
+            newOwnerMessage: "{{ownerName}} l'è adès al parun. Al vécc parun l'ha lassê la zógh.",  
+        },  
+    },   
     }
   };
