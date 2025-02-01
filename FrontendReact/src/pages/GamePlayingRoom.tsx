@@ -1,6 +1,6 @@
 import { Client, IMessage } from "@stomp/stompjs";
 import axios from "axios";
-import { ChangeEvent, useEffect, useRef, useState } from "react";
+import { ChangeEvent, useEffect, useRef, useState, useContext } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import images from "../cards/cards_importer";
 import CallModal from "../components/CallModal";
@@ -23,6 +23,7 @@ import {
 } from "../events/game-playing-room/WebSocketEventTypes";
 import "../styles/game-playing-room.css";
 import ResultModal from "../components/ResultModal";
+import { LanguageContext } from "../context/LanguageContext";
 
 var client: Client;
 
@@ -66,12 +67,11 @@ const GamePlayingRoom = () => {
   const [blueTeamPoints, setBlueTeamPoints] = useState<string>("");
   const [cards, setCards] = useState<[bigint, string][]>([]);
   const [playerCardMapCurrentTurn, setPlayerCardMapCurrentTurn] = useState<
-    // map of cards played by players in current round
     Map<string, string | null>
   >(new Map());
   const [loading, setLoading] = useState(true);
   // trump suit part
-  const [suit, setSuit] = useState<string>("COINS"); // TODO wait until user selects trump and after that let him play his card (needed for user who chooses trump suit), because client.publish are asynchronous!
+  const [suit, setSuit] = useState<string>("COINS");
   const [displayTrumpSuitSelection, setDisplayTrumpSuitSelection] =
     useState(false);
   const [displayedSuit, setDisplayedSuit] = useState<string>("-");
@@ -95,11 +95,14 @@ const GamePlayingRoom = () => {
   // cards played last turn part
   const [playerCardMapLastTurn, setPlayerCardMapLastTurn] = useState<
     Map<string, string | null>
-  >(new Map()); // username -> played card
+  >(new Map());
   const [isPlayerCardMapLastTurnVisible, setIsPlayerCardMapLastTurnVisible] =
     useState(true);
   // timer to let cards be on board for a while before new round starts
   const paused = useRef(false);
+
+  // Use the LanguageContext
+  const { t } = useContext(LanguageContext)!;
 
   // HELPER FUNCTIONS
 
@@ -121,7 +124,6 @@ const GamePlayingRoom = () => {
     client.publish({
       destination: `/app/game/${gameContent.gameId}/timeout`,
     });
-    // set values of variables responsible for timeout management
     setIsTimerRunning(false);
   };
 
@@ -170,11 +172,9 @@ const GamePlayingRoom = () => {
 
   const handleTurnStateEvent = (playerCardMap: Map<string, Card>) => {
     setPlayerCardMapCurrentTurn((prevMap) => {
-      // go through each player in playerCardMap from the event
       Object.entries(playerCardMap).forEach(([playerName, card]) => {
         prevMap.set(playerName, convertCardIntoImageSrc(card));
       });
-      // return new version of prev map
       return prevMap;
     });
   };
@@ -227,14 +227,12 @@ const GamePlayingRoom = () => {
     });
     newRedTeamPoints = Number(newRedTeamPoints / 3);
     newBlueTeamPoints = Number(newBlueTeamPoints / 3);
-    // find what is a fraction (no fraction, 1/3 or 2/3)
     var redTeamFraction: string = convertToFraction(
       newRedTeamPoints - Math.floor(newRedTeamPoints)
     );
     var blueTeamFraction: string = convertToFraction(
       newBlueTeamPoints - Math.floor(newBlueTeamPoints)
     );
-    // we want to display integer part with fraction part
     var redTeamInteger: string = Math.floor(newRedTeamPoints).toString();
     var blueTeamInteger: string = Math.floor(newBlueTeamPoints).toString();
 
@@ -249,7 +247,6 @@ const GamePlayingRoom = () => {
 
   const handlePlayersOrderStateEvent = (playersOrder: string[]) => {
     setPlayers(playersOrder);
-    // set map to display the cards on the board in the correct order
     const newMap = new Map();
     playersOrder.forEach((player) => {
       newMap.set(player, null);
@@ -259,15 +256,12 @@ const GamePlayingRoom = () => {
 
   const handleTrumpSuitStateEvent = (trumpSuit: string) => {
     setDisplayedSuit(trumpSuit);
-    if (trumpSuit != null)
-      // if trump suit was already selected, do not display trump suit selection option
-      setDisplayTrumpSuitSelection(false);
+    if (trumpSuit != null) setDisplayTrumpSuitSelection(false);
   };
 
   const handleNewTurnEvent = () => {
     paused.current = true;
     setTimeout(() => {
-      // clear board and move all the cards played in this turn to proper map
       setPlayerCardMapCurrentTurn((prevMap) => {
         setPlayerCardMapLastTurn(prevMap);
         return new Map();
@@ -277,14 +271,9 @@ const GamePlayingRoom = () => {
   };
 
   const handleNewRoundEvent = (firstPlayerName: string) => {
-    // reset timer
     handleStopTimer();
     handleStartTimer();
-
-    // clear board and move cards to last turn cards section
     handleNewTurnEvent();
-
-    // handle suit and call
     setDisplayedSuit("None");
     if (usernameRef.current == firstPlayerName) {
       setSuit("COINS");
@@ -384,13 +373,12 @@ const GamePlayingRoom = () => {
 
   useEffect(() => {
     if (client?.connected) {
-      client.deactivate(); // if connection still remains after previous connection
+      client.deactivate();
     }
 
     const createWebSocketConnection = () => {
       client = new Client({
         brokerURL: `${baseUrl}/game`,
-        // debug: (str) => console.log(str),
         onConnect: onConnected,
         onStompError: onError,
       });
@@ -483,9 +471,7 @@ const GamePlayingRoom = () => {
   };
 
   const handleSelectCall = (call: string) => {
-    if (call == "")
-      // empty call means that user does not want to make a call
-      return;
+    if (call == "") return;
     client.publish({
       destination: `/app/game/${gameContent.gameId}/call`,
       body: JSON.stringify(call),
@@ -515,7 +501,7 @@ const GamePlayingRoom = () => {
   if (loading) {
     return (
       <div className="d-flex justify-content-center align-items-center min-vh-100">
-        <p className="fs-4 fw-bold">Loading game data...</p>
+        <p className="fs-4 fw-bold">{t("loading")}</p>
       </div>
     );
   }
@@ -535,19 +521,19 @@ const GamePlayingRoom = () => {
       {/* Call Modal */}
       {showCallModal && (
         <CallModal
-          title={players[0] + " call"}
-          message={call}
+          title={`${players[0]} ${t("call")}`}
+          message={t(call.toLowerCase()) || t("none")}
           onClose={() => {
             setShowCallModal(false);
             setCall("");
           }}
         />
       )}
-      {/* place for result modal */}
+      {/* Result Modal */}
       {showResultModal && (
         <ResultModal
-          title="Game Over"
-          message={`${capitalizeWord(winnerTeam)} team won!`}
+          title={t("gameOver")}
+          message={`${capitalizeWord(winnerTeam)} ${t("teamWon")}`}
           winnerTeam={winnerTeam}
           onClose={handleQuitGame}
         />
@@ -562,7 +548,7 @@ const GamePlayingRoom = () => {
               className="btn btn-danger fw-bold custom-exit-button"
               onClick={handleQuitGame}
             >
-              Exit
+              {t("exit")}
             </button>
           </div>
           <div className="d-flex justify-content-start align-items-center custom-players-container">
@@ -605,7 +591,7 @@ const GamePlayingRoom = () => {
             setIsPlayerCardMapLastTurnVisible(!isPlayerCardMapLastTurnVisible)
           }
         >
-          {isPlayerCardMapLastTurnVisible ? "Hide" : "Show"}
+          {isPlayerCardMapLastTurnVisible ? t("hide") : t("show")}
         </button>
 
         {/* Cards Played In Last Turn */}
@@ -614,7 +600,7 @@ const GamePlayingRoom = () => {
             isPlayerCardMapLastTurnVisible ? "visible" : "hidden"
           }`}
         >
-          <p className="fs-5 fw-bold text-center">Last Turn Cards</p>
+          <p className="fs-5 fw-bold text-center">{t("lastTurnCards")}</p>
           <div className="d-flex flex-wrap justify-content-center gap-3">
             {Array.from(playerCardMapLastTurn).map(
               ([playerName, src]) =>
@@ -661,7 +647,7 @@ const GamePlayingRoom = () => {
           }}
           onClick={toggleOptionsVisibility}
         >
-          {isOptionsVisible ? "Hide" : "Show"}
+          {isOptionsVisible ? t("hide") : t("show")}
         </button>
 
         {/* Points and other options */}
@@ -671,11 +657,11 @@ const GamePlayingRoom = () => {
           }`}
         >
           <div className="d-flex flex-column align-items-center bg-white rounded-4 p-2">
-            <p className="fw-bold fs-4">Points</p>
+            <p className="fw-bold fs-4">{t("points")}</p>
             <div className="d-flex flex-row align-items-center justify-content-end w-100 px-2">
               <p className="me-auto text-danger fw-bold">
                 {redTeamRef.current[0]}{" "}
-                <span className="text-black fw-normal">and</span>{" "}
+                <span className="text-black fw-normal">{t("and")}</span>{" "}
                 {redTeamRef.current[1]}:{" "}
               </p>
               <p
@@ -688,7 +674,7 @@ const GamePlayingRoom = () => {
             <div className="d-flex flex-row align-items-center justify-content-end w-100 px-2">
               <p className="me-auto text-primary fw-bold">
                 {blueTeamRef.current[0]}{" "}
-                <span className="text-black fw-normal">and</span>{" "}
+                <span className="text-black fw-normal">{t("and")}</span>{" "}
                 {blueTeamRef.current[1]}:{" "}
               </p>
               <p
@@ -698,37 +684,37 @@ const GamePlayingRoom = () => {
                 {blueTeamPoints}
               </p>
             </div>
-            <p className="fw-bold fs-4 mt-3">Trump Suit</p>
-            <p className="fw-bold">{displayedSuit || "None"}</p>
+            <p className="fw-bold fs-4 mt-3">{t("trumpSuit")}</p>
+            <p className="fw-bold">{t(displayedSuit.toLowerCase()) || t("none")}</p>
             {displayTrumpSuitSelection && (
               <div className="mt-2">
-                <p className="mb-2">Trump suit</p>
+                <p className="mb-2">{t("trumpSuit")}</p>
                 <select
                   className="form-select"
                   value={suit}
                   onChange={handleSuitChange}
                 >
-                  <option value="COINS">Coins</option>
-                  <option value="CUPS">Cups</option>
-                  <option value="CLUBS">Clubs</option>
-                  <option value="SWORDS">Swords</option>
+                  <option value="COINS">{t("coins")}</option>
+                  <option value="CUPS">{t("cups")}</option>
+                  <option value="CLUBS">{t("clubs")}</option>
+                  <option value="SWORDS">{t("swords")}</option>
                 </select>
               </div>
             )}
             {/* Call select section */}
             {displayCallSelection && (
               <div className="mt-2">
-                <p className="mb-2">Call</p>
+                <p className="mb-2">{t("call")}</p>
                 <select
                   className="form-select"
                   value={call}
                   onChange={handleCallChange}
                 >
-                  <option value="">None</option>
-                  <option value="KNOCK">Knock</option>
-                  <option value="FLY">Fly</option>
-                  <option value="SLITHER">Slither</option>
-                  <option value="RESLITHER">Reslither</option>
+                  <option value="">{t("none")}</option>
+                  <option value="KNOCK">{t("knock")}</option>
+                  <option value="FLY">{t("fly")}</option>
+                  <option value="SLITHER">{t("slither")}</option>
+                  <option value="RESLITHER">{t("reslither")}</option>
                 </select>
               </div>
             )}
