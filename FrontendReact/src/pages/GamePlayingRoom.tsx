@@ -1,14 +1,19 @@
-import { ChangeEvent, useEffect, useRef, useState } from "react";
-import "../styles/game-playing-room.css";
-import images from "../cards/cards_importer";
 import { Client, IMessage } from "@stomp/stompjs";
-import { useLocation } from "react-router-dom";
 import axios from "axios";
+import { ChangeEvent, useEffect, useRef, useState, useContext } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import images from "../cards/cards_importer";
+import CallModal from "../components/CallModal";
+import ErrorModal from "../components/ErrorModal";
 import {
+  Call,
+  CallState,
   Card,
   ErrorEvent,
   MyCardsState,
   NewRound,
+  NewTurn,
+  NextPlayerState,
   PlayersOrderState,
   PointState,
   TeamStateEvent,
@@ -16,6 +21,9 @@ import {
   TurnState,
   WinnerState,
 } from "../events/game-playing-room/WebSocketEventTypes";
+import "../styles/game-playing-room.css";
+import ResultModal from "../components/ResultModal";
+import { LanguageContext } from "../context/LanguageContext";
 
 var client: Client;
 
@@ -30,12 +38,16 @@ type WebSocketEventType =
   | PointState
   | PlayersOrderState
   | TrumpSuitState
+  | NewTurn
   | NewRound
   | WinnerState
   | ErrorEvent
-  | TeamStateEvent;
-// TODO, when user refresh page after turn is ended, he gets all the cards that were visible at the board
-const convertCardIntoImageSrc = (card: Card): string => {
+  | TeamStateEvent
+  | NextPlayerState
+  | CallState;
+
+const convertCardIntoImageSrc = (card: Card | null): string | null => {
+  if (card == null) return null;
   var imageKey =
     card.suit.charAt(0).toUpperCase() +
     card.suit.slice(1).toLowerCase() +
@@ -50,29 +62,47 @@ const GamePlayingRoom = () => {
   const gameContent: PlayingRoomContent = location.state;
   const [players, setPlayers] = useState<string[]>([]);
   const redTeamRef = useRef<string[]>([]);
-  const [redTeamPoints, setRedTeamPoints] = useState<number>(0);
+  const [redTeamPoints, setRedTeamPoints] = useState<string>("");
   const blueTeamRef = useRef<string[]>([]);
-  const [blueTeamPoints, setBlueTeamPoints] = useState<number>(0);
+  const [blueTeamPoints, setBlueTeamPoints] = useState<string>("");
   const [cards, setCards] = useState<[bigint, string][]>([]);
   const [playerCardMapCurrentTurn, setPlayerCardMapCurrentTurn] = useState<
-    // map of cards played by players in current round
     Map<string, string | null>
   >(new Map());
-  const [suit, setSuit] = useState<string>("COINS"); // TODO wait until user selects trump and after that let him play his card (needed for user who chooses trump suit), because client.publish are asynchronous!
+  const [loading, setLoading] = useState(true);
+  // trump suit part
+  const [suit, setSuit] = useState<string>("COINS");
   const [displayTrumpSuitSelection, setDisplayTrumpSuitSelection] =
     useState(false);
   const [displayedSuit, setDisplayedSuit] = useState<string>("-");
+  // call part
+  const [call, setCall] = useState<string>("");
   const [displayCallSelection, setDisplayCallSelection] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [showCallModal, setShowCallModal] = useState(false);
   // errors part
-  const [errorModalMessage, setErrorModalMessage] = useState<string>();
+  const [errorModalMessage, setErrorModalMessage] = useState<string>("");
   const [showErrorModal, setShowErrorModal] = useState<boolean>(false);
   // timer part
-  const totalTime = 10;
-  const [isUserTurn, setIsUserTurn] = useState<boolean>(false);
+  const totalTime = 20;
   const [isTimerRunning, setIsTimerRunning] = useState<boolean>(false);
   const [timeLeft, setTimeLeft] = useState<number>(totalTime);
   const [percentage, setPercentage] = useState<number>(100);
+  // username part
+  const usernameRef = useRef<string>();
+  // result of the game modal
+  const [showResultModal, setShowResultModal] = useState(false);
+  const [winnerTeam, setWinnerTeam] = useState<string>("");
+  // cards played last turn part
+  const [playerCardMapLastTurn, setPlayerCardMapLastTurn] = useState<
+    Map<string, string | null>
+  >(new Map());
+  const [isPlayerCardMapLastTurnVisible, setIsPlayerCardMapLastTurnVisible] =
+    useState(true);
+  // timer to let cards be on board for a while before new round starts
+  const paused = useRef(false);
+
+  // Use the LanguageContext
+  const { t } = useContext(LanguageContext)!;
 
   // HELPER FUNCTIONS
 
@@ -91,83 +121,97 @@ const GamePlayingRoom = () => {
 
   const onTimeUp = () => {
     if (!isTimerRunning) return;
-    // TODO if it is player that has to select trump suit - select random trump suit then
     client.publish({
       destination: `/app/game/${gameContent.gameId}/timeout`,
     });
-    // set values of variables responsible for timeout management
-    setIsUserTurn(false);
+    setIsTimerRunning(false);
   };
 
-  // it removes cards that were played last in last round
-  const clearBoard = () => {
-    const newMap = new Map<string, string | null>();
-    players.forEach((player) => newMap.set(player, null));
-    setPlayerCardMapCurrentTurn(newMap);
+  const handleStartTimer = () => {
+    setIsTimerRunning(true);
+    setTimeLeft(totalTime);
+  };
+
+  const handleStopTimer = () => {
+    setIsTimerRunning(false);
+    setTimeLeft(0);
+  };
+
+  const capitalizeWord = (word: string): string | null => {
+    if (!word) return null;
+    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+  };
+
+  async function waitUntilResumed() {
+    return new Promise((resolve: Function) => {
+      const intervalId = setInterval(() => {
+        if (!paused.current) {
+          clearInterval(intervalId);
+          resolve();
+        }
+      }, 334);
+    });
+  }
+
+  const convertToFraction = (value: number) => {
+    const epsilon = 1e-6;
+    const fractions = [
+      { value: 0, fraction: "0" },
+      { value: 1 / 3, fraction: "¹/₃" },
+      { value: 2 / 3, fraction: "²/₃" },
+    ];
+
+    for (const fraction of fractions) {
+      if (Math.abs(value - fraction.value) < epsilon) return fraction.fraction;
+    }
+
+    throw new Error("Value does not match expected fractions");
   };
 
   // WEBSOCKET FUNCTIONS
 
-  const onMessageReceived = (msg: IMessage) => {
-    console.log("MESSAGE RECEIVED, BODY:");
-    console.log(msg.body);
-    const events: WebSocketEventType[] = JSON.parse(msg.body);
-    events.forEach((event) => {
-      switch (event.eventType) {
-        case "TurnState":
-          handleTurnStateEvent(event.turn);
-          break;
-        case "MyCardsState":
-          handleMyCardsStateEvent(event.myCards);
-          break;
-        case "PointState":
-          handlePointStateEvent(event.playerPointState);
-          clearBoard();
-          break;
-        case "PlayersOrderState":
-          handlePlayersOrderStateEvent(event.playersOrder);
-          break;
-        case "TrumpSuitState":
-          handleTrumpSuitStateEvent(event.trumpSuit);
-          break;
-        case "NewRound":
-          handleNewRoundEvent();
-          break;
-        case "WinnerState":
-          handleWinnerStateEvent(event.winnerTeam);
-          break;
-        case "ErrorEvent":
-          handleErrorEvent(event.errorMessage);
-          break;
-        case "TeamState":
-          handleTeamStateEvent(event.redTeam, event.blueTeam);
-          break;
-        default:
-          console.warn("Unknown event type");
-          break;
-      }
-    });
-  };
-
   const handleTurnStateEvent = (playerCardMap: Map<string, Card>) => {
-    var newPlayerCardMapCurrentTurn: Map<string, string> = new Map();
-    Object.entries(playerCardMap).forEach(([playerName, card]) => {
-      if (card !== null)
-        newPlayerCardMapCurrentTurn.set(
-          playerName,
-          convertCardIntoImageSrc(card)
-        );
+    setPlayerCardMapCurrentTurn((prevMap) => {
+      Object.entries(playerCardMap).forEach(([playerName, card]) => {
+        prevMap.set(playerName, convertCardIntoImageSrc(card));
+      });
+      return prevMap;
     });
-    setPlayerCardMapCurrentTurn(newPlayerCardMapCurrentTurn);
   };
 
   const handleMyCardsStateEvent = (cards: Card[]) => {
-    const newCards: [bigint, string][] = [];
+    const clubsCards: [bigint, string][] = [];
+    const coinsCards: [bigint, string][] = [];
+    const cupsCards: [bigint, string][] = [];
+    const swordsCards: [bigint, string][] = [];
     cards.map((card) => {
-      newCards.push([card.id, convertCardIntoImageSrc(card)]);
+      const valueToAdd: [bigint, string] = [
+        card.id,
+        convertCardIntoImageSrc(card) ?? "",
+      ];
+      switch (card.suit) {
+        case "CLUBS":
+          clubsCards.push(valueToAdd);
+          break;
+        case "CUPS":
+          cupsCards.push(valueToAdd);
+          break;
+        case "SWORDS":
+          swordsCards.push(valueToAdd);
+          break;
+        case "COINS":
+          coinsCards.push(valueToAdd);
+          break;
+      }
     });
-    if (newCards.length === 10 && doesUserHaveFourCoins(newCards))
+    const newCards: [bigint, string][] = clubsCards
+      .concat(coinsCards)
+      .concat(cupsCards)
+      .concat(swordsCards);
+    if (newCards.length === 10 && doesUserHaveFourCoins(newCards)) {
+      setDisplayCallSelection(true);
       setDisplayTrumpSuitSelection(true);
+    }
     setCards(newCards);
   };
 
@@ -181,25 +225,70 @@ const GamePlayingRoom = () => {
         newBlueTeamPoints += playerPoints;
       }
     });
-    setRedTeamPoints(newRedTeamPoints);
-    setBlueTeamPoints(newBlueTeamPoints);
+    newRedTeamPoints = Number(newRedTeamPoints / 3);
+    newBlueTeamPoints = Number(newBlueTeamPoints / 3);
+    var redTeamFraction: string = convertToFraction(
+      newRedTeamPoints - Math.floor(newRedTeamPoints)
+    );
+    var blueTeamFraction: string = convertToFraction(
+      newBlueTeamPoints - Math.floor(newBlueTeamPoints)
+    );
+    var redTeamInteger: string = Math.floor(newRedTeamPoints).toString();
+    var blueTeamInteger: string = Math.floor(newBlueTeamPoints).toString();
+
+    if (redTeamFraction == "0") setRedTeamPoints(redTeamInteger);
+    else if (redTeamInteger == "0") setRedTeamPoints(redTeamFraction);
+    else setRedTeamPoints(redTeamInteger + redTeamFraction);
+
+    if (blueTeamFraction == "0") setBlueTeamPoints(blueTeamInteger);
+    else if (blueTeamInteger == "0") setBlueTeamPoints(blueTeamFraction);
+    else setBlueTeamPoints(blueTeamInteger + blueTeamFraction);
   };
 
   const handlePlayersOrderStateEvent = (playersOrder: string[]) => {
     setPlayers(playersOrder);
+    const newMap = new Map();
+    playersOrder.forEach((player) => {
+      newMap.set(player, null);
+    });
+    setPlayerCardMapCurrentTurn(newMap);
   };
 
   const handleTrumpSuitStateEvent = (trumpSuit: string) => {
     setDisplayedSuit(trumpSuit);
+    if (trumpSuit != null) setDisplayTrumpSuitSelection(false);
   };
 
-  const handleNewRoundEvent = () => {
-    // TODO this event is unnecessary?
-    // getPlayerCards();
+  const handleNewTurnEvent = () => {
+    paused.current = true;
+    setTimeout(() => {
+      setPlayerCardMapCurrentTurn((prevMap) => {
+        setPlayerCardMapLastTurn(prevMap);
+        return new Map();
+      });
+      paused.current = false;
+    }, 2000);
+  };
+
+  const handleNewRoundEvent = (firstPlayerName: string) => {
+    handleStopTimer();
+    handleStartTimer();
+    handleNewTurnEvent();
+    setDisplayedSuit("None");
+    if (usernameRef.current == firstPlayerName) {
+      setSuit("COINS");
+      setDisplayTrumpSuitSelection(true);
+      setDisplayCallSelection(true);
+    } else {
+      setDisplayTrumpSuitSelection(false);
+      setDisplayCallSelection(false);
+    }
   };
 
   const handleWinnerStateEvent = (team: string) => {
-    console.log("team: " + team + " won!");
+    handleStopTimer();
+    setWinnerTeam(team);
+    setShowResultModal(true);
   };
 
   const handleErrorEvent = (errorMessage: string) => {
@@ -212,17 +301,84 @@ const GamePlayingRoom = () => {
     blueTeamRef.current = blueTeam;
   };
 
+  const handleNextPlayerStateEvent = (
+    playerName: string,
+    isFirstPlayer: boolean
+  ) => {
+    if (usernameRef.current === playerName && isFirstPlayer)
+      setDisplayCallSelection(true);
+    else setDisplayCallSelection(false);
+    handleStopTimer();
+    handleStartTimer();
+  };
+
+  const handleCallStateEvent = (call: Call) => {
+    setCall(call);
+    setShowCallModal(true);
+  };
+
+  const onMessageReceived = async (msg: IMessage) => {
+    const events: WebSocketEventType[] = JSON.parse(msg.body);
+
+    for (let i = 0; i < events.length; i++) {
+      const event = events[i];
+
+      if (paused.current) await waitUntilResumed();
+
+      switch (event.eventType) {
+        case "TurnState":
+          handleTurnStateEvent(event.turn);
+          break;
+        case "MyCardsState":
+          handleMyCardsStateEvent(event.myCards);
+          break;
+        case "PointState":
+          handlePointStateEvent(event.playerPointState);
+          break;
+        case "PlayersOrderState":
+          handlePlayersOrderStateEvent(event.playersOrder);
+          break;
+        case "TrumpSuitState":
+          handleTrumpSuitStateEvent(event.trumpSuit);
+          break;
+        case "NewTurn":
+          handleNewTurnEvent();
+          break;
+        case "NewRound":
+          handleNewRoundEvent(event.firstPlayerName);
+          break;
+        case "WinnerState":
+          handleWinnerStateEvent(event.winnerTeam);
+          break;
+        case "ErrorEvent":
+          handleErrorEvent(event.errorMessage);
+          break;
+        case "TeamState":
+          handleTeamStateEvent(event.redTeam, event.blueTeam);
+          break;
+        case "NextPlayerState":
+          handleNextPlayerStateEvent(event.playerName, event.isFirstPlayer);
+          break;
+        case "CallState":
+          handleCallStateEvent(event.call);
+          break;
+        default:
+          console.warn("Unknown event type");
+          break;
+      }
+    }
+  };
+
   // USE EFFECT HOOKS
 
   useEffect(() => {
     if (client?.connected) {
-      client.deactivate(); // if connection still remains after previous connection
+      client.deactivate();
     }
 
     const createWebSocketConnection = () => {
       client = new Client({
         brokerURL: `${baseUrl}/game`,
-        // debug: (str) => console.log(str),
         onConnect: onConnected,
         onStompError: onError,
       });
@@ -254,13 +410,23 @@ const GamePlayingRoom = () => {
     };
   }, []);
 
+  // user data hook
+
+  useEffect(() => {
+    axios
+      .get(`${baseUrl}/user/info`)
+      .then((response) => {
+        usernameRef.current = response.data.username;
+      })
+      .catch((error) => console.log(error));
+  }, []);
+
   // time use effect
 
   useEffect(() => {
     let timer: NodeJS.Timeout | undefined;
 
-    if (isUserTurn && !isTimerRunning) {
-      setIsTimerRunning(true);
+    if (isTimerRunning) {
       timer = setInterval(() => {
         setTimeLeft((prevTime) => {
           if (prevTime <= 1) {
@@ -271,17 +437,12 @@ const GamePlayingRoom = () => {
           return prevTime - 1;
         });
       }, 1000);
-    } else if (!isUserTurn && isTimerRunning) {
-      if (timer) {
-        clearInterval(timer);
-      }
-      setIsTimerRunning(false);
     }
 
     return () => {
       if (timer) clearInterval(timer);
     };
-  }, [isUserTurn, isTimerRunning]);
+  }, [isTimerRunning]);
 
   useEffect(() => {
     setPercentage((timeLeft / totalTime) * 100);
@@ -293,82 +454,105 @@ const GamePlayingRoom = () => {
     else setLoading(true);
   }, [redTeamRef.current, blueTeamRef.current]);
 
-  // modal error use effect
-
-  const modalRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleOutsideClick = (event: MouseEvent) => {
-      if (
-        modalRef.current &&
-        !modalRef.current.contains(event.target as Node)
-      ) {
-        setShowErrorModal(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleOutsideClick);
-
-    return () => {
-      document.removeEventListener("mousedown", handleOutsideClick);
-    };
-  }, []);
-
   // WIDGET FUNCTIONS
 
-  function handleSelectCard(id: bigint): void {
+  const handleSelectCard = (id: bigint) => {
     client.publish({
       destination: `/app/game/${gameContent.gameId}/card`,
       body: JSON.stringify({ cardId: id }),
     });
-  }
+  };
 
-  function handleSelectSuit(suit: string) {
+  const handleSelectSuit = (suit: string) => {
     client.publish({
       destination: `/app/game/${gameContent.gameId}/suit`,
       body: JSON.stringify({ trumpSuit: suit }),
     });
-  }
+  };
 
-  function handleSuitChange(event: ChangeEvent<HTMLSelectElement>): void {
+  const handleSelectCall = (call: string) => {
+    if (call == "") return;
+    client.publish({
+      destination: `/app/game/${gameContent.gameId}/call`,
+      body: JSON.stringify(call),
+    });
+  };
+
+  const handleSuitChange = (event: ChangeEvent<HTMLSelectElement>) => {
     setSuit(event.target.value);
-  }
+  };
+
+  const handleCallChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    setCall(event.target.value);
+  };
+
+  const navigate = useNavigate();
+
+  const handleQuitGame = () => {
+    navigate("/", { replace: true });
+  };
+
+  const [isOptionsVisible, setIsOptionsVisible] = useState<boolean>(true);
+
+  const toggleOptionsVisibility = () => {
+    setIsOptionsVisible((prev) => !prev);
+  };
 
   if (loading) {
     return (
       <div className="d-flex justify-content-center align-items-center min-vh-100">
-        <p className="fs-4 fw-bold">Loading game data...</p>
+        <p className="fs-4 fw-bold">{t("loading")}</p>
       </div>
     );
   }
+
   return (
     <>
-      {/* place for error modal */}
-      <div className={`modal fade ${showErrorModal ? "show d-block" : ""}`}>
-        <div className="modal-dialog modal-md mt-5" ref={modalRef}>
-          <div className="modal-content bg-danger">
-            <div className="modal-header border-black">
-              <button
-                type="button"
-                className="btn-close"
-                onClick={() => setShowErrorModal(false)}
-              ></button>
-            </div>
-            <div className="modal-body fw-bold">{errorModalMessage}</div>
-          </div>
-        </div>
-      </div>
+      {/* Error Modal */}
+      {showErrorModal && (
+        <ErrorModal
+          message={errorModalMessage}
+          onClose={() => {
+            setShowErrorModal(false);
+            setErrorModalMessage("");
+          }}
+        />
+      )}
+      {/* Call Modal */}
+      {showCallModal && (
+        <CallModal
+          title={`${players[0]} ${t("call")}`}
+          message={t(call.toLowerCase()) || t("none")}
+          onClose={() => {
+            setShowCallModal(false);
+            setCall("");
+          }}
+        />
+      )}
+      {/* Result Modal */}
+      {showResultModal && (
+        <ResultModal
+          title={t("gameOver")}
+          message={`${capitalizeWord(winnerTeam)} ${t("teamWon")}`}
+          winnerTeam={winnerTeam}
+          onClose={handleQuitGame}
+        />
+      )}
+
       {/* Main page content */}
       <div className="custom-outer-div d-flex flex-column justify-content-between p-2 min-vw-100 min-vh-100">
         {/* upper part */}
-        <div className="d-flex">
-          <div className="w-25">
-            <button className="btn btn-danger fw-bold btn-lg rounded-0">
-              Exit
+        <div className="d-flex custom-upper-part">
+          <div className="custom-exit-container">
+            <button
+              className="btn btn-danger fw-bold custom-exit-button"
+              onClick={handleQuitGame}
+            >
+              {t("exit")}
             </button>
           </div>
-          <div className="d-flex justify-content-start align-items-center w-75 text-center">
-            <ul className="d-flex list-unstyled gap-5 fs-5 fw-bold m-0 ms-5">
+          <div className="d-flex justify-content-start align-items-center custom-players-container">
+            <ul className="d-flex list-unstyled custom-players-list">
               {players.map((player) => (
                 <li
                   key={player}
@@ -384,86 +568,159 @@ const GamePlayingRoom = () => {
             </ul>
           </div>
           {/* timeout bar */}
-          {isUserTurn && (
+          {isTimerRunning && (
             <div className="d-flex align-items-center w-25">
               <div
-                className="d-flex bg-primary ms-auto border border-black border-3 h-50"
+                className="d-flex bg-primary ms-auto border border-black border-3 h-50 mt-3"
                 style={{ width: `${percentage}%` }}
               ></div>
             </div>
           )}
         </div>
-        <div className="d-flex flex-row align-items-center">
-          {/* Cards played in current round section */}
-          <div className="d-flex justify-content-center gap-4 w-50">
-            {Array.from(playerCardMapCurrentTurn).map(
+
+        {/* Toggle Button */}
+        <button
+          className="btn btn-primary position-fixed"
+          style={{
+            top: "60%",
+            left: "10px",
+            transform: "translateY(-50%)",
+            zIndex: 1050,
+          }}
+          onClick={() =>
+            setIsPlayerCardMapLastTurnVisible(!isPlayerCardMapLastTurnVisible)
+          }
+        >
+          {isPlayerCardMapLastTurnVisible ? t("hide") : t("show")}
+        </button>
+
+        {/* Cards Played In Last Turn */}
+        <div
+          className={`last-turn-cards-container d-flex flex-column justify-content-start align-items-center w-25 bg-white p-3 ${
+            isPlayerCardMapLastTurnVisible ? "visible" : "hidden"
+          }`}
+        >
+          <p className="fs-5 fw-bold text-center">{t("lastTurnCards")}</p>
+          <div className="d-flex flex-wrap justify-content-center gap-3">
+            {Array.from(playerCardMapLastTurn).map(
               ([playerName, src]) =>
                 src && (
                   <div className="text-center" key={playerName}>
-                    <p className="fw-bold fs-5">{playerName}</p>
-                    <img className="custom-img" src={src} />
+                    <p className="fw-semibold mb-0">{playerName}</p>
+                    <img className="last-turn-img" src={src} alt={`${playerName}'s card`} />
                   </div>
                 )
             )}
           </div>
-          {/* Points and other options */}
-          <div className="d-flex flex-column w-50 align-items-center">
-            {/* Points section */}
-            <div className="d-flex flex-column align-items-center w-25 bg-white rounded-4 p-2">
-              <p className="fw-bold fs-4">Points</p>
-              {/* points red team */}
-              <div className="d-flex flex-row align-items-center justify-content-end w-100 px-2">
-                <p className="me-auto text-danger fw-bold">
-                  {redTeamRef.current[0]}{" "}
-                  <span className="text-black fw-normal">and</span>{" "}
-                  {redTeamRef.current[1]}:{" "}
-                </p>
-                <p className="ms-auto fs-5 fw-bold">{redTeamPoints}</p>
-              </div>
-              {/* points blue team */}
-              <div className="d-flex flex-row align-items-center justify-content-end w-100 px-2">
-                <p className="w-100 text-primary fw-bold">
-                  {blueTeamRef.current[0]}{" "}
-                  <span className="text-black fw-normal">and</span>{" "}
-                  {blueTeamRef.current[1]}:{" "}
-                </p>
-                <p className="ms-auto fs-5 fw-bold">{blueTeamPoints}</p>
-              </div>
-              {/* Trump Suit display section */}
-              <p className="fw-bold fs-4 mt-3">Trump Suit</p>
-              <p className="fw-bold">{displayedSuit}</p>
+        </div>
+
+        {/* Center Cards Section */}
+        <div className="d-flex justify-contents-center align-items-center">
+          <div className="custom-center-cards">
+            {Array.from(playerCardMapCurrentTurn).map(
+              ([playerName, src], index) =>
+                src && (
+                  <div
+                    className="text-center custom-card"
+                    key={playerName + index}
+                  >
+                    <p className="fw-bold fs-5">{playerName}</p>
+                    <img
+                      className="custom-img"
+                      src={src}
+                      alt={`${playerName}'s card`}
+                    />
+                  </div>
+                )
+            )}
+          </div>
+        </div>
+
+        {/* Toggle Button */}
+        <button
+          className="btn btn-primary position-fixed"
+          style={{
+            top: "60%",
+            right: "10px",
+            transform: "translateY(-50%)",
+            zIndex: 1050,
+          }}
+          onClick={toggleOptionsVisibility}
+        >
+          {isOptionsVisible ? t("hide") : t("show")}
+        </button>
+
+        {/* Points and other options */}
+        <div
+          className={`options-container ${
+            isOptionsVisible ? "visible" : "hidden"
+          }`}
+        >
+          <div className="d-flex flex-column align-items-center bg-white rounded-4 p-2">
+            <p className="fw-bold fs-4">{t("points")}</p>
+            <div className="d-flex flex-row align-items-center justify-content-end w-100 px-2">
+              <p className="me-auto text-danger fw-bold">
+                {redTeamRef.current[0]}{" "}
+                <span className="text-black fw-normal">{t("and")}</span>{" "}
+                {redTeamRef.current[1]}:{" "}
+              </p>
+              <p
+                className="ms-auto fs-4 fw-bold"
+                style={{ whiteSpace: "nowrap" }}
+              >
+                {redTeamPoints}
+              </p>
             </div>
-            {/* Trump Suit select section */}
+            <div className="d-flex flex-row align-items-center justify-content-end w-100 px-2">
+              <p className="me-auto text-primary fw-bold">
+                {blueTeamRef.current[0]}{" "}
+                <span className="text-black fw-normal">{t("and")}</span>{" "}
+                {blueTeamRef.current[1]}:{" "}
+              </p>
+              <p
+                className="ms-auto fs-4 fw-bold"
+                style={{ whiteSpace: "nowrap" }}
+              >
+                {blueTeamPoints}
+              </p>
+            </div>
+            <p className="fw-bold fs-4 mt-3">{t("trumpSuit")}</p>
+            <p className="fw-bold">{t(displayedSuit.toLowerCase()) || t("none")}</p>
             {displayTrumpSuitSelection && (
-              <div className="w-25 mt-2">
-                <p className="mb-2">Trump suit</p>
+              <div className="mt-2">
+                <p className="mb-2">{t("trumpSuit")}</p>
                 <select
                   className="form-select"
                   value={suit}
                   onChange={handleSuitChange}
                 >
-                  <option value="COINS">Coins</option>
-                  <option value="CUPS">Cups</option>
-                  <option value="CLUBS">Clubs</option>
-                  <option value="SWORDS">Swords</option>
+                  <option value="COINS">{t("coins")}</option>
+                  <option value="CUPS">{t("cups")}</option>
+                  <option value="CLUBS">{t("clubs")}</option>
+                  <option value="SWORDS">{t("swords")}</option>
                 </select>
               </div>
             )}
-            {/* TODO handle call - player that is starting round can call sth (so we have to know who win previous turn) */}
             {/* Call select section */}
             {displayCallSelection && (
-              <div className="w-25 mt-2">
-                <p className="mb-2">Call</p>
-                <select name="" className="form-select">
-                  <option value="">Knock</option>
-                  <option value="">Fly</option>
-                  <option value="">Slither</option>
-                  <option value="">Reslither</option>
+              <div className="mt-2">
+                <p className="mb-2">{t("call")}</p>
+                <select
+                  className="form-select"
+                  value={call}
+                  onChange={handleCallChange}
+                >
+                  <option value="">{t("none")}</option>
+                  <option value="KNOCK">{t("knock")}</option>
+                  <option value="FLY">{t("fly")}</option>
+                  <option value="SLITHER">{t("slither")}</option>
+                  <option value="RESLITHER">{t("reslither")}</option>
                 </select>
               </div>
             )}
           </div>
         </div>
+
         {/* Cards */}
         <div className="d-flex flex-wrap gap-2 custom-cards-container">
           {cards.map(([id, src]) => (
@@ -474,10 +731,12 @@ const GamePlayingRoom = () => {
               onClick={() => {
                 if (displayTrumpSuitSelection) {
                   handleSelectSuit(suit);
-                  setDisplayTrumpSuitSelection(false);
                 }
                 handleSelectCard(id);
-                setIsUserTurn(false);
+                if (displayCallSelection) {
+                  handleSelectCall(call);
+                  setDisplayCallSelection(false);
+                }
               }}
             />
           ))}

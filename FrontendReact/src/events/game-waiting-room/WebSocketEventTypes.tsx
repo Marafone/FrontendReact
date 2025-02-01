@@ -24,3 +24,14 @@ export interface PlayerLeftEvent extends BaseEvent {
   eventType: "PlayerLeftEvent";
   playerName: string;
 }
+
+export interface ErrorEvent extends BaseEvent {
+  eventType: "ErrorEvent";
+  errorMessage: string;
+}
+
+export interface OwnerEvent extends BaseEvent {
+  eventType: "OwnerEvent";
+  newOwnerName: string;
+  isNew: boolean;
+}

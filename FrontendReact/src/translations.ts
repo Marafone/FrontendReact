@@ -1,3 +1,6 @@
+import GameCreation from "./pages/GameCreation";
+import GamePlayingRoom from "./pages/GamePlayingRoom";
+
 export interface Translations {
     EN: {
       home: {
@@ -45,9 +48,6 @@ export interface Translations {
         loadingImage: string;
         imageAlt: string;
       };
-    };
-    PL: {
-      // Define PL translations here
     };
 }
 
@@ -99,6 +99,67 @@ export const translations = {
         loadingImage: "Loading image...",
         imageAlt: "All cards used in Marafon"
       },
+      errors: {
+        gameNameLength: "Length must be between 4 and 20 characters",
+        passwordEmpty: "Password cannot be empty",
+        gameNameTaken: "Game name already taken. Try with the other name.",
+      },
+      placeholders: {
+        gameName: "SampleName123",
+        password: "password123",
+      },
+      labels: {
+        private: "Private",
+      },
+      gameTypes: {
+        marafone: "Marafone",
+        briscola: "Briscola",
+        tresette: "Tresette",
+      },   
+      gameWaitingRoom: {
+        events: {
+          defaultMessage: "Have fun!",
+          playerJoined: "joined the game!",
+          playerLeft: "left the game!",
+          title: "Events",
+        },
+        buttons: {
+          exit: "Exit",
+          redTeam: "Red",
+          blueTeam: "Blue",
+          startGame: "Start game",
+        },
+        labels: {
+          gameType: "Game Type",
+          players: "Players",
+        },
+        info: {
+          newOwnerTitle: "New Game Owner Selected",
+          newOwnerMessage: "{{ownerName}} is now the owner. The previous owner has left the game.",
+        },
+      },
+     
+      loading: "Loading game data...",
+      call: "call",
+      gameOver: "Game Over",
+      teamWon: "team won!",
+      exit: "Exit",
+      hide: "Hide",
+      show: "Show",
+      lastTurnCards: "Last Turn Cards",
+      points: "Points",
+      and: "and",
+      trumpSuit: "Trump Suit",
+      none: "None",
+      coins: "Coins",
+      cups: "Cups",
+      clubs: "Clubs",
+      swords: "Swords",
+      knock: "Knock",
+      fly: "Fly",
+      slither: "Slither",
+      reslither: "Reslither",
+      
     },
     PL: {
       home: {
@@ -155,6 +216,65 @@ export const translations = {
         loadingImage: "Ładowanie obrazu...",
         imageAlt: "Wszystkie karty używane w grze Marafon",
       },
+      errors: {
+        gameNameLength: "Długość musi wynosić od 4 do 20 znaków",
+        passwordEmpty: "Hasło nie może być puste",
+        gameNameTaken: "Nazwa gry jest już zajęta. Spróbuj inną nazwę."
+      },
+      placeholders: {
+        gameName: "PrzykładowaNazwa123",
+        password: "haslo123"
+      },
+      labels: {
+        private: "Prywatna"
+      },
+      gameTypes: {
+        marafone: "Marafone",
+        briscola: "Briscola",
+        tresette: "Tresette"
+      },
+      gameWaitingRoom: {  
+        events: {  
+            defaultMessage: "Baw się dobrze!",  
+            playerJoined: "dołączył do gry!",  
+            playerLeft: "opuścił grę!",  
+            title: "Zdarzenia",  
+        },  
+        buttons: {  
+            exit: "Wyjdź",  
+            redTeam: "Czerwony",  
+            blueTeam: "Niebieski",  
+            startGame: "Rozpocznij grę",  
+        },  
+        labels: {  
+            gameType: "Typ gry",  
+            players: "Gracze",  
+        },  
+        info: {  
+            newOwnerTitle: "Nowy właściciel gry",  
+            newOwnerMessage: "{{ownerName}} jest teraz właścicielem. Poprzedni właściciel opuścił grę.",  
+        },  
+      },  
+      loading: "Ładowanie danych gry...",  
+      call: "wezwanie",  
+      gameOver: "Koniec gry",  
+      teamWon: "drużyna wygrała!",  
+      exit: "Wyjdź",  
+      hide: "Ukryj",  
+      show: "Pokaż",  
+      lastTurnCards: "Karty z ostatniej tury",  
+      points: "Punkty",  
+      and: "i",  
+      trumpSuit: "Atut",  
+      none: "Brak",  
+      coins: "Monety",  
+      cups: "Kielichy",  
+      clubs: "Buławy",  
+      swords: "Miecze",  
+      knock: "Pukanie",  
+      fly: "Lot",  
+      slither: "Pełzanie",  
+      reslither: "Ponowne pełzanie",  
     },
     IT:{
       home: {
@@ -210,7 +330,66 @@ export const translations = {
           "Alla fine di ogni mano, i punti vengono contati e il giocatore che ha guidato la prima presa diventa il nuovo mazziere.",
         loadingImage: "Caricamento immagine...",
         imageAlt: "Tutte le carte utilizzate nel Marafon"
-      }
+      },
+      errors: {  
+        gameNameLength: "La lunghezza deve essere tra 4 e 20 caratteri",  
+        passwordEmpty: "La password non può essere vuota",  
+        gameNameTaken: "Nome della partita già preso. Prova con un altro nome.",  
+      },  
+      placeholders: {  
+          gameName: "NomeEsempio123",  
+          password: "password123",  
+      },  
+      labels: {  
+          private: "Privata",  
+      },  
+      gameTypes: {  
+          marafone: "Marafone",  
+          briscola: "Briscola",  
+          tresette: "Tresette",  
+      },  
+      gameWaitingRoom: {  
+        events: {  
+            defaultMessage: "Divertiti!",  
+            playerJoined: "si è unito al gioco!",  
+            playerLeft: "ha lasciato il gioco!",  
+            title: "Eventi",  
+        },  
+        buttons: {  
+            exit: "Esci",  
+            redTeam: "Rosso",  
+            blueTeam: "Blu",  
+            startGame: "Inizia partita",  
+        },  
+        labels: {  
+            gameType: "Tipo di gioco",  
+            players: "Giocatori",  
+        },  
+        info: {  
+            newOwnerTitle: "Nuovo proprietario della partita",  
+            newOwnerMessage: "{{ownerName}} è ora il proprietario. Il precedente proprietario ha lasciato il gioco.",  
+        },  
+      },  
+      loading: "Caricamento dati di gioco...",  
+      call: "chiamata",  
+      gameOver: "Fine partita",  
+      teamWon: "squadra ha vinto!",  
+      exit: "Esci",  
+      hide: "Nascondi",  
+      show: "Mostra",  
+      lastTurnCards: "Carte dell'ultimo turno",  
+      points: "Punti",  
+      and: "e",  
+      trumpSuit: "Briscola",  
+      none: "Nessuna",  
+      coins: "Denari",  
+      cups: "Coppe",  
+      clubs: "Bastoni",  
+      swords: "Spade",  
+      knock: "Busso",  
+      fly: "Volo",  
+      slither: "Striscio",  
+      reslither: "Ristriscio",  
     },
     RGN: {
       home: {
@@ -266,6 +445,65 @@ export const translations = {
           "A la fin ad ogni mà, i punti i s'conten, e chi ha guidà la prima mà la dvèinta e' nôv dàl carteur.",
         loadingImage: "A s'cârica la imâggin...",
         imageAlt: "Tot i carte adoperè int la Maraffò"
-      }
+      },
+      errors: {  
+        gameNameLength: "La lunghezza dvès èsar tra 4 e 20 caràter",  
+        passwordEmpty: "La parola segreta la pò n'èsar vòida",  
+        gameNameTaken: "Al nóm dla zógh l'é zà ciapê. Pròva un nóm diffarènt.",  
+      },  
+      placeholders: {  
+          gameName: "EsempiNòm123",  
+          password: "parolasegreta123",  
+      },  
+      labels: {  
+          private: "Privê",  
+      },  
+      gameTypes: {  
+          marafone: "Marafone",  
+          briscola: "Briscola",  
+          tresette: "Tresette",  
+      },  
+      gameWaitingRoom: {  
+        events: {  
+            defaultMessage: "Divartit!",  
+            playerJoined: "l'è intrê in tla zógh!",  
+            playerLeft: "l'ha lassê la zógh!",  
+            title: "Event",  
+        },  
+        buttons: {  
+            exit: "Své",  
+            redTeam: "Rôs",  
+            blueTeam: "Blê",  
+            startGame: "Cuminsa la zógh",  
+        },  
+        labels: {  
+            gameType: "Tìp ed zógh",  
+            players: "Zughadôr",  
+        },  
+        info: {  
+            newOwnerTitle: "Nuov parun dla zógh",  
+            newOwnerMessage: "{{ownerName}} l'è adès al parun. Al vécc parun l'ha lassê la zógh.",  
+        },  
+      },   
+      loading: "Carghénd i dat dla zógh...",  
+      call: "chiamê",  
+      gameOver: "Fin dla zógh",  
+      teamWon: "squadra l'ha vinciû!",  
+      exit: "Své",  
+      hide: "Zug",  
+      show: "Mustrê",  
+      lastTurnCards: "Cart dla ùltima mà",  
+      points: "Punt",  
+      and: "e",  
+      trumpSuit: "Brìscula",  
+      none: "Nisun",  
+      coins: "Danar",  
+      cups: "Cop",  
+      clubs: "Bastón",  
+      swords: "Spêd",  
+      knock: "Bat",  
+      fly: "Zvulê",  
+      slither: "Strisé",  
+      reslither: "Ristrisé",  
     }
   };

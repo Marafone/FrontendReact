@@ -8,7 +8,7 @@ const LoginSuccess = () => {
     // Redirect to homepage after a short delay
     setTimeout(() => {
       navigate("/");
-    }, 1000); // 1-second delay
+    }, 100); // 100ms delay
   }, [navigate]);
 
   return (

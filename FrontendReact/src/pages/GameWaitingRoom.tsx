@@ -1,15 +1,19 @@
 import { Client, IMessage } from "@stomp/stompjs";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useUserContext } from "../context/UserContext";
 import {
+  ErrorEvent,
   GameStartedEvent,
+  OwnerEvent,
   PlayerJoinedEvent,
   PlayerLeftEvent,
   TeamStateEvent,
 } from "../events/game-waiting-room/WebSocketEventTypes";
 import "../styles/game-waiting-room.css";
+import ErrorModal from "../components/ErrorModal";
+import InfoModal from "../components/InfoModal";
+import { LanguageContext } from "../context/LanguageContext";
 
 interface waitingRoomContent {
   gameId: bigint;
@@ -22,11 +26,17 @@ type WebSocketEventType =
   | TeamStateEvent
   | PlayerJoinedEvent
   | PlayerLeftEvent
-  | GameStartedEvent;
+  | GameStartedEvent
+  | ErrorEvent
+  | OwnerEvent;
 
 var client: Client;
 
 const GameWaitingRoom = () => {
+
+    // Use the LanguageContext
+    const { t } = useContext(LanguageContext)!;
+
   var maxPlayersAmount = 4;
   const location = useLocation();
   const gameContent: waitingRoomContent = location.state;
@@ -34,9 +44,20 @@ const GameWaitingRoom = () => {
   const [teamRed, setTeamRed] = useState<string[]>([]);
   const [teamBlue, setTeamBlue] = useState<string[]>([]);
   const [playersAmount, setPlayersAmount] = useState(1);
-  const [eventMessages, setEventMessages] = useState<string[]>(["Have fun!"]);
-  const { username, setUsername } = useUserContext();
+  const [eventMessages, setEventMessages] = useState<string[]>([
+    t("gameWaitingRoom.events.defaultMessage"), // Use translation
+  ]);
+  const [username, setUsername] = useState<string>();
   const navigate = useNavigate();
+  // owner info
+  const [ownerName, setOwnerName] = useState("");
+  // error modal
+  const [error, setError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  // information modal
+  const [info, setInfo] = useState(false);
+  const [infoTitle, setInfoTitle] = useState("");
+  const [infoMessage, setInfoMessage] = useState("");
 
   // HELPER FUNCTIONS
 
@@ -81,6 +102,12 @@ const GameWaitingRoom = () => {
         case "PlayerLeftEvent":
           handlePlayerLeftEvent(event.playerName);
           break;
+        case "ErrorEvent":
+          handleErrorEvent(event.errorMessage);
+          break;
+        case "OwnerEvent":
+          handleOwnerEvent(event.newOwnerName, event.isNew);
+          break;
         default:
           break;
       }
@@ -91,11 +118,12 @@ const GameWaitingRoom = () => {
     // change teams information
     setTeamRed(redTeam);
     setTeamBlue(blueTeam);
+    setPlayersAmount(redTeam.length + blueTeam.length);
   }
 
   function handlePlayerJoinedEvent(event: PlayerJoinedEvent) {
-    // edit event messages
-    const newEventMessage = event.playerName + " joined the game!";
+    // Append player name to the translated message
+    const newEventMessage = `${event.playerName} ${t("gameWaitingRoom.events.playerJoined")}`;
     setEventMessages((prevMessages) => [...prevMessages, newEventMessage]);
     // edit amount of players
     setPlayersAmount((prevAmount) => prevAmount + 1);
@@ -117,8 +145,8 @@ const GameWaitingRoom = () => {
   };
 
   function handlePlayerLeftEvent(playerName: string) {
-    // edit event messages
-    const newEventMessage = playerName + " left the game!";
+    // Append player name to the translated message
+    const newEventMessage = `${playerName} ${t("gameWaitingRoom.events.playerLeft")}`;
     setEventMessages((prevMessages) => [...prevMessages, newEventMessage]);
     // edit amount of players
     setPlayersAmount((prev) => prev - 1);
@@ -135,6 +163,21 @@ const GameWaitingRoom = () => {
     );
   }
 
+  const handleErrorEvent = (errorMessage: string) => {
+    setError(true);
+    setErrorMessage(errorMessage);
+  };
+
+  const handleOwnerEvent = (newOwnerName: string, isNew: boolean) => {
+    setOwnerName(newOwnerName);
+    if (!isNew) return;
+    setInfo(true);
+    setInfoTitle(t("gameWaitingRoom.info.newOwnerTitle")); // Use translation
+    setInfoMessage(
+      '${ownerName} ${t("gameWaitingRoom.info.newOwnerMessage")}' // Use translation with dynamic value
+    );
+  };
+
   // USE EFFECT HOOK
 
   useEffect(() => {
@@ -150,12 +193,16 @@ const GameWaitingRoom = () => {
     };
 
     const onConnected = () => {
-      if (client && client.connected)
+      if (client && client.connected) {
         client.subscribe(
           `/topic/game/${gameContent.gameId}`,
           onMessageReceived
         );
-      else console.log("STOMP Connection is not established yet!");
+        client.subscribe(`/user/queue/game`, onMessageReceived);
+        client.publish({
+          destination: `/app/game/${gameContent.gameId}/reconnect`,
+        });
+      }
     };
 
     const onError = (err: any) => {
@@ -164,39 +211,48 @@ const GameWaitingRoom = () => {
 
     createWebSocketConnection();
 
-    // function to get all the information necessary for user when joining game
-
-    const getBeginningGameInformation = () => {
-      axios
-        .get(`${baseUrl}/game/${gameContent.gameId}/teams`)
-        .then((response) => {
-          const newTeamRed: string[] = [];
-          const newTeamBlue: string[] = [];
-          response.data.RED.forEach((x: any) =>
-            newTeamRed.push(x.user.username)
-          );
-          response.data.BLUE.forEach((x: any) =>
-            newTeamBlue.push(x.user.username)
-          );
-          setTeamRed(newTeamRed);
-          setTeamBlue(newTeamBlue);
-          setPlayersAmount(newTeamRed.length + newTeamBlue.length);
-        })
-        .catch((error) => console.log(error));
-    };
-
-    getBeginningGameInformation();
-
     return () => {
       if (client?.connected) {
         client.unsubscribe(`/topic/game/${gameContent.gameId}`);
+        client.unsubscribe(`/user/queue/game`);
         client.deactivate();
       }
     };
   }, []);
 
+  // user data hook
+
+  useEffect(() => {
+    axios
+      .get(`${baseUrl}/user/info`)
+      .then((response) => {
+        setUsername(response.data.username);
+      })
+      .catch((error) => console.log(error));
+  }, []);
+
   return (
     <>
+      {error && (
+        <ErrorModal
+          message={errorMessage}
+          onClose={() => {
+            setErrorMessage("");
+            setError(false);
+          }}
+        />
+      )}
+      {info && (
+        <InfoModal
+          title={infoTitle}
+          message={infoMessage}
+          onClose={() => {
+            setInfoTitle("");
+            setInfoMessage("");
+            setInfo(false);
+          }}
+        />
+      )}
       <div
         className="d-flex flex-column justify-content-evenly align-items-center min-vh-100 min-vw-100"
         style={{ backgroundColor: "#FFC058" }}
@@ -211,20 +267,19 @@ const GameWaitingRoom = () => {
                 className="btn btn-danger fw-bold"
                 onClick={handleLeaveGame}
               >
-                Exit
+                {t("gameWaitingRoom.buttons.exit")} {/* Use translation */}
               </button>
             </div>
             <hr className="border border-black border-2 opacity-50 mt-0 mx-3" />
           </div>
           {/* teams */}
-          {/* TODO - MANAGE PLAYERS OPTIONS */}
           <div className="d-flex justify-content-evenly">
             <div className="d-flex flex-column align-items-center">
               <button
                 className="btn btn-danger fw-bold mb-4"
                 onClick={() => handleChangeTeam("RED")}
               >
-                Red
+                {t("gameWaitingRoom.buttons.redTeam")} {/* Use translation */}
               </button>
               {teamRed.map((player) => (
                 <p
@@ -233,6 +288,9 @@ const GameWaitingRoom = () => {
                     username === player ? "fw-bold" : ""
                   }`}
                 >
+                  {player == ownerName && (
+                    <i className="bi bi-person-badge px-1" />
+                  )}
                   {player}
                 </p>
               ))}
@@ -242,7 +300,7 @@ const GameWaitingRoom = () => {
                 className="btn btn-primary fw-bold mb-4"
                 onClick={() => handleChangeTeam("BLUE")}
               >
-                Blue
+                {t("gameWaitingRoom.buttons.blueTeam")} {/* Use translation */}
               </button>
               {teamBlue.map((player) => (
                 <p
@@ -251,6 +309,9 @@ const GameWaitingRoom = () => {
                     username === player ? "fw-bold" : ""
                   }`}
                 >
+                  {player == ownerName && (
+                    <i className="bi bi-person-badge px-1" />
+                  )}
                   {player}
                 </p>
               ))}
@@ -259,25 +320,24 @@ const GameWaitingRoom = () => {
           {/* game info */}
           <div className="d-flex flex-column align-items-center mt-3">
             <p>
-              <span className="fw-bold">Game Type: </span>
+              <span className="fw-bold">{t("gameWaitingRoom.labels.gameType")}: </span> {/* Use translation */}
               {gameContent.gameType}
             </p>
             <p>
-              <span className="fw-bold">Players: </span>
+              <span className="fw-bold">{t("gameWaitingRoom.labels.players")}: </span> {/* Use translation */}
               {playersAmount}/{maxPlayersAmount}
             </p>
             <button
               className="btn btn-success fw-bold border border-black border-opacity-25"
               onClick={handleStartGame}
             >
-              Start game
+              {t("gameWaitingRoom.buttons.startGame")} {/* Use translation */}
             </button>
           </div>
         </div>
         {/* Events */}
         <div className="custom-events d-flex flex-column align-items-center w-50 px-3 py-2">
-          {" "}
-          <h2>Events</h2>
+          <h2>{t("gameWaitingRoom.events.title")}</h2> {/* Use translation */}
           <hr className="border border-black border-2 opacity-50 mt-0 w-100" />
           <div className="custom-event-messages-container w-100 overflow-auto">
             {eventMessages.map((message, index) => (

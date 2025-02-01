@@ -1,5 +1,11 @@
-:root {
-  --background-color: #ffc058;
+/* Ensure the background covers the entire screen */
+body,
+html {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background-color: #f8c471; /* Match your background color */
+  overflow-x: hidden; /* Prevent horizontal scrolling */
 }
 
 .custom-outer-div {
@@ -9,4 +15,220 @@
 .custom-img {
   max-width: 125px;
   max-height: 250px;
+}
+
+.last-turn-img {
+  max-width: 50px;
+  max-height: 100px;
+}
+
+.last-turn-cards-container {
+  position: fixed;
+  top: 15%;
+  height: 25%;
+  left: 0%;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
+  overflow-y: auto;
+  transition: transform 0.3s ease-in-out;
+}
+
+.last-turn-cards-container.hidden {
+  transform: translateX(-100%);
+}
+
+.last-turn-cards-container.visible {
+  transform: translateX(0%);
+}
+
+@media (max-width: 768px) {
+  .last-turn-cards-container {
+    top: 10%;
+    height: 45%;
+  }
+}
+
+.options-container {
+  position: fixed;
+  top: 10%;
+  bottom: 10%;
+  right: 0;
+  height: 45%;
+  width: 15%;
+  background: #fff;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
+  overflow-y: auto;
+  transition: transform 0.3s ease-in-out;
+  font-size: clamp(0.8rem, 1.5vw, 1.2rem); /* Scales font size between 0.8rem and 1.2rem */
+}
+
+.options-container .fw-bold {
+  font-size: clamp(1rem, 2vw, 1.5rem); /* Slightly larger for bold text */
+}
+
+.options-container p {
+  line-height: 1.3; /* Adjust spacing for smaller text */
+}
+
+.options-container select {
+  font-size: clamp(0.8rem, 1.5vw, 1rem); /* Scale dropdown font size */
+}
+
+.options-container.hidden {
+  transform: translateX(100%);
+}
+
+.options-container.visible {
+  transform: translateX(0);
+}
+
+/* Default visibility for wider screens */
+@media (min-width: 768px) {
+  .options-container {
+    display: block !important; /* Always visible for screens > 768px */
+    width: 20%;
+  }
+}
+
+@media (max-width: 768px) {
+  .options-container {
+    width: 150px;
+  }
+}
+
+.transition-all {
+  transition: all 0.3s ease;
+}
+
+.position-fixed {
+  position: fixed;
+}
+
+.overflow-hidden {
+  overflow: hidden;
+}
+
+.custom-cards-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: left;
+  align-items: left;
+  gap: 1rem;
+  padding: 1rem;
+  width: 100%;
+}
+
+.custom-img {
+  max-width: 14vw; /* Scale cards relative to viewport width */
+  max-height: 20vh; /* Scale cards relative to viewport height */
+  width: auto; /* Maintain aspect ratio */
+  height: auto; /* Maintain aspect ratio */
+  object-fit: contain; /* Ensures the image fits well within bounds */
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
+}
+
+.custom-img:hover {
+  transform: scale(1.05); /* Slight zoom effect on hover */
+}
+
+/* General styles for responsiveness */
+.custom-outer-div {
+  min-height: 100vh;
+  min-width: 100vw;
+  background-color: #f8c471; /* Match the background */
+  overflow-x: hidden; /* Prevent horizontal scrolling */
+}
+
+/* Upper part styling */
+.custom-upper-part {
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Exit button container */
+.custom-exit-container {
+  flex: 0 0 auto;
+}
+
+.custom-exit-button {
+  font-size: calc(1rem + 0.5vw); /* Scale size based on viewport width */
+  padding: calc(0.5rem + 0.5vw);
+}
+
+/* Players container */
+.custom-players-container {
+  flex-grow: 1;
+  text-align: center;
+}
+
+.custom-players-list {
+  display: flex;
+  gap: calc(5rem + 2.5vw); /* Adjust spacing dynamically */
+  font-size: calc(1rem + 0.8vw);
+  font-weight: bold;
+  margin-left: 20%;
+  margin-top: 2%;
+  justify-content: center; /* Center player names */
+  align-items: center;
+}
+
+.custom-player {
+  white-space: nowrap; /* Prevent names from wrapping */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .custom-upper-part {
+    padding: 0.5rem;
+  }
+
+  .custom-exit-button {
+    font-size: calc(0.8rem + 0.4vw); /* Reduce size for smaller screens */
+    padding: 1rem;
+  }
+
+  .custom-players-list {
+    gap: calc(0.7rem + 0.5vw); /* Reduce gap between names */
+    font-size: calc(1rem + 0.7vw); /* Scale down font size */
+    font-weight: bold;
+  }
+}
+
+@media (max-width: 480px) {
+  .custom-exit-button {
+    font-size: calc(0.7rem + 0.3vw);
+    padding: calc(0.3rem + 0.3vw);
+  }
+
+  .custom-players-list {
+    gap: calc(0.5rem + 0.3vw); /* Further reduce gap */
+    font-size: calc(0.8rem + 0.5vw); /* Further scale down font size */
+    font-weight: bold;
+  }
+}
+
+.custom-center-cards {
+  display: flex;
+  flex-direction: row; /* Ensure cards are laid out horizontally */
+  justify-content: center; /* Center the cards in the container */
+  align-items: center; /* Vertically center the cards */
+  gap: 1rem; /* Space between the cards */
+  flex-wrap: nowrap; /* Prevent wrapping to a new row */
+  margin: 0 auto; /* Center the entire container */
+  padding: 0 1rem; /* Add padding on left and right */
+}
+
+.custom-card {
+  flex: 0 0 auto; /* Keep each card's size fixed */
+  white-space: nowrap; /* Ensure name and card stay together */
+}
+
+/* Adjust layout for smaller screens */
+@media (max-width: 768px) {
+  .custom-center-cards {
+    gap: 0.5rem; /* Reduce spacing between cards */
+    padding: 0 0.5rem; /* Adjust padding for smaller screens */
+  }
 }
