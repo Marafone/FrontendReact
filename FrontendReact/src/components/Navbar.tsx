@@ -7,7 +7,7 @@ import { useTheme } from "../context/ThemeContext";
 const Navbar = () => {
   const [displayLanguages, setDisplayLanguages] = useState(false);
   const [displayUserMenu, setDisplayUserMenu] = useState(false);
-  
+
   const { username, setUsername } = useContext(UserContext);
   const { language, setLanguage } = useContext(LanguageContext); // Access language context
 
@@ -29,7 +29,15 @@ const Navbar = () => {
   const handleLanguagesClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     setDisplayLanguages((prev) => {
-      if (!prev) setDisplayUserMenu(false);
+      if (!prev) setDisplayUserMenu(false); // Close user menu when opening language menu
+      return !prev;
+    });
+  };
+
+  const handleUserMenuClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setDisplayUserMenu((prev) => {
+      if (!prev) setDisplayLanguages(false); // Close language menu when opening user menu
       return !prev;
     });
   };
@@ -109,10 +117,7 @@ const Navbar = () => {
             <li className="dropdown">
               <i
                 className="bi bi-person-circle text-white fs-4"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setDisplayUserMenu((prev) => !prev);
-                }}
+                onClick={handleUserMenuClick} // Use the new handler
                 style={{ cursor: "pointer" }}
               ></i>
               <ul
