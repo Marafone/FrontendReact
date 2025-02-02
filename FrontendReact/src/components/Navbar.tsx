@@ -65,9 +65,18 @@ const Navbar = () => {
               </Link>
             </li>
           </ul>
-          <button role="button" onClick={toggleTheme}>
-           {theme === "light" ? "Dark" : "Light"} Mode
-          </button>
+          <div
+            className="dark-button"
+            role="button"
+            onClick={toggleTheme}
+            style={{ cursor: "pointer", fontSize: "1.5rem" }}
+          >
+            {theme === "light" ? (
+              <i className="bi bi-moon"></i>
+            ) : (
+              <i className="bi bi-sun"></i>
+            )}
+          </div>
           <ul className="list-group list-group-horizontal list-unstyled me-4">
             <li className="dropdown me-3 mt-1">
               <button
