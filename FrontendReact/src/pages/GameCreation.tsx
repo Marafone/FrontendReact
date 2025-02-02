@@ -33,7 +33,7 @@ const GameCreation = () => {
   // Use the LanguageContext
   const { t } = useContext(LanguageContext)!;
 
-  const { theme, toggleTheme } = useTheme();
+  const { theme } = useTheme();
     
   useEffect(() => {
       document.documentElement.setAttribute("data-theme", theme);

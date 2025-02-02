@@ -38,7 +38,7 @@ const Home = () => {
 
   const context = useContext(LanguageContext);
 
-  const { theme, toggleTheme } = useTheme();
+  const { theme } = useTheme();
 
   if (!context) {
     throw new Error("LanguageContext must be used within a LanguageProvider.");
@@ -177,7 +177,7 @@ const Home = () => {
               {/* Pagination */}
               <div className="d-flex justify-content-between align-items-center container-fluid p-2 mt-auto border-black border-top border-opacity-25">
                 <div
-                  className="d-flex align-items-center gap-2 text-black fw-bold"
+                  className="d-flex align-items-center gap-2 fw-bold"
                   style={{ cursor: "pointer" }}
                   onClick={() => {
                     page > 1 && setPage(page - 1);
@@ -192,7 +192,7 @@ const Home = () => {
                 </p>{" "}
                 {/* Translated Page Text */}
                 <div
-                  className="d-flex align-items-center gap-2 text-black fw-bold"
+                  className="d-flex align-items-center gap-2 fw-bold"
                   style={{ cursor: "pointer" }}
                   onClick={() => {
                     setPage(page + 1);

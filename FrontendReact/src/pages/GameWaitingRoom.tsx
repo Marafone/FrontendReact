@@ -234,7 +234,7 @@ const GameWaitingRoom = () => {
 
   // dark mode effect
 
-  const { theme, toggleTheme } = useTheme();
+  const { theme } = useTheme();
   
   useEffect(() => {
       document.documentElement.setAttribute("data-theme", theme);

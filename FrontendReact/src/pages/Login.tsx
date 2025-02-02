@@ -22,7 +22,7 @@ const Login = () => {
 
   const { t } = context; // Now `context` is guaranteed to be defined
 
-  const { theme, toggleTheme } = useTheme();
+  const { theme } = useTheme();
   
     useEffect(() => {
         document.documentElement.setAttribute("data-theme", theme);

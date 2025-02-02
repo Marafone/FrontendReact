@@ -5,7 +5,7 @@ import { useTheme } from "../context/ThemeContext";
 import { LanguageContext } from "../context/LanguageContext";
 
 const Rules: React.FC = () => {
-  const [loading, setLoading] = useState(false); // You can set to true if you want a loading simulation initially
+  const [loading] = useState(false); // You can set to true if you want a loading simulation initially
   
   const context = useContext(LanguageContext);
 
@@ -15,7 +15,7 @@ const Rules: React.FC = () => {
 
   const { t } = context; // Now `context` is guaranteed to be defined
 
-  const { theme, toggleTheme } = useTheme();
+  const { theme } = useTheme();
 
   useEffect(() => {
       document.documentElement.setAttribute("data-theme", theme);

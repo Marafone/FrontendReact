@@ -6,7 +6,7 @@ import { useTheme } from "../context/ThemeContext";
 
 const MainLayout = () => {
 
-  const { theme, toggleTheme } = useTheme();
+  const { theme } = useTheme();
   
   useEffect(() => {
       document.documentElement.setAttribute("data-theme", theme);

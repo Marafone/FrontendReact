@@ -455,7 +455,7 @@ const GamePlayingRoom = () => {
     else setLoading(true);
   }, [redTeamRef.current, blueTeamRef.current]);
 
-  const { theme, toggleTheme } = useTheme();
+  const { theme } = useTheme();
   
   useEffect(() => {
       document.documentElement.setAttribute("data-theme", theme);

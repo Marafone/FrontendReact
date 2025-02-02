@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useContext } from "react";
+import {useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../styles/register-login-page.css";
@@ -23,7 +23,7 @@ const Register = () => {
 
   const { t } = context; // Now `context` is guaranteed to be defined
 
-  const { theme, toggleTheme } = useTheme();
+  const { theme } = useTheme();
   
   useEffect(() => {
       document.documentElement.setAttribute("data-theme", theme);
