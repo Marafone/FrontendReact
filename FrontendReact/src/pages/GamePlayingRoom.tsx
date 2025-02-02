@@ -74,7 +74,7 @@ const GamePlayingRoom = () => {
   // trump suit part
   const [suit, setSuit] = useState<string>("COINS");
   const [displayTrumpSuitSelection, setDisplayTrumpSuitSelection] =
-    useState(false);
+    useState(true);
   const [displayedSuit, setDisplayedSuit] = useState<string>("-");
   // call part
   const [call, setCall] = useState<string>("");
@@ -257,7 +257,7 @@ const GamePlayingRoom = () => {
 
   const handleTrumpSuitStateEvent = (trumpSuit: string) => {
     setDisplayedSuit(trumpSuit);
-    if (trumpSuit != null) setDisplayTrumpSuitSelection(false);
+    if (trumpSuit != null) setDisplayTrumpSuitSelection(true);
   };
 
   const handleNewTurnEvent = () => {
@@ -281,7 +281,7 @@ const GamePlayingRoom = () => {
       setDisplayTrumpSuitSelection(true);
       setDisplayCallSelection(true);
     } else {
-      setDisplayTrumpSuitSelection(false);
+      setDisplayTrumpSuitSelection(true);
       setDisplayCallSelection(false);
     }
   };
