@@ -36,7 +36,7 @@
 
 .custom-form-element {
   background-color: var(--events-bg-color) !important;
-  color: var(--text-color);
+  color: var(--text-color) !important;
 }
 
 .custom-btn:hover {

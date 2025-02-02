@@ -576,9 +576,9 @@ const GamePlayingRoom = () => {
           </div>
           {/* timeout bar */}
           {isTimerRunning && (
-            <div className="d-flex align-items-center w-25">
+            <div className="timeout-bar d-flex align-items-center w-25">
               <div
-                className="d-flex bg-primary ms-auto border border-black border-3 h-50 mt-3"
+                className="d-flex bg-primary ms-auto border border-3 h-50 mt-3"
                 style={{ width: `${percentage}%` }}
               ></div>
             </div>
@@ -603,7 +603,7 @@ const GamePlayingRoom = () => {
 
         {/* Cards Played In Last Turn */}
         <div
-          className={`last-turn-cards-container d-flex flex-column justify-content-start align-items-center w-25 bg-white p-3 ${
+          className={`last-turn-cards-container d-flex flex-column justify-content-start align-items-center w-25 p-3 ${
             isPlayerCardMapLastTurnVisible ? "visible" : "hidden"
           }`}
         >
@@ -663,12 +663,12 @@ const GamePlayingRoom = () => {
             isOptionsVisible ? "visible" : "hidden"
           }`}
         >
-          <div className="d-flex flex-column align-items-center bg-white rounded-4 p-2">
+          <div className="d-flex flex-column align-items-center rounded-4 p-2">
             <p className="fw-bold fs-4">{t("points")}</p>
             <div className="d-flex flex-row align-items-center justify-content-end w-100 px-2">
               <p className="me-auto text-danger fw-bold">
                 {redTeamRef.current[0]}{" "}
-                <span className="text-black fw-normal">{t("and")}</span>{" "}
+                <span className="fw-normal">{t("and")}</span>{" "}
                 {redTeamRef.current[1]}:{" "}
               </p>
               <p
@@ -681,7 +681,7 @@ const GamePlayingRoom = () => {
             <div className="d-flex flex-row align-items-center justify-content-end w-100 px-2">
               <p className="me-auto text-primary fw-bold">
                 {blueTeamRef.current[0]}{" "}
-                <span className="text-black fw-normal">{t("and")}</span>{" "}
+                <span className="fw-normal">{t("and")}</span>{" "}
                 {blueTeamRef.current[1]}:{" "}
               </p>
               <p
