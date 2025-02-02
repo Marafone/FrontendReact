@@ -3,6 +3,7 @@ import { useEffect, useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../styles/home-page.css";
 import { LanguageContext } from "../context/LanguageContext";
+import { useTheme } from "../context/ThemeContext";
 import ErrorModal from "../components/ErrorModal";
 
 axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL;
@@ -37,6 +38,8 @@ const Home = () => {
 
   const context = useContext(LanguageContext);
 
+  const { theme } = useTheme();
+
   if (!context) {
     throw new Error("LanguageContext must be used within a LanguageProvider.");
   }
@@ -60,6 +63,10 @@ const Home = () => {
 
     fetchGames();
   }, []);
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+  }, [theme]);
 
   const handleNavigation = (gameData: GameData) => {
     navigate("/wait-for-game", { state: gameData });
@@ -95,7 +102,7 @@ const Home = () => {
   };
 
   return (
-    <>
+    <div className="home-page">
       {error && (
         <ErrorModal
           message={errorMessage}
@@ -105,7 +112,7 @@ const Home = () => {
           }}
         />
       )}
-      <div className="container-fluid d-flex flex-column align-items-center h-100 p-3">
+      <div className=" container-fluid d-flex flex-column align-items-center h-100 p-3 w-100">
         {/* Create Game Button */}
         <div className="w-50 mb-4 mt-2">
           <Link
@@ -170,7 +177,7 @@ const Home = () => {
               {/* Pagination */}
               <div className="d-flex justify-content-between align-items-center container-fluid p-2 mt-auto border-black border-top border-opacity-25">
                 <div
-                  className="d-flex align-items-center gap-2 text-black fw-bold"
+                  className="d-flex align-items-center gap-2 fw-bold"
                   style={{ cursor: "pointer" }}
                   onClick={() => {
                     page > 1 && setPage(page - 1);
@@ -185,7 +192,7 @@ const Home = () => {
                 </p>{" "}
                 {/* Translated Page Text */}
                 <div
-                  className="d-flex align-items-center gap-2 text-black fw-bold"
+                  className="d-flex align-items-center gap-2 fw-bold"
                   style={{ cursor: "pointer" }}
                   onClick={() => {
                     setPage(page + 1);
@@ -200,7 +207,7 @@ const Home = () => {
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

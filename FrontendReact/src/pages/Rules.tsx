@@ -1,10 +1,11 @@
-import React, { useState, useContext } from "react";
+import React, {useEffect, useState, useContext } from "react";
 import Navbar from "../components/Navbar.tsx";
 import "../styles/rules-page.css";
+import { useTheme } from "../context/ThemeContext";
 import { LanguageContext } from "../context/LanguageContext";
 
 const Rules: React.FC = () => {
-  const [loading, setLoading] = useState(false); // You can set to true if you want a loading simulation initially
+  const [loading] = useState(false); // You can set to true if you want a loading simulation initially
   
   const context = useContext(LanguageContext);
 
@@ -13,6 +14,12 @@ const Rules: React.FC = () => {
   }
 
   const { t } = context; // Now `context` is guaranteed to be defined
+
+  const { theme } = useTheme();
+
+  useEffect(() => {
+      document.documentElement.setAttribute("data-theme", theme);
+    }, [theme]);
 
   return (
     <>

@@ -14,6 +14,7 @@ import "../styles/game-waiting-room.css";
 import ErrorModal from "../components/ErrorModal";
 import InfoModal from "../components/InfoModal";
 import { LanguageContext } from "../context/LanguageContext";
+import { useTheme } from "../context/ThemeContext";
 
 interface waitingRoomContent {
   gameId: bigint;
@@ -231,6 +232,14 @@ const GameWaitingRoom = () => {
       .catch((error) => console.log(error));
   }, []);
 
+  // dark mode effect
+
+  const { theme } = useTheme();
+  
+  useEffect(() => {
+      document.documentElement.setAttribute("data-theme", theme);
+    }, [theme]);
+
   return (
     <>
       {error && (
@@ -254,8 +263,7 @@ const GameWaitingRoom = () => {
         />
       )}
       <div
-        className="d-flex flex-column justify-content-evenly align-items-center min-vh-100 min-vw-100"
-        style={{ backgroundColor: "#FFC058" }}
+        className="main-container d-flex flex-column justify-content-evenly align-items-center min-vh-100 min-vw-100"
       >
         {/* Lobby */}
         <div className="custom-lobby w-75 p-3">

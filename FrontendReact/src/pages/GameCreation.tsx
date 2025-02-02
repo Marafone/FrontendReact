@@ -1,7 +1,9 @@
 import axios, { AxiosError } from "axios";
-import React, { useState, useContext } from "react";
+import React, {useEffect, useState, useContext } from "react";
+import "../styles/game-creation-form.css";
 import { useNavigate } from "react-router-dom";
 import { LanguageContext } from "../context/LanguageContext";
+import { useTheme } from "../context/ThemeContext";
 
 axios.defaults.withCredentials = true;
 
@@ -30,6 +32,12 @@ const GameCreation = () => {
 
   // Use the LanguageContext
   const { t } = useContext(LanguageContext)!;
+
+  const { theme } = useTheme();
+    
+  useEffect(() => {
+      document.documentElement.setAttribute("data-theme", theme);
+    }, [theme]);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -91,7 +99,7 @@ const GameCreation = () => {
   };
 
   return (
-    <div className="d-flex justify-content-center align-items-center w-100 h-100">
+    <div className="main-creation-div d-flex justify-content-center align-items-center w-100 h-100">
       <div className="custom-game-creation-div d-flex flex-column justify-content-center align-items-center w-75 h-75 border border-black border-opacity-50 p-3">
         <p className="fs-2 fw-bold">{t("home.createGameBtn")}</p> {/* Use translation */}
         <form className="d-flex flex-column gap-4">

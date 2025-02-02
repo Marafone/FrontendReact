@@ -1,5 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import "../styles/register-login-page.css";
+import { useTheme } from "../context/ThemeContext";
 
 const LoginSuccess = () => {
   const navigate = useNavigate();
@@ -11,8 +13,14 @@ const LoginSuccess = () => {
     }, 100); // 100ms delay
   }, [navigate]);
 
+  const { theme } = useTheme();
+    
+    useEffect(() => {
+        document.documentElement.setAttribute("data-theme", theme);
+      }, [theme]);
+
   return (
-    <div>
+    <div className="register-login-page min-vw-100 min-vh-100">
       
     </div>
   );

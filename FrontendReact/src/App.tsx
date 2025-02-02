@@ -7,6 +7,8 @@ import {
 
 import { UserProvider } from "./context/UserContext";
 import { LanguageProvider } from "./context/LanguageContext";
+import { ThemeProvider } from "./context/ThemeContext";
+
 
 // Pages
 import MainLayout from "./layouts/MainLayout";
@@ -59,11 +61,13 @@ function App() {
   );
 
   return (
-    <UserProvider>
-      <LanguageProvider>
-        <RouterProvider router={router} />
-      </LanguageProvider>
-    </UserProvider>
+    <ThemeProvider>
+      <UserProvider>
+        <LanguageProvider>
+          <RouterProvider router={router} />
+        </LanguageProvider>
+      </UserProvider>
+    </ThemeProvider>
   );
 }
 

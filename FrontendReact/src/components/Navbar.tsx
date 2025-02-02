@@ -2,13 +2,16 @@ import { useState, useEffect, useContext } from "react";
 import { Link } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
 import { LanguageContext } from "../context/LanguageContext";
+import { useTheme } from "../context/ThemeContext";
 
 const Navbar = () => {
   const [displayLanguages, setDisplayLanguages] = useState(false);
   const [displayUserMenu, setDisplayUserMenu] = useState(false);
-  
+
   const { username, setUsername } = useContext(UserContext);
   const { language, setLanguage } = useContext(LanguageContext); // Access language context
+
+  const { theme, toggleTheme } = useTheme();
 
   const languagesMenuColor = "#a0091b";
 
@@ -26,7 +29,15 @@ const Navbar = () => {
   const handleLanguagesClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     setDisplayLanguages((prev) => {
-      if (!prev) setDisplayUserMenu(false);
+      if (!prev) setDisplayUserMenu(false); // Close user menu when opening language menu
+      return !prev;
+    });
+  };
+
+  const handleUserMenuClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setDisplayUserMenu((prev) => {
+      if (!prev) setDisplayLanguages(false); // Close language menu when opening user menu
       return !prev;
     });
   };
@@ -62,6 +73,18 @@ const Navbar = () => {
               </Link>
             </li>
           </ul>
+          <div
+            className="dark-button"
+            role="button"
+            onClick={toggleTheme}
+            style={{ cursor: "pointer", fontSize: "1.5rem" }}
+          >
+            {theme === "light" ? (
+              <i className="bi bi-moon"></i>
+            ) : (
+              <i className="bi bi-sun"></i>
+            )}
+          </div>
           <ul className="list-group list-group-horizontal list-unstyled me-4">
             <li className="dropdown me-3 mt-1">
               <button
@@ -94,10 +117,7 @@ const Navbar = () => {
             <li className="dropdown">
               <i
                 className="bi bi-person-circle text-white fs-4"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setDisplayUserMenu((prev) => !prev);
-                }}
+                onClick={handleUserMenuClick} // Use the new handler
                 style={{ cursor: "pointer" }}
               ></i>
               <ul

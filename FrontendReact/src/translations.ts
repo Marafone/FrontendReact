@@ -1,5 +1,3 @@
-import GameCreation from "./pages/GameCreation";
-import GamePlayingRoom from "./pages/GamePlayingRoom";
 
 export interface Translations {
     EN: {
