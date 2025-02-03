@@ -1,6 +1,6 @@
 :root {
   --background-color: #ffc360;
-  --window-color: #ffd99b;
+  --rules-color: #ffd99b;
 }
 
 [data-theme="dark"] {
@@ -20,7 +20,7 @@
 }
 
 .rules-content {
-  background-color: var(--window-color);
+  background-color: var(--rules-color);
   color: var(--text-color);
   max-width: 800px;
   width: 90%;
