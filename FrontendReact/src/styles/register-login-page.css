@@ -1,8 +1,12 @@
+:root {
+  --background-color: #ffc360;
+  --form-color: #ffd99b;
+}
 
 [data-theme="dark"] {
   --background-color: #121212;
   --text-color: #ffffff;
-  --window-color: #282828;
+  --form-color: #282828;
   --border-color: #333333;
 }
 
@@ -13,5 +17,5 @@
 }
 
 .custom-user-info-window {
-  background-color: var(--window-color);
+  background-color: var(--form-color);
 }

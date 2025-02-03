@@ -7,15 +7,24 @@ interface UserData {
 
 export const UserContext = createContext<UserData | undefined>(undefined);
 
-export const UserProvider: React.FC<any> = ({ children }) => {
+export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [username, setUsername] = useState<string | null>(() => {
-    const storedUsername = localStorage.getItem("usernameValue");
-    return storedUsername ? JSON.parse(storedUsername) : null;
+    try {
+      const storedUsername = localStorage.getItem("usernameValue");
+      return storedUsername ? JSON.parse(storedUsername) : null;
+    } catch {
+      return null;
+    }
   });
 
-  // save username to localStorage every time username is changed
+  // Save username to localStorage every time it changes
   useEffect(() => {
-    localStorage.setItem("usernameValue", JSON.stringify(username)); // TODO don't store it in localStorage, use cookie instead
+    if (username) {
+      localStorage.setItem("usernameValue", JSON.stringify(username));
+      console.log(localStorage.usernameValue);
+    } else {
+      localStorage.removeItem("usernameValue"); // Ensure it's removed on logout
+    }
   }, [username]);
 
   return (
@@ -25,12 +34,11 @@ export const UserProvider: React.FC<any> = ({ children }) => {
   );
 };
 
+// Custom hook to use UserContext safely
 export const useUserContext = () => {
   const userContext = useContext(UserContext);
-  if (userContext === undefined) {
-    throw new Error(
-      "You should use UserProvider instead of UserContext.Provider"
-    );
+  if (!userContext) {
+    throw new Error("useUserContext must be used within a UserProvider.");
   }
   return userContext;
 };

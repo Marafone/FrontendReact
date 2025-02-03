@@ -22,7 +22,7 @@ export const translations: TranslationsType = {
         pageText: "Page",
       },
       login: {
-        title: "Login",
+        title: "Log In",
         username: "Username",
         password: "Password",
         cancel: "Cancel",
@@ -38,7 +38,10 @@ export const translations: TranslationsType = {
         cancel: "Cancel",
         error: "Registration failed. Please try again.",
       },
+      logout: "Log Out",
+      language: "Language",
       rules: {
+        navbar: "Rules",
         title: "Rules of Marafon",
         gameName: "Marafon",
         gameAlias: "Maraffa or Beccaccino",
@@ -147,7 +150,10 @@ export const translations: TranslationsType = {
         cancel: "Anuluj",
         error: "Rejestracja nie powiodła się. Spróbuj ponownie.",
       },
+      logout: "Wyloguj się",
+      language: "Język",
       rules: {
+        navbar: "Zasady",
         title: "Zasady gry w Marafon",
         gameName: "Marafon",
         gameAlias: "znany również jako Maraffa lub Beccaccino,",
@@ -262,7 +268,10 @@ export const translations: TranslationsType = {
         cancel: "Annulla",
         error: "Registrazione fallita. Riprova."
       },
+      logout: "Esci",
+      language: "Lingua",
       rules: {
+        navbar: "Regole",
         title: "Regole del Marafon",
         gameName: "Marafon",
         gameAlias: "conosciuto anche come Maraffa o Beccaccino,",
@@ -377,7 +386,10 @@ export const translations: TranslationsType = {
         cancel: "Anulè",
         error: "Registraziòun falì. Pròva d nòv."
       },
+      logout: "Sgnìs da fôra",
+      language: "Léngua",
       rules: {
+        navbar: "Réguel",
         title: "Regl dla Maraffò",
         gameName: "Maraffò",
         gameAlias: "cunusù anca cmè Maraffa o Beccaccìno,",

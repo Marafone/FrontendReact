@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from "react";
 import { Link } from "react-router-dom";
-import { UserContext } from "../context/UserContext";
+import { useUserContext } from "../context/UserContext";
 import { LanguageContext } from "../context/LanguageContext";
 import { useTheme } from "../context/ThemeContext";
 
@@ -8,16 +8,26 @@ const Navbar = () => {
   const [displayLanguages, setDisplayLanguages] = useState(false);
   const [displayUserMenu, setDisplayUserMenu] = useState(false);
 
-  const { username, setUsername } = useContext(UserContext);
-  const { language, setLanguage } = useContext(LanguageContext); // Access language context
+  const languageContext = useContext(LanguageContext);
 
+  if (!languageContext) {
+    throw new Error("LanguageContext must be used within a LanguageProvider.");
+  }
+
+  const { username, setUsername } = useUserContext();
+  const { language, setLanguage } = languageContext;
   const { theme, toggleTheme } = useTheme();
+
+  const storedUsername = localStorage.getItem("usernameValue");
+  storedUsername ? JSON.parse(storedUsername) : null;
+
+  const { t } = languageContext; // Now `context` is guaranteed to be defined
 
   const languagesMenuColor = "#a0091b";
 
   const handleLogout = () => {
     setUsername(null);
-    localStorage.removeItem("username");
+    localStorage.removeItem("usernameValue"); // Correct key removal
     console.log("User logged out");
   };
 
@@ -29,7 +39,7 @@ const Navbar = () => {
   const handleLanguagesClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     setDisplayLanguages((prev) => {
-      if (!prev) setDisplayUserMenu(false); // Close user menu when opening language menu
+      if (!prev) setDisplayUserMenu(false);
       return !prev;
     });
   };
@@ -37,7 +47,7 @@ const Navbar = () => {
   const handleUserMenuClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     setDisplayUserMenu((prev) => {
-      if (!prev) setDisplayLanguages(false); // Close language menu when opening user menu
+      if (!prev) setDisplayLanguages(false);
       return !prev;
     });
   };
@@ -69,7 +79,7 @@ const Navbar = () => {
             </li>
             <li className="nav-item">
               <Link to="/rules" className="nav-link text-white">
-                Rules
+                {t("rules.navbar")}
               </Link>
             </li>
           </ul>
@@ -94,7 +104,7 @@ const Navbar = () => {
                 aria-expanded="false"
                 onClick={handleLanguagesClick}
               >
-                Language ({language})
+                {t("language")} ({language})
               </button>
               <ul
                 className={`dropdown-menu custom-dropdown-menu border border-black border-2 ${
@@ -115,9 +125,12 @@ const Navbar = () => {
               </ul>
             </li>
             <li className="dropdown">
+              {/* Change icon dynamically based on login state */}
               <i
-                className="bi bi-person-circle text-white fs-4"
-                onClick={handleUserMenuClick} // Use the new handler
+                className={`bi ${
+                  storedUsername ? "bi-person-circle" : "bi-door-open"
+                } text-white fs-4`}
+                onClick={handleUserMenuClick}
                 style={{ cursor: "pointer" }}
               ></i>
               <ul
@@ -130,14 +143,14 @@ const Navbar = () => {
                   left: "auto",
                 }}
               >
-                {!username ? (
+                {!storedUsername ? (
                   <>
                     <li>
                       <Link
                         to="/register"
                         className="dropdown-item text-white custom-dropdown-item"
                       >
-                        Register
+                        {t("register.title")}
                       </Link>
                     </li>
                     <li>
@@ -145,7 +158,7 @@ const Navbar = () => {
                         to="/login"
                         className="dropdown-item text-white custom-dropdown-item"
                       >
-                        Login
+                        {t("login.title")}
                       </Link>
                     </li>
                   </>
@@ -155,7 +168,7 @@ const Navbar = () => {
                       onClick={handleLogout}
                       className="dropdown-item text-white custom-dropdown-item"
                     >
-                      Logout
+                      {t("logout")}
                     </button>
                   </li>
                 )}

@@ -34,6 +34,9 @@ const Login = () => {
       const response = await axios.post(`${baseUrl}/auth/login`, { username, password });
       if (response.status === 200) {
 
+        setUsername(username);
+        // Store username in localStorage (temporary solution; ideally, use cookies)
+        localStorage.setItem("usernameValue", JSON.stringify(username));
         // Redirect immediately after successful login
         navigate("/login-success");
       }
