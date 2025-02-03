@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useUserContext } from "../context/UserContext";
 import { LanguageContext } from "../context/LanguageContext";
 import { useTheme } from "../context/ThemeContext";
+import axios from "axios";
 
 const Navbar = () => {
   const [displayLanguages, setDisplayLanguages] = useState(false);
@@ -14,7 +15,7 @@ const Navbar = () => {
     throw new Error("LanguageContext must be used within a LanguageProvider.");
   }
 
-  const { username, setUsername } = useUserContext();
+  const { setUsername } = useUserContext();
   const { language, setLanguage } = languageContext;
   const { theme, toggleTheme } = useTheme();
 
@@ -25,9 +26,12 @@ const Navbar = () => {
 
   const languagesMenuColor = "#a0091b";
 
-  const handleLogout = () => {
-    setUsername(null);
+  const baseUrl = import.meta.env.VITE_API_BASE_URL;
+
+  const handleLogout = async () => {
     localStorage.removeItem("usernameValue"); // Correct key removal
+    await axios.post(`${baseUrl}/auth/logout`);
+    setUsername(null);
     console.log("User logged out");
   };
 
