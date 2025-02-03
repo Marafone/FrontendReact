@@ -7,7 +7,7 @@
 [data-theme="dark"] {
   --background-color: #121212;
   --text-color: #ffffff;
-  --window-color: #282828;
+  --lobby-color: #282828;
   --border-color: #333333;
   --events-bg-color: #575757;
   --player-hover-bg-color: #8b8a81;
@@ -22,7 +22,7 @@
 }
 
 .custom-game-creation-div {
-  background-color: var(--window-color);
+  background-color: var(--lobby-color);
   color: var(--text-color);
 }
 
@@ -45,7 +45,7 @@
 }
 
 .custom-error-msg {
-  background-color: var(--window-color);
+  background-color: var(--lobby-color);
   color: var(--text-color);
   position: absolute;
   top: 100%;

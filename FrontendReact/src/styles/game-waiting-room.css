@@ -1,5 +1,5 @@
 :root {
-  --window-color: #f2eece;
+  --lobby-color: #f2eece;
   --events-bg-color: #f2eece;
   --player-hover-bg-color: #fdf9e0;
 }
@@ -7,7 +7,7 @@
 [data-theme="dark"] {
   --background-color: #121212;
   --text-color: #ffffff;
-  --window-color: #282828;
+  --lobby-color: #282828;
   --border-color: #333333;
   --events-bg-color: #575757;
   --player-hover-bg-color: #8b8a81;
@@ -18,12 +18,12 @@
 }
 
 .custom-lobby {
-  background-color: var(--window-color);
+  background-color: var(--lobby-color);
   color: var(--text-color);
 }
 
 .custom-events {
-  background-color: var(--window-color);
+  background-color: var(--lobby-color);
   color: var(--text-color);
 }
 
@@ -33,6 +33,6 @@
 }
 
 .custom-event-messages-container {
-  background-color: var(--window-color);
+  background-color: var(--lobby-color);
   height: 120px;
 }
