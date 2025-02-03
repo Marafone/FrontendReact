@@ -1,55 +1,11 @@
+type TranslationsType = {
+  [key: string]: {
+    [nestedKey: string]: any;
+  };
+};
 
-export interface Translations {
-    EN: {
-      home: {
-        title: string;
-        createGameBtn: string;
-        newsTitle: string;
-        newsContent: string;
-        lobbyName: string;
-        gameType: string;
-        players: string;
-        loading: string;
-        prevPage: string;
-        nextPage: string;
-        pageText: string;
-      };
-      login: {
-        title: string;
-        username: string;
-        password: string;
-        errorMessage: string;
-        cancel: string;
-        submit: string;
-      };
-      register: {
-        title: string;
-        username: string;
-        email: string;
-        password: string;
-        errorMessage: string;
-        cancel: string;
-        submit: string;
-      };
-      rules: {
-        title: string;
-        gameName: string;
-        gameAlias: string;
-        description: string;
-        deckDescription: string;
-        pointsDescription: string;
-        teamDescription: string;
-        firstHand: string;
-        maraffaBonus: string;
-        trickRules: string;
-        handConclusion: string;
-        loadingImage: string;
-        imageAlt: string;
-      };
-    };
-}
 
-export const translations = {
+export const translations: TranslationsType = {
     EN: {
       home: {
         title: "Welcome to the Home Page!",
