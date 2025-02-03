@@ -38,7 +38,7 @@ const Register = () => {
         }
       })
       .catch((error) => {
-        setErrorMessage(t("register.registrationFailed")); // Translated error message
+        setErrorMessage(t("register.error")); // Translated error message
         console.log("Error:", error);
       });
   };

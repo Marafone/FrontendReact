@@ -112,7 +112,7 @@ const Home = () => {
           }}
         />
       )}
-      <div className=" container-fluid d-flex flex-column align-items-center h-100 p-3 w-100">
+      <div className="container-fluid d-flex flex-column align-items-center h-100 p-3 w-100">
         {/* Create Game Button */}
         <div className="w-50 mb-4 mt-2">
           <Link
