@@ -1,5 +1,7 @@
-import React from "react";
+import React, { useEffect } from "react"
 import { Button, Modal } from "react-bootstrap";
+import "../styles/error-modal.css";
+import { useTheme } from "../context/ThemeContext";
 
 interface ErrorModalProps {
   title?: string;
@@ -8,8 +10,15 @@ interface ErrorModalProps {
 }
 
 const ErrorModal: React.FC<ErrorModalProps> = ({ title, message, onClose }) => {
+
+  const { theme } = useTheme();
+  
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+  }, [theme]);
+
   return (
-    <Modal show onHide={onClose}>
+    <Modal classnName="error-modal" show onHide={onClose}>
       <Modal.Header closeButton>
         <Modal.Title>{title || "Error"}</Modal.Title>
       </Modal.Header>

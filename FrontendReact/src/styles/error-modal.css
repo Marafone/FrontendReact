@@ -1,0 +1,14 @@
+
+[data-theme="dark"] {
+    --background-color: #121212;
+    --text-color: #ffffff;
+    --widgets-bg-color: #282828;
+    --widgets-hover-bg-color: #8b8a81;
+    --border-color: #333333;
+    --window-color: #282828; /* Add this for modals in dark mode */
+}
+
+.error-modal {
+    background-color: red !important;
+    color: var(--text-color);
+}

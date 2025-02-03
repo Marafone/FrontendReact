@@ -1,5 +1,7 @@
-import React from "react";
+import React, { useEffect } from "react"
 import { Button, Modal } from "react-bootstrap";
+import "../styles/info-call-result-modal.css";
+import { useTheme } from "../context/ThemeContext";
 
 interface InfoModalProps {
   title?: string;
@@ -8,8 +10,15 @@ interface InfoModalProps {
 }
 
 const InfoModal: React.FC<InfoModalProps> = ({ title, message, onClose }) => {
+
+  const { theme } = useTheme();
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+  }, [theme]);
+  
   return (
-    <Modal show onHide={onClose}>
+    <Modal className="call-info-result" show onHide={onClose}>
       <Modal.Header closeButton>
         <Modal.Title>{title || "Information"}</Modal.Title>
       </Modal.Header>

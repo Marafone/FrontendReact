@@ -1,5 +1,7 @@
-import React from "react";
+import React, { useEffect } from "react"
 import { Button, Modal } from "react-bootstrap";
+import "../styles/info-call-result-modal.css";
+import { useTheme } from "../context/ThemeContext";
 
 interface ResultModalProps {
   title?: string;
@@ -14,8 +16,15 @@ const ResultModal: React.FC<ResultModalProps> = ({
   winnerTeam,
   onClose,
 }) => {
+
+  const { theme } = useTheme();
+  
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+  }, [theme]);
+
   return (
-    <Modal show onHide={onClose} backdrop="static" keyboard={false} centered>
+    <Modal className="call-info-result" show onHide={onClose} backdrop="static" keyboard={false} centered>
       <Modal.Header>
         <Modal.Title>{title || "Result"}</Modal.Title>
       </Modal.Header>
