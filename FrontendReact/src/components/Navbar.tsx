@@ -28,11 +28,30 @@ const Navbar = () => {
 
   const baseUrl = import.meta.env.VITE_API_BASE_URL;
 
+  axios.defaults.withCredentials = true;
+
+  // Logout request
   const handleLogout = async () => {
-    localStorage.removeItem("usernameValue"); // Correct key removal
-    await axios.post(`${baseUrl}/auth/logout`);
-    setUsername(null);
-    console.log("User logged out");
+    try {
+      const response = await axios.post(
+        `${baseUrl}/auth/logout`,
+        {},
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          withCredentials: true, //  Allow cookies
+        }
+      );
+  
+      if (response.status === 200) {
+        setUsername(null);
+        localStorage.removeItem("usernameValue");
+        console.log("User logged out");
+      }
+    } catch (error) {
+      console.log("Error:", error);
+    }
   };
 
   const closeDropdowns = () => {

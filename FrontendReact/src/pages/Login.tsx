@@ -23,21 +23,31 @@ const Login = () => {
   const { t } = context; // Now `context` is guaranteed to be defined
 
   const { theme } = useTheme();
-  
-    useEffect(() => {
-        document.documentElement.setAttribute("data-theme", theme);
-      }, [theme]);
 
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+  }, [theme]);
+
+  axios.defaults.withCredentials = true;
+    
+  // Login request
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault(); // Prevent the default form submission
+    e.preventDefault();
     try {
-      const response = await axios.post(`${baseUrl}/auth/login`, { username, password });
+      const response = await axios.post(
+        `${baseUrl}/auth/login`,
+        { username, password },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          withCredentials: true, //  Allow cookies
+        }
+      );
+  
       if (response.status === 200) {
-
         setUsername(username);
-        // Store username in localStorage (temporary solution; ideally, use cookies)
         localStorage.setItem("usernameValue", JSON.stringify(username));
-        // Redirect immediately after successful login
         navigate("/login-success");
       }
     } catch (error) {
