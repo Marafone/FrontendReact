@@ -13,6 +13,7 @@ interface FormData {
   gameName: string;
   gameType: GameType;
   password: string;
+  pointsToWin: number;
 }
 
 interface Errors {
@@ -26,6 +27,7 @@ const GameCreation = () => {
     gameName: "",
     gameType: "MARAFFA",
     password: "",
+    pointsToWin: 21,
   });
   const [errors, setErrors] = useState<Errors>({});
   const navigate = useNavigate();
@@ -129,6 +131,7 @@ const GameCreation = () => {
               {t("home.gameType")} {/* Use translation */}
             </span>
             <select
+              id="gameType"
               className="form-control border border-black border-opacity-25 custom-input custom-form-element"
               name="gameType"
               value={formData?.gameType}
@@ -137,6 +140,23 @@ const GameCreation = () => {
               <option value="MARAFFA">{t("gameTypes.marafone")}</option> {/* Use translation */}
               <option value="BRISCOLLA">{t("gameTypes.briscola")}</option> {/* Use translation */}
               <option value="TRISETTE">{t("gameTypes.tresette")}</option> {/* Use translation */}
+            </select>
+          </div>
+          {/* PointsToWin input group */}
+          <div className="input-group position-relative">
+            <span className="fw-medium input-group-text border border-black border-opacity-50 custom-form-element">
+              {t("home.points")} {/* Use translation */}
+            </span>
+            <select
+              id="pointsToWin"
+              className="form-control border border-black border-opacity-25 custom-input custom-form-element"
+              name="pointsToWin"
+              value={formData?.pointsToWin}
+              onChange={handleChange}
+            >
+              <option value="21">21</option> 
+              <option value="31">31</option> 
+              <option value="41">41</option> 
             </select>
           </div>
           {/* Private input group */}
@@ -157,6 +177,7 @@ const GameCreation = () => {
                 {t("login.password")} {/* Use translation */}
               </span>
               <input
+                id="joinGameCode"
                 type="password"
                 className="form-control border border-black border-opacity-25 custom-input custom-form-element"
                 placeholder={t("placeholders.password")}
