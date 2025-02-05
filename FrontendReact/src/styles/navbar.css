@@ -3,6 +3,11 @@
   --dropdown-item-hover-color: #90091b;
 }
 
+.dark-button {
+  color: #ffffff;
+  padding-right: 1.0rem;
+}
+
 .custom-navbar {
   background-color: var(--navbar-bg-color);
 }

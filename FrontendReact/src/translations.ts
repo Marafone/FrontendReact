@@ -1,54 +1,11 @@
-export interface Translations {
-    EN: {
-      home: {
-        title: string;
-        createGameBtn: string;
-        newsTitle: string;
-        newsContent: string;
-        lobbyName: string;
-        gameType: string;
-        players: string;
-        loading: string;
-        prevPage: string;
-        nextPage: string;
-        pageText: string;
-      };
-      login: {
-        title: string;
-        username: string;
-        password: string;
-        errorMessage: string;
-        cancel: string;
-        submit: string;
-      };
-      register: {
-        title: string;
-        username: string;
-        email: string;
-        password: string;
-        errorMessage: string;
-        cancel: string;
-        submit: string;
-      };
-      rules: {
-        title: string;
-        gameName: string;
-        gameAlias: string;
-        description: string;
-        deckDescription: string;
-        pointsDescription: string;
-        teamDescription: string;
-        firstHand: string;
-        maraffaBonus: string;
-        trickRules: string;
-        handConclusion: string;
-        loadingImage: string;
-        imageAlt: string;
-      };
-    };
-}
+type TranslationsType = {
+  [key: string]: {
+    [nestedKey: string]: any;
+  };
+};
 
-export const translations = {
+
+export const translations: TranslationsType = {
     EN: {
       home: {
         title: "Welcome to the Home Page!",
@@ -58,6 +15,7 @@ export const translations = {
           "We are currently working hard to improve the app! A new iOS version is in development, which will bring smoother gameplay and additional features for iPhone users. Stay tuned for updates as we roll out new enhancements for all platforms.",
         lobbyName: "Lobby name",
         gameType: "Game type",
+        points: "Points",
         players: "Players",
         loading: "Loading...",
         prevPage: "Prev",
@@ -65,7 +23,7 @@ export const translations = {
         pageText: "Page",
       },
       login: {
-        title: "Login",
+        title: "Log In",
         username: "Username",
         password: "Password",
         cancel: "Cancel",
@@ -81,7 +39,10 @@ export const translations = {
         cancel: "Cancel",
         error: "Registration failed. Please try again.",
       },
+      logout: "Log Out",
+      language: "Language",
       rules: {
+        navbar: "Rules",
         title: "Rules of Marafon",
         gameName: "Marafon",
         gameAlias: "Maraffa or Beccaccino",
@@ -96,24 +57,67 @@ export const translations = {
         loadingImage: "Loading image...",
         imageAlt: "All cards used in Marafon"
       },
+      errors: {
+        gameNameLength: "Length must be between 4 and 20 characters",
+        passwordEmpty: "Password cannot be empty",
+        gameNameTaken: "Game name already taken. Try with the other name.",
+      },
+      placeholders: {
+        gameName: "SampleName123",
+        password: "password123",
+      },
+      labels: {
+        private: "Private",
+      },
+      gameTypes: {
+        marafone: "Marafone",
+        briscola: "Briscola",
+        tresette: "Tresette",
+      },   
       gameWaitingRoom: {
         events: {
-          "defaultMessage": "Have fun!",
-          "playerJoined": "{{playerName}} joined the game!",
-          "playerLeft": "{{playerName}} left the game!",
-          "title": "Events"
+          defaultMessage: "Have fun!",
+          playerJoined: "joined the game!",
+          playerLeft: "left the game!",
+          title: "Events",
         },
         buttons: {
-          "exit": "Exit",
-          "redTeam": "Red",
-          "blueTeam": "Blue",
-          "startGame": "Start game"
+          exit: "Exit",
+          redTeam: "Red",
+          blueTeam: "Blue",
+          startGame: "Start game",
         },
         labels: {
-          "gameType": "Game Type",
-          "players": "Players"
-        }
+          gameType: "Game Type",
+          players: "Players",
+        },
+        info: {
+          newOwnerTitle: "New Game Owner Selected",
+          newOwnerMessage: "{{ownerName}} is now the owner. The previous owner has left the game.",
+        },
       },
+     
+      loading: "Loading game data...",
+      call: "call",
+      gameOver: "Game Over",
+      teamWon: "team won!",
+      exit: "Exit",
+      hide: "Hide",
+      show: "Show",
+      lastTurnCards: "Last Turn Cards",
+      points: "Points",
+      and: "and",
+      trumpSuit: "Trump Suit",
+      none: "None",
+      coins: "Coins",
+      cups: "Cups",
+      clubs: "Clubs",
+      swords: "Swords",
+      knock: "Knock",
+      fly: "Fly",
+      slither: "Slither",
+      reslither: "Reslither",
+      
     },
     PL: {
       home: {
@@ -124,6 +128,7 @@ export const translations = {
           "Pracujemy intensywnie nad ulepszaniem aplikacji! Nowa wersja na iOS jest w fazie rozwoju, która zapewni płynniejszą rozgrywkę i dodatkowe funkcje dla użytkowników iPhone. Śledź aktualizacje, gdy wprowadzimy nowe usprawnienia na wszystkie platformy.",
         lobbyName: "Nazwa lobby",
         gameType: "Typ gry",
+        points: "Punkty",
         players: "Gracze",
         loading: "Ładowanie...",
         prevPage: "Poprzednia",
@@ -147,7 +152,10 @@ export const translations = {
         cancel: "Anuluj",
         error: "Rejestracja nie powiodła się. Spróbuj ponownie.",
       },
+      logout: "Wyloguj się",
+      language: "Język",
       rules: {
+        navbar: "Zasady",
         title: "Zasady gry w Marafon",
         gameName: "Marafon",
         gameAlias: "znany również jako Maraffa lub Beccaccino,",
@@ -170,24 +178,65 @@ export const translations = {
         loadingImage: "Ładowanie obrazu...",
         imageAlt: "Wszystkie karty używane w grze Marafon",
       },
-      gameWaitingRoom: {
-        events: {
-          defaultMessage: "Baw się dobrze!",
-          playerJoined: "{{playerName}} dołączył do gry!",
-          playerLeft: "{{playerName}} opuścił grę!",
-          title: "Wydarzenia"
-        },
-        buttons: {
-          exit: "Wyjdź",
-          redTeam: "Czerwoni",
-          blueTeam: "Niebiescy",
-          startGame: "Rozpocznij grę"
-        },
-        labels: {
-          gameType: "Typ gry",
-          players: "Gracze"
-        }
+      errors: {
+        gameNameLength: "Długość musi wynosić od 4 do 20 znaków",
+        passwordEmpty: "Hasło nie może być puste",
+        gameNameTaken: "Nazwa gry jest już zajęta. Spróbuj inną nazwę."
       },
+      placeholders: {
+        gameName: "PrzykładowaNazwa123",
+        password: "haslo123"
+      },
+      labels: {
+        private: "Prywatna"
+      },
+      gameTypes: {
+        marafone: "Marafone",
+        briscola: "Briscola",
+        tresette: "Tresette"
+      },
+      gameWaitingRoom: {  
+        events: {  
+            defaultMessage: "Baw się dobrze!",  
+            playerJoined: "dołączył do gry!",  
+            playerLeft: "opuścił grę!",  
+            title: "Zdarzenia",  
+        },  
+        buttons: {  
+            exit: "Wyjdź",  
+            redTeam: "Czerwony",  
+            blueTeam: "Niebieski",  
+            startGame: "Rozpocznij grę",  
+        },  
+        labels: {  
+            gameType: "Typ gry",  
+            players: "Gracze",  
+        },  
+        info: {  
+            newOwnerTitle: "Nowy właściciel gry",  
+            newOwnerMessage: "{{ownerName}} jest teraz właścicielem. Poprzedni właściciel opuścił grę.",  
+        },  
+      },  
+      loading: "Ładowanie danych gry...",  
+      call: "wezwanie",  
+      gameOver: "Koniec gry",  
+      teamWon: "drużyna wygrała!",  
+      exit: "Wyjdź",  
+      hide: "Ukryj",  
+      show: "Pokaż",  
+      lastTurnCards: "Karty z ostatniej tury",  
+      points: "Punkty",  
+      and: "i",  
+      trumpSuit: "Atut",  
+      none: "Brak",  
+      coins: "Monety",  
+      cups: "Kielichy",  
+      clubs: "Buławy",  
+      swords: "Miecze",  
+      knock: "Pukanie",  
+      fly: "Lot",  
+      slither: "Pełzanie",  
+      reslither: "Ponowne pełzanie",  
     },
     IT:{
       home: {
@@ -198,6 +247,7 @@ export const translations = {
           "Stiamo lavorando duramente per migliorare l'app! Una nuova versione per iOS è in sviluppo e porterà un gameplay più fluido e funzionalità aggiuntive per gli utenti iPhone. Rimanete sintonizzati per aggiornamenti mentre implementiamo nuovi miglioramenti per tutte le piattaforme.",
         lobbyName: "Nome Lobby",
         gameType: "Tipo di Gioco",
+        points: "Punti",
         players: "Giocatori",
         loading: "Caricamento...",
         prevPage: "Precedente",
@@ -221,7 +271,10 @@ export const translations = {
         cancel: "Annulla",
         error: "Registrazione fallita. Riprova."
       },
+      logout: "Esci",
+      language: "Lingua",
       rules: {
+        navbar: "Regole",
         title: "Regole del Marafon",
         gameName: "Marafon",
         gameAlias: "conosciuto anche come Maraffa o Beccaccino,",
@@ -244,24 +297,65 @@ export const translations = {
         loadingImage: "Caricamento immagine...",
         imageAlt: "Tutte le carte utilizzate nel Marafon"
       },
-      gameWaitingRoom: {
-        events: {
-          defaultMessage: "Divertiti!",
-          playerJoined: "{{playerName}} si è unito al gioco!",
-          playerLeft: "{{playerName}} ha lasciato il gioco!",
-          title: "Eventi"
-        },
-        buttons: {
-          exit: "Esci",
-          redTeam: "Rosso",
-          blueTeam: "Blu",
-          startGame: "Inizia gioco"
-        },
-        labels: {
-          gameType: "Tipo di gioco",
-          players: "Giocatori"
-        }
-      }
+      errors: {  
+        gameNameLength: "La lunghezza deve essere tra 4 e 20 caratteri",  
+        passwordEmpty: "La password non può essere vuota",  
+        gameNameTaken: "Nome della partita già preso. Prova con un altro nome.",  
+      },  
+      placeholders: {  
+          gameName: "NomeEsempio123",  
+          password: "password123",  
+      },  
+      labels: {  
+          private: "Privata",  
+      },  
+      gameTypes: {  
+          marafone: "Marafone",  
+          briscola: "Briscola",  
+          tresette: "Tresette",  
+      },  
+      gameWaitingRoom: {  
+        events: {  
+            defaultMessage: "Divertiti!",  
+            playerJoined: "si è unito al gioco!",  
+            playerLeft: "ha lasciato il gioco!",  
+            title: "Eventi",  
+        },  
+        buttons: {  
+            exit: "Esci",  
+            redTeam: "Rosso",  
+            blueTeam: "Blu",  
+            startGame: "Inizia partita",  
+        },  
+        labels: {  
+            gameType: "Tipo di gioco",  
+            players: "Giocatori",  
+        },  
+        info: {  
+            newOwnerTitle: "Nuovo proprietario della partita",  
+            newOwnerMessage: "{{ownerName}} è ora il proprietario. Il precedente proprietario ha lasciato il gioco.",  
+        },  
+      },  
+      loading: "Caricamento dati di gioco...",  
+      call: "chiamata",  
+      gameOver: "Fine partita",  
+      teamWon: "squadra ha vinto!",  
+      exit: "Esci",  
+      hide: "Nascondi",  
+      show: "Mostra",  
+      lastTurnCards: "Carte dell'ultimo turno",  
+      points: "Punti",  
+      and: "e",  
+      trumpSuit: "Briscola",  
+      none: "Nessuna",  
+      coins: "Denari",  
+      cups: "Coppe",  
+      clubs: "Bastoni",  
+      swords: "Spade",  
+      knock: "Busso",  
+      fly: "Volo",  
+      slither: "Striscio",  
+      reslither: "Ristriscio",  
     },
     RGN: {
       home: {
@@ -272,6 +366,7 @@ export const translations = {
           "Stèm travoiè dur per migliurè l'app! Na nova versiòun per iOS la j è in svilòup e la purtéra un gameplay pió fluènt e funzionalità novi par i utént iPhone. Stè cuntad par i aggiornamenti quand ch'us purtèm di novi migliuramént par tót i piatafórmi.",
         lobbyName: "Nòm dla Lobby",
         gameType: "Tipo ad Giòuch",
+        points: "Punté",
         players: "Giucadór",
         loading: "Caricamènt...",
         prevPage: "Precedènta",
@@ -295,7 +390,10 @@ export const translations = {
         cancel: "Anulè",
         error: "Registraziòun falì. Pròva d nòv."
       },
+      logout: "Sgnìs da fôra",
+      language: "Léngua",
       rules: {
+        navbar: "Réguel",
         title: "Regl dla Maraffò",
         gameName: "Maraffò",
         gameAlias: "cunusù anca cmè Maraffa o Beccaccìno,",
@@ -318,23 +416,64 @@ export const translations = {
         loadingImage: "A s'cârica la imâggin...",
         imageAlt: "Tot i carte adoperè int la Maraffò"
       },
-      gameWaitingRoom: {
-        events: {
-          defaultMessage: "Divirtèt!",
-          playerJoined: "{{playerName}} l'è vnì in tla zóca!",
-          playerLeft: "{{playerName}} l'è andè fura da la zóca!",
-          title: "Evenmént"
-        },
-        buttons: {
-          exit: "Esci",
-          redTeam: "Russ",
-          blueTeam: "Blu",
-          startGame: "Cuminsa la zóca"
-        },
-        labels: {
-          gameType: "Tìp ad zóca",
-          players: "Zugadòur"
-        }
-      }
+      errors: {  
+        gameNameLength: "La lunghezza dvès èsar tra 4 e 20 caràter",  
+        passwordEmpty: "La parola segreta la pò n'èsar vòida",  
+        gameNameTaken: "Al nóm dla zógh l'é zà ciapê. Pròva un nóm diffarènt.",  
+      },  
+      placeholders: {  
+          gameName: "EsempiNòm123",  
+          password: "parolasegreta123",  
+      },  
+      labels: {  
+          private: "Privê",  
+      },  
+      gameTypes: {  
+          marafone: "Marafone",  
+          briscola: "Briscola",  
+          tresette: "Tresette",  
+      },  
+      gameWaitingRoom: {  
+        events: {  
+            defaultMessage: "Divartit!",  
+            playerJoined: "l'è intrê in tla zógh!",  
+            playerLeft: "l'ha lassê la zógh!",  
+            title: "Event",  
+        },  
+        buttons: {  
+            exit: "Své",  
+            redTeam: "Rôs",  
+            blueTeam: "Blê",  
+            startGame: "Cuminsa la zógh",  
+        },  
+        labels: {  
+            gameType: "Tìp ed zógh",  
+            players: "Zughadôr",  
+        },  
+        info: {  
+            newOwnerTitle: "Nuov parun dla zógh",  
+            newOwnerMessage: "{{ownerName}} l'è adès al parun. Al vécc parun l'ha lassê la zógh.",  
+        },  
+      },   
+      loading: "Carghénd i dat dla zógh...",  
+      call: "chiamê",  
+      gameOver: "Fin dla zógh",  
+      teamWon: "squadra l'ha vinciû!",  
+      exit: "Své",  
+      hide: "Zug",  
+      show: "Mustrê",  
+      lastTurnCards: "Cart dla ùltima mà",  
+      points: "Punt",  
+      and: "e",  
+      trumpSuit: "Brìscula",  
+      none: "Nisun",  
+      coins: "Danar",  
+      cups: "Cop",  
+      clubs: "Bastón",  
+      swords: "Spêd",  
+      knock: "Bat",  
+      fly: "Zvulê",  
+      slither: "Strisé",  
+      reslither: "Ristrisé",  
     }
   };

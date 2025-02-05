@@ -1,21 +1,57 @@
 import { useState, useEffect, useContext } from "react";
 import { Link } from "react-router-dom";
-import { UserContext } from "../context/UserContext";
+import { useUserContext } from "../context/UserContext";
 import { LanguageContext } from "../context/LanguageContext";
+import { useTheme } from "../context/ThemeContext";
+import axios from "axios";
 
 const Navbar = () => {
   const [displayLanguages, setDisplayLanguages] = useState(false);
   const [displayUserMenu, setDisplayUserMenu] = useState(false);
-  
-  const { username, setUsername } = useContext(UserContext);
-  const { language, setLanguage } = useContext(LanguageContext); // Access language context
+
+  const languageContext = useContext(LanguageContext);
+
+  if (!languageContext) {
+    throw new Error("LanguageContext must be used within a LanguageProvider.");
+  }
+
+  const { setUsername } = useUserContext();
+  const { language, setLanguage } = languageContext;
+  const { theme, toggleTheme } = useTheme();
+
+  const storedUsername = localStorage.getItem("usernameValue");
+  storedUsername ? JSON.parse(storedUsername) : null;
+
+  const { t } = languageContext; // Now `context` is guaranteed to be defined
 
   const languagesMenuColor = "#a0091b";
 
-  const handleLogout = () => {
-    setUsername(null);
-    localStorage.removeItem("username");
-    console.log("User logged out");
+  const baseUrl = import.meta.env.VITE_API_BASE_URL;
+
+  axios.defaults.withCredentials = true;
+
+  // Logout request
+  const handleLogout = async () => {
+    try {
+      const response = await axios.post(
+        `${baseUrl}/auth/logout`,
+        {},
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          withCredentials: true, //  Allow cookies
+        }
+      );
+  
+      if (response.status === 200) {
+        setUsername(null);
+        localStorage.removeItem("usernameValue");
+        console.log("User logged out");
+      }
+    } catch (error) {
+      console.log("Error:", error);
+    }
   };
 
   const closeDropdowns = () => {
@@ -27,6 +63,14 @@ const Navbar = () => {
     e.stopPropagation();
     setDisplayLanguages((prev) => {
       if (!prev) setDisplayUserMenu(false);
+      return !prev;
+    });
+  };
+
+  const handleUserMenuClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setDisplayUserMenu((prev) => {
+      if (!prev) setDisplayLanguages(false);
       return !prev;
     });
   };
@@ -58,10 +102,22 @@ const Navbar = () => {
             </li>
             <li className="nav-item">
               <Link to="/rules" className="nav-link text-white">
-                Rules
+                {t("rules.navbar")}
               </Link>
             </li>
           </ul>
+          <div
+            className="dark-button"
+            role="button"
+            onClick={toggleTheme}
+            style={{ cursor: "pointer", fontSize: "1.5rem" }}
+          >
+            {theme === "light" ? (
+              <i className="bi bi-moon"></i>
+            ) : (
+              <i className="bi bi-sun"></i>
+            )}
+          </div>
           <ul className="list-group list-group-horizontal list-unstyled me-4">
             <li className="dropdown me-3 mt-1">
               <button
@@ -71,7 +127,7 @@ const Navbar = () => {
                 aria-expanded="false"
                 onClick={handleLanguagesClick}
               >
-                Language ({language})
+                {t("language")} ({language})
               </button>
               <ul
                 className={`dropdown-menu custom-dropdown-menu border border-black border-2 ${
@@ -92,12 +148,12 @@ const Navbar = () => {
               </ul>
             </li>
             <li className="dropdown">
+              {/* Change icon dynamically based on login state */}
               <i
-                className="bi bi-person-circle text-white fs-4"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setDisplayUserMenu((prev) => !prev);
-                }}
+                className={`bi ${
+                  storedUsername ? "bi-person-circle" : "bi-door-open"
+                } text-white fs-4`}
+                onClick={handleUserMenuClick}
                 style={{ cursor: "pointer" }}
               ></i>
               <ul
@@ -110,14 +166,14 @@ const Navbar = () => {
                   left: "auto",
                 }}
               >
-                {!username ? (
+                {!storedUsername ? (
                   <>
                     <li>
                       <Link
                         to="/register"
                         className="dropdown-item text-white custom-dropdown-item"
                       >
-                        Register
+                        {t("register.title")}
                       </Link>
                     </li>
                     <li>
@@ -125,7 +181,7 @@ const Navbar = () => {
                         to="/login"
                         className="dropdown-item text-white custom-dropdown-item"
                       >
-                        Login
+                        {t("login.title")}
                       </Link>
                     </li>
                   </>
@@ -135,7 +191,7 @@ const Navbar = () => {
                       onClick={handleLogout}
                       className="dropdown-item text-white custom-dropdown-item"
                     >
-                      Logout
+                      {t("logout")}
                     </button>
                   </li>
                 )}

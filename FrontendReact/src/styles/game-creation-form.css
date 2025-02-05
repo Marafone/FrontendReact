@@ -4,8 +4,26 @@
   --btn-hover-color: #ffd99baa;
 }
 
+[data-theme="dark"] {
+  --background-color: #121212;
+  --text-color: #ffffff;
+  --lobby-color: #282828;
+  --border-color: #333333;
+  --events-bg-color: #575757;
+  --player-hover-bg-color: #8b8a81;
+}
+
+:root {
+  background-color: #121212;
+}
+
+.main-creation-div {
+  background-color: var(--background-color) !important;
+}
+
 .custom-game-creation-div {
-  background-color: var(--game-creation-background-color);
+  background-color: var(--lobby-color);
+  color: var(--text-color);
 }
 
 .form-check-input:focus {
@@ -17,14 +35,18 @@
 }
 
 .custom-form-element {
-  background-color: var(--form-elements-background-color) !important;
+  background-color: var(--events-bg-color) !important;
+  color: var(--text-color) !important;
 }
 
 .custom-btn:hover {
-  background-color: var(--btn-hover-color) !important;
+  background-color: var(--player-hover-bg-color) !important;
+  color: var(--text-color);
 }
 
 .custom-error-msg {
+  background-color: var(--lobby-color);
+  color: var(--text-color);
   position: absolute;
   top: 100%;
   font-size: 10px;

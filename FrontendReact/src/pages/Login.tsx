@@ -1,8 +1,9 @@
-import React, { useState, useContext } from "react";
+import React, {useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../styles/register-login-page.css";
 import { LanguageContext } from "../context/LanguageContext";
+import { useTheme } from "../context/ThemeContext";
 
 axios.defaults.withCredentials = true;
 
@@ -21,17 +22,36 @@ const Login = () => {
 
   const { t } = context; // Now `context` is guaranteed to be defined
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault(); // Prevent the default form submission
-    try {
-      const response = await axios.post(`${baseUrl}/auth/login`, { username, password });
-      if (response.status === 200) {
+  const { theme } = useTheme();
 
-        // Redirect immediately after successful login
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+  }, [theme]);
+
+  axios.defaults.withCredentials = true;
+    
+  // Login request
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post(
+        `${baseUrl}/auth/login`,
+        { username, password },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          withCredentials: true, //  Allow cookies
+        }
+      );
+  
+      if (response.status === 200) {
+        setUsername(username);
+        localStorage.setItem("usernameValue", JSON.stringify(username));
         navigate("/login-success");
       }
     } catch (error) {
-      setErrorMessage(t("login.loginFailed")); // Translated error message
+      setErrorMessage(t("login.error")); // Translated error message
       console.log("Error:", error);
     }
   };
