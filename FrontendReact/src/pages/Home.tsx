@@ -44,18 +44,20 @@ const Home = () => {
   const { t } = context; // Now `context` is guaranteed to be defined
 
   useEffect(() => {
-    const fetchGames = async () => {
-      try {
-        setLoading(true);
-        const response = await axios.get("/game/waiting");
-        setLobbies(Array.isArray(response.data) ? response.data : []);
-      } catch (err) {
-        handleRequestError(
-          "Unable to load games. Please try refreshing the page."
-        );
-      } finally {
-        setLoading(false);
-      }
+    const fetchGames = () => {
+      setLoading(true);
+      axios
+        .get("/game/waiting")
+        .then((response) => {
+          setLobbies(Array.isArray(response.data) ? response.data : []);
+          setLoading(false);
+        })
+        .catch((error: AxiosError) => {
+          if (error.response?.status == 403) {
+            navigate("/login");
+            alert("Unauthorized! Redirecting to login...");
+          }
+        });
     };
 
     fetchGames();

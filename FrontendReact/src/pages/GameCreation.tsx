@@ -70,6 +70,11 @@ const GameCreation = () => {
         handleNavigation(gameId);
       })
       .catch((e: AxiosError) => {
+        if (e.response?.status == 403) {
+          alert("Unauthorized! Redirecting to login...");
+          navigate("/login");
+        }
+
         const errorResponse = e.response?.data;
         if (errorResponse === "GAME_NAME_TAKEN") {
           setErrors({
