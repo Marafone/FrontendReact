@@ -279,7 +279,6 @@ const GamePlayingRoom = () => {
   const handleNewRoundEvent = (firstPlayerName: string) => {
     // reset timer
     handleStopTimer();
-    handleStartTimer();
 
     // clear board and move cards to last turn cards section
     handleNewTurnEvent();
@@ -294,12 +293,16 @@ const GamePlayingRoom = () => {
       setDisplayTrumpSuitSelection(false);
       setDisplayCallSelection(false);
     }
+
+    handleStartTimer();
   };
 
   const handleWinnerStateEvent = (team: string) => {
     handleStopTimer();
     setWinnerTeam(team);
-    setShowResultModal(true);
+    setTimeout(() => {
+      setShowResultModal(true);
+    }, 1500);
   };
 
   const handleErrorEvent = (errorMessage: string) => {
@@ -621,7 +624,11 @@ const GamePlayingRoom = () => {
                 src && (
                   <div className="text-center" key={playerName}>
                     <p className="fw-semibold mb-0">{playerName}</p>
-                    <img className="last-turn-img" src={src} alt={`${playerName}'s card`} />
+                    <img
+                      className="last-turn-img"
+                      src={src}
+                      alt={`${playerName}'s card`}
+                    />
                   </div>
                 )
             )}
