@@ -101,6 +101,8 @@ const GamePlayingRoom = () => {
     useState(true);
   // timer to let cards be on board for a while before new round starts
   const paused = useRef(false);
+  // tracking the current player
+  const [currentPlayer, setCurrentPlayer] = useState<string>("");
 
   // Use the LanguageContext
   const { t } = useContext(LanguageContext)!;
@@ -253,6 +255,7 @@ const GamePlayingRoom = () => {
       newMap.set(player, null);
     });
     setPlayerCardMapCurrentTurn(newMap);
+    setCurrentPlayer(playersOrder[0]);
   };
 
   const handleTrumpSuitStateEvent = (trumpSuit: string) => {
@@ -311,9 +314,15 @@ const GamePlayingRoom = () => {
     playerName: string,
     isFirstPlayer: boolean
   ) => {
-    if (usernameRef.current === playerName && isFirstPlayer)
+    setCurrentPlayer(playerName); // Track whose turn it is
+
+    if (usernameRef.current === playerName && isFirstPlayer){
       setDisplayCallSelection(true);
-    else setDisplayCallSelection(false);
+    }
+    else {
+      setDisplayCallSelection(false);
+    }
+
     handleStopTimer();
     handleStartTimer();
   };
@@ -459,6 +468,26 @@ const GamePlayingRoom = () => {
       setLoading(false);
     else setLoading(true);
   }, [redTeamRef.current, blueTeamRef.current]);
+
+  // Trigger automatic AI moves 
+
+  useEffect(() => {
+    if (currentPlayer.startsWith("AI_")) {
+      const timeoutId = setTimeout(() => {
+        axios
+          .post(`${baseUrl}/game/${gameContent.gameId}/ai-move`, currentPlayer, {
+            headers: {
+              "Content-Type": "text/plain",
+            },
+          })
+          .catch((error) => console.log(error));
+      }, 1000); // 1 second delay
+  
+      return () => clearTimeout(timeoutId); // Cleanup if currentPlayer changes before timeout
+    }
+  }, [currentPlayer]);
+
+  // Dark mode
 
   const { theme } = useTheme();
   

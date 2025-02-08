@@ -89,7 +89,7 @@ const GameWaitingRoom = () => {
     axios
       .post(`${baseUrl}/game/${gameContent.gameId}/add-ai`, team, {
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "text/plain",
         },
       })
       .catch((error) => console.log(error));
