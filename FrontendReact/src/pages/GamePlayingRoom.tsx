@@ -481,7 +481,7 @@ const GamePlayingRoom = () => {
             },
           })
           .catch((error) => console.log(error));
-      }, 1000); // 1 second delay
+      }, 3000); // 3 second delay
   
       return () => clearTimeout(timeoutId); // Cleanup if currentPlayer changes before timeout
     }
