@@ -302,10 +302,11 @@ const GameWaitingRoom = () => {
               </button>
               {/* Add AI to Red Team */}
               <button
-                className="btn btn-secondary fw-bold mb-2"
+                className="btn btn-link fw-bold text-danger mb-2"
                 onClick={() => handleAddAI("RED")}
               >
-                {t("gameWaitingRoom.buttons.redAI")}
+                <i className="bi bi-pc-display-horizontal rounded me-1" /> 
+                {t("gameWaitingRoom.buttons.addAI")}
               </button>
               {teamRed.map((player) => (
                 <p
@@ -330,10 +331,11 @@ const GameWaitingRoom = () => {
               </button>
               {/* Add AI to Blue Team */}
               <button
-                className="btn btn-secondary fw-bold mb-2"
+                className="btn btn-link fw-bold text-primary mb-2"
                 onClick={() => handleAddAI("BLUE")}
               >
-                {t("gameWaitingRoom.buttons.blueAI")}
+                <i className="bi bi-pc-display-horizontal me-1" />
+                {t("gameWaitingRoom.buttons.addAI")}
               </button>
               {teamBlue.map((player) => (
                 <p
