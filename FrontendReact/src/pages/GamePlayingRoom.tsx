@@ -495,7 +495,7 @@ const GamePlayingRoom = () => {
     else{
       time = 2000;
     }
-
+    // current player can be set asynchronously so we are not really sure if it's the correct one
     if (currentPlayer.startsWith("AI_")) {
       const timeoutId = setTimeout(() => {
         axios
@@ -505,9 +505,10 @@ const GamePlayingRoom = () => {
             },
           })
           .catch((error) => console.log(error));
+
+          playSound("/sounds/card_play.mp3");
       }, time); 
 
-      playSound("/sounds/card_play.mp3");
       return () => clearTimeout(timeoutId); // Cleanup if currentPlayer changes before timeout
     }
   }, [currentPlayer]);
