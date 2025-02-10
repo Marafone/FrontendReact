@@ -25,6 +25,7 @@ import "../styles/game-playing-room.css";
 import ResultModal from "../components/ResultModal";
 import { LanguageContext } from "../context/LanguageContext";
 import { useTheme } from "../context/ThemeContext";
+import { playSound } from "../soundEffects";
 
 var client: Client;
 
@@ -289,6 +290,8 @@ const GamePlayingRoom = () => {
   const handleNewRoundEvent = (firstPlayerName: string) => {
     handleStopTimer();
 
+    playSound("/sounds/card_shuffle.mp3");
+
     // clear board and move cards to last turn cards section
     handleNewTurnEvent();
     setDisplayedSuit("None");
@@ -503,7 +506,8 @@ const GamePlayingRoom = () => {
           })
           .catch((error) => console.log(error));
       }, time); 
-  
+
+      playSound("/sounds/card_play.mp3");
       return () => clearTimeout(timeoutId); // Cleanup if currentPlayer changes before timeout
     }
   }, [currentPlayer]);
@@ -523,6 +527,7 @@ const GamePlayingRoom = () => {
       destination: `/app/game/${gameContent.gameId}/card`,
       body: JSON.stringify({ cardId: id }),
     });
+    playSound("/sounds/card_play.mp3");
   };
 
   const handleSelectSuit = (suit: string) => {
