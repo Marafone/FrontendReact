@@ -103,6 +103,7 @@ const GamePlayingRoom = () => {
   const paused = useRef(false);
   // tracking the current player
   const [currentPlayer, setCurrentPlayer] = useState<string>("");
+  const [firstPlayer, setFirstPlayer] = useState<string>("");
 
   // Use the LanguageContext
   const { t } = useContext(LanguageContext)!;
@@ -207,6 +208,16 @@ const GamePlayingRoom = () => {
           break;
       }
     });
+
+    // Sorting by ID in ascending order
+    const sortById = (a: [bigint, string], b: [bigint, string]) => 
+      Number(a[0]) - Number(b[0]);
+
+    clubsCards.sort(sortById);
+    coinsCards.sort(sortById);
+    cupsCards.sort(sortById);
+    swordsCards.sort(sortById);
+
     const newCards: [bigint, string][] = clubsCards
       .concat(coinsCards)
       .concat(cupsCards)
@@ -256,6 +267,7 @@ const GamePlayingRoom = () => {
     });
     setPlayerCardMapCurrentTurn(newMap);
     setCurrentPlayer(playersOrder[0]);
+    setFirstPlayer(playersOrder[0]);
   };
 
   const handleTrumpSuitStateEvent = (trumpSuit: string) => {
@@ -472,6 +484,15 @@ const GamePlayingRoom = () => {
   // Trigger automatic AI moves 
 
   useEffect(() => {
+    var time;
+    // when a new turn begins the ai cannot play too quickly because the card wont be shown
+    if(currentPlayer == firstPlayer){
+      time = 4000;
+    }
+    else{
+      time = 2000;
+    }
+
     if (currentPlayer.startsWith("AI_")) {
       const timeoutId = setTimeout(() => {
         axios
@@ -481,7 +502,7 @@ const GamePlayingRoom = () => {
             },
           })
           .catch((error) => console.log(error));
-      }, 3000); // 3 second delay
+      }, time); 
   
       return () => clearTimeout(timeoutId); // Cleanup if currentPlayer changes before timeout
     }
