@@ -46,6 +46,8 @@ function App() {
     )
   );
 
+  localStorage.removeItem("usernameValue");
+  
   return (
     <ThemeProvider>
       <UserProvider>

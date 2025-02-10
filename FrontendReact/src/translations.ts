@@ -85,6 +85,7 @@ export const translations: TranslationsType = {
           exit: "Exit",
           redTeam: "Red",
           blueTeam: "Blue",
+          addAI: "Add AI",
           startGame: "Start game",
         },
         labels: {
@@ -205,7 +206,8 @@ export const translations: TranslationsType = {
         buttons: {  
             exit: "Wyjdź",  
             redTeam: "Czerwony",  
-            blueTeam: "Niebieski",  
+            blueTeam: "Niebieski",
+            addAI: "Dodaj AI", 
             startGame: "Rozpocznij grę",  
         },  
         labels: {  
@@ -325,6 +327,7 @@ export const translations: TranslationsType = {
             exit: "Esci",  
             redTeam: "Rosso",  
             blueTeam: "Blu",  
+            addAI: "Aggiungi AI",
             startGame: "Inizia partita",  
         },  
         labels: {  
@@ -444,6 +447,7 @@ export const translations: TranslationsType = {
             exit: "Své",  
             redTeam: "Rôs",  
             blueTeam: "Blê",  
+            addAI: "Zvé un AI",
             startGame: "Cuminsa la zógh",  
         },  
         labels: {  

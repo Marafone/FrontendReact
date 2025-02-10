@@ -85,6 +85,17 @@ const GameWaitingRoom = () => {
       .catch((error) => console.log(error));
   };
 
+  const handleAddAI = (team: string) => {
+    axios
+      .post(`${baseUrl}/game/${gameContent.gameId}/add-ai`, team, {
+        headers: {
+          "Content-Type": "text/plain",
+        },
+      })
+      .catch((error) => console.log(error));
+  };
+
+
   // WEBSOCKET FUNCTIONS
 
   const onMessageReceived = (msg: IMessage) => {
@@ -289,6 +300,14 @@ const GameWaitingRoom = () => {
               >
                 {t("gameWaitingRoom.buttons.redTeam")} {/* Use translation */}
               </button>
+              {/* Add AI to Red Team */}
+              <button
+                className="btn btn-link fw-bold text-danger mb-2"
+                onClick={() => handleAddAI("RED")}
+              >
+                <i className="bi bi-pc-display-horizontal rounded me-1" /> 
+                {t("gameWaitingRoom.buttons.addAI")}
+              </button>
               {teamRed.map((player) => (
                 <p
                   key={player}
@@ -309,6 +328,14 @@ const GameWaitingRoom = () => {
                 onClick={() => handleChangeTeam("BLUE")}
               >
                 {t("gameWaitingRoom.buttons.blueTeam")} {/* Use translation */}
+              </button>
+              {/* Add AI to Blue Team */}
+              <button
+                className="btn btn-link fw-bold text-primary mb-2"
+                onClick={() => handleAddAI("BLUE")}
+              >
+                <i className="bi bi-pc-display-horizontal me-1" />
+                {t("gameWaitingRoom.buttons.addAI")}
               </button>
               {teamBlue.map((player) => (
                 <p
