@@ -25,6 +25,7 @@ import "../styles/game-playing-room.css";
 import ResultModal from "../components/ResultModal";
 import { LanguageContext } from "../context/LanguageContext";
 import { useTheme } from "../context/ThemeContext";
+import { playSound } from "../soundEffects";
 
 var client: Client;
 
@@ -103,6 +104,7 @@ const GamePlayingRoom = () => {
   const paused = useRef(false);
   // tracking the current player
   const [currentPlayer, setCurrentPlayer] = useState<string>("");
+  const [firstPlayer, setFirstPlayer] = useState<string>("");
 
   // Use the LanguageContext
   const { t } = useContext(LanguageContext)!;
@@ -207,6 +209,16 @@ const GamePlayingRoom = () => {
           break;
       }
     });
+
+    // Sorting by ID in ascending order
+    const sortById = (a: [bigint, string], b: [bigint, string]) => 
+      Number(a[0]) - Number(b[0]);
+
+    clubsCards.sort(sortById);
+    coinsCards.sort(sortById);
+    cupsCards.sort(sortById);
+    swordsCards.sort(sortById);
+
     const newCards: [bigint, string][] = clubsCards
       .concat(coinsCards)
       .concat(cupsCards)
@@ -256,6 +268,7 @@ const GamePlayingRoom = () => {
     });
     setPlayerCardMapCurrentTurn(newMap);
     setCurrentPlayer(playersOrder[0]);
+    setFirstPlayer(playersOrder[0]);
   };
 
   const handleTrumpSuitStateEvent = (trumpSuit: string) => {
@@ -276,6 +289,8 @@ const GamePlayingRoom = () => {
 
   const handleNewRoundEvent = (firstPlayerName: string) => {
     handleStopTimer();
+
+    playSound("/sounds/card_shuffle.mp3");
 
     // clear board and move cards to last turn cards section
     handleNewTurnEvent();
@@ -472,6 +487,15 @@ const GamePlayingRoom = () => {
   // Trigger automatic AI moves 
 
   useEffect(() => {
+    var time;
+    // when a new turn begins the ai cannot play too quickly because the card wont be shown
+    if(currentPlayer == firstPlayer){
+      time = 4000;
+    }
+    else{
+      time = 2000;
+    }
+    // current player can be set asynchronously so we are not really sure if it's the correct one
     if (currentPlayer.startsWith("AI_")) {
       const timeoutId = setTimeout(() => {
         axios
@@ -481,8 +505,10 @@ const GamePlayingRoom = () => {
             },
           })
           .catch((error) => console.log(error));
-      }, 3000); // 3 second delay
-  
+
+          playSound("/sounds/card_play.mp3");
+      }, time); 
+
       return () => clearTimeout(timeoutId); // Cleanup if currentPlayer changes before timeout
     }
   }, [currentPlayer]);
@@ -502,6 +528,7 @@ const GamePlayingRoom = () => {
       destination: `/app/game/${gameContent.gameId}/card`,
       body: JSON.stringify({ cardId: id }),
     });
+    playSound("/sounds/card_play.mp3");
   };
 
   const handleSelectSuit = (suit: string) => {

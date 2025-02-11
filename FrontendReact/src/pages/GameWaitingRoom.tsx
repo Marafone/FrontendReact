@@ -302,7 +302,7 @@ const GameWaitingRoom = () => {
               </button>
               {/* Add AI to Red Team */}
               <button
-                className="btn btn-link fw-bold text-danger mb-2"
+                className="btn fw-bold text-danger mb-2"
                 onClick={() => handleAddAI("RED")}
               >
                 <i className="bi bi-pc-display-horizontal rounded me-1" /> 
@@ -331,7 +331,7 @@ const GameWaitingRoom = () => {
               </button>
               {/* Add AI to Blue Team */}
               <button
-                className="btn btn-link fw-bold text-primary mb-2"
+                className="btn fw-bold text-primary mb-2"
                 onClick={() => handleAddAI("BLUE")}
               >
                 <i className="bi bi-pc-display-horizontal me-1" />
