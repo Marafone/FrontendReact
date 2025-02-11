@@ -1,5 +1,5 @@
 import axios, { AxiosError } from "axios";
-import React, {useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import "../styles/game-creation-form.css";
 import { useNavigate } from "react-router-dom";
 import { LanguageContext } from "../context/LanguageContext";
@@ -36,10 +36,10 @@ const GameCreation = () => {
   const { t } = useContext(LanguageContext)!;
 
   const { theme } = useTheme();
-    
+
   useEffect(() => {
-      document.documentElement.setAttribute("data-theme", theme);
-    }, [theme]);
+    document.documentElement.setAttribute("data-theme", theme);
+  }, [theme]);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -106,111 +106,113 @@ const GameCreation = () => {
   };
 
   return (
-    <div className="main-creation-div d-flex justify-content-center align-items-center w-100 h-100">
-      <div className="custom-game-creation-div d-flex flex-column justify-content-center align-items-center w-75 h-75 border border-black border-opacity-50 p-3">
-        <p className="fs-2 fw-bold">{t("home.createGameBtn")}</p> {/* Use translation */}
-        <form className="d-flex flex-column gap-4">
-          {/* Game Name input group */}
-          <div className="input-group position-relative">
+    <div className="custom-game-creation-div d-flex flex-column justify-content-center align-items-center w-75 h-75 border border-black border-opacity-50 p-3">
+      <p className="fs-2 fw-bold">{t("home.createGameBtn")}</p>{" "}
+      {/* Use translation */}
+      <form className="d-flex flex-column gap-4">
+        {/* Game Name input group */}
+        <div className="input-group position-relative">
+          <span className="fw-medium input-group-text border border-black border-opacity-50 custom-form-element">
+            {t("home.lobbyName")} {/* Use translation */}
+          </span>
+          <input
+            type="text"
+            className="form-control border border-black border-opacity-25 custom-input custom-form-element"
+            placeholder={t("placeholders.gameName")}
+            name="gameName"
+            value={formData?.gameName}
+            onChange={handleChange}
+            required
+          />
+          {errors.gameName && (
+            <div className="text-white bg-danger custom-error-msg rounded mw-100 z-3 px-2 py-1">
+              {errors.gameName}
+            </div>
+          )}
+        </div>
+        {/* Game Type input group */}
+        <div className="input-group">
+          <span className="fw-medium input-group-text border border-black border-opacity-50 custom-form-element">
+            {t("home.gameType")} {/* Use translation */}
+          </span>
+          <select
+            id="gameType"
+            className="form-control border border-black border-opacity-25 custom-input custom-form-element"
+            name="gameType"
+            value={formData?.gameType}
+            onChange={handleChange}
+          >
+            <option value="MARAFFA">{t("gameTypes.marafone")}</option>{" "}
+            {/* Use translation */}
+            <option value="BRISCOLLA">{t("gameTypes.briscola")}</option>{" "}
+            {/* Use translation */}
+            <option value="TRISETTE">{t("gameTypes.tresette")}</option>{" "}
+            {/* Use translation */}
+          </select>
+        </div>
+        {/* PointsToWin input group */}
+        <div className="input-group position-relative">
+          <span className="fw-medium input-group-text border border-black border-opacity-50 custom-form-element">
+            {t("home.points")} {/* Use translation */}
+          </span>
+          <select
+            id="pointsToWin"
+            className="form-control border border-black border-opacity-25 custom-input custom-form-element"
+            name="pointsToWin"
+            value={formData?.pointsToWin}
+            onChange={handleChange}
+          >
+            <option value="21">21</option>
+            <option value="31">31</option>
+            <option value="41">41</option>
+          </select>
+        </div>
+        {/* Private input group */}
+        <div className="form-check form-switch">
+          <input
+            className="form-check-input border-0 custom-form-element"
+            type="checkbox"
+            onClick={() => setIsGamePrivate(!isGamePrivate)}
+          />
+          <label className="fw-medium form-check-label">
+            {t("labels.private")} {/* Use translation */}
+          </label>
+        </div>
+        {/* Password input group */}
+        {isGamePrivate && (
+          <div className="input-group">
             <span className="fw-medium input-group-text border border-black border-opacity-50 custom-form-element">
-              {t("home.lobbyName")} {/* Use translation */}
+              {t("login.password")} {/* Use translation */}
             </span>
             <input
-              type="text"
+              id="joinGameCode"
+              type="password"
               className="form-control border border-black border-opacity-25 custom-input custom-form-element"
-              placeholder={t("placeholders.gameName")}
-              name="gameName"
-              value={formData?.gameName}
+              placeholder={t("placeholders.password")}
+              name="password"
+              value={formData?.password}
               onChange={handleChange}
-              required
             />
-            {errors.gameName && (
+            {errors.password && (
               <div className="text-white bg-danger custom-error-msg rounded mw-100 z-3 px-2 py-1">
-                {errors.gameName}
+                {errors.password}
               </div>
             )}
           </div>
-          {/* Game Type input group */}
-          <div className="input-group">
-            <span className="fw-medium input-group-text border border-black border-opacity-50 custom-form-element">
-              {t("home.gameType")} {/* Use translation */}
-            </span>
-            <select
-              id="gameType"
-              className="form-control border border-black border-opacity-25 custom-input custom-form-element"
-              name="gameType"
-              value={formData?.gameType}
-              onChange={handleChange}
-            >
-              <option value="MARAFFA">{t("gameTypes.marafone")}</option> {/* Use translation */}
-              <option value="BRISCOLLA">{t("gameTypes.briscola")}</option> {/* Use translation */}
-              <option value="TRISETTE">{t("gameTypes.tresette")}</option> {/* Use translation */}
-            </select>
-          </div>
-          {/* PointsToWin input group */}
-          <div className="input-group position-relative">
-            <span className="fw-medium input-group-text border border-black border-opacity-50 custom-form-element">
-              {t("home.points")} {/* Use translation */}
-            </span>
-            <select
-              id="pointsToWin"
-              className="form-control border border-black border-opacity-25 custom-input custom-form-element"
-              name="pointsToWin"
-              value={formData?.pointsToWin}
-              onChange={handleChange}
-            >
-              <option value="21">21</option> 
-              <option value="31">31</option> 
-              <option value="41">41</option> 
-            </select>
-          </div>
-          {/* Private input group */}
-          <div className="form-check form-switch">
-            <input
-              className="form-check-input border-0 custom-form-element"
-              type="checkbox"
-              onClick={() => setIsGamePrivate(!isGamePrivate)}
-            />
-            <label className="fw-medium form-check-label">
-              {t("labels.private")} {/* Use translation */}
-            </label>
-          </div>
-          {/* Password input group */}
-          {isGamePrivate && (
-            <div className="input-group">
-              <span className="fw-medium input-group-text border border-black border-opacity-50 custom-form-element">
-                {t("login.password")} {/* Use translation */}
-              </span>
-              <input
-                id="joinGameCode"
-                type="password"
-                className="form-control border border-black border-opacity-25 custom-input custom-form-element"
-                placeholder={t("placeholders.password")}
-                name="password"
-                value={formData?.password}
-                onChange={handleChange}
-              />
-              {errors.password && (
-                <div className="text-white bg-danger custom-error-msg rounded mw-100 z-3 px-2 py-1">
-                  {errors.password}
-                </div>
-              )}
-            </div>
-          )}
-          {/* Create Game button */}
-          <div>
-            <button
-              className="custom-btn btn fw-bold w-100 custom-form-element border border-black border-opacity-25"
-              type="button"
-              onClick={() => {
-                createGame();
-              }}
-            >
-              {t("home.createGameBtn")} {/* Use translation */}
-            </button>
-          </div>
-        </form>
-      </div>
+        )}
+        {/* Create Game button */}
+        <div>
+          <button
+            className="custom-btn btn fw-bold w-100 custom-form-element border border-black border-opacity-25"
+            type="button"
+            onClick={() => {
+              createGame();
+            }}
+          >
+            {t("home.createGameBtn")} {/* Use translation */}
+          </button>
+        </div>
+      </form>
     </div>
   );
 };

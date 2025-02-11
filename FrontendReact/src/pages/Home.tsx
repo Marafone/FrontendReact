@@ -104,7 +104,7 @@ const Home = () => {
   };
 
   return (
-    <div className="home-page">
+    <>
       {error && (
         <ErrorModal
           message={errorMessage}
@@ -209,7 +209,7 @@ const Home = () => {
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
