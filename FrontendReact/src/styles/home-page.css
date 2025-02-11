@@ -9,15 +9,8 @@
   --background-color: #121212;
   --text-color: #ffffff;
   --widgets-bg-color: #282828;
-  --widgets-hover-bg-color: #8b8a81 ;
+  --widgets-hover-bg-color: #8b8a81;
   --border-color: #333333;
-}
-
-.home-page {
-  background-color: var(--background-color);
-  min-height: 100vh; /* Ensures it covers the full viewport height */
-  width: 100%;
-  color: var(--text-color);
 }
 
 /* Other styles for the Home page */
@@ -40,8 +33,7 @@
   background-color: var(--widgets-hover-bg-color);
 }
 
-
-.custom-lobby-div-element:hover {  
+.custom-lobby-div-element:hover {
   background-color: var(--widgets-hover-bg-color);
   cursor: pointer;
 }
