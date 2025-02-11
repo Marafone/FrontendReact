@@ -15,6 +15,7 @@ import ErrorModal from "../components/ErrorModal";
 import InfoModal from "../components/InfoModal";
 import { LanguageContext } from "../context/LanguageContext";
 import { useTheme } from "../context/ThemeContext";
+import { playSound } from "../soundEffects";
 
 interface waitingRoomContent {
   gameId: bigint;
@@ -73,6 +74,8 @@ const GameWaitingRoom = () => {
         navigate("/", { replace: true });
       })
       .catch((error) => console.log(error));
+
+      playSound("/sounds/ui-leave.mp3");
   };
 
   const handleChangeTeam = (team: string) => {
@@ -148,6 +151,8 @@ const GameWaitingRoom = () => {
         event.playerName,
       ]);
     }
+
+    playSound("/sounds/ui-join.mp3");
   }
 
   const handleGameStartedEvent = () => {
