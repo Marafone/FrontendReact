@@ -17,10 +17,6 @@
   background-color: #121212;
 }
 
-.main-creation-div {
-  background-color: var(--background-color) !important;
-}
-
 .custom-game-creation-div {
   background-color: var(--lobby-color);
   color: var(--text-color);
