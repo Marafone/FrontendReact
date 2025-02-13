@@ -57,6 +57,9 @@ export const translations: TranslationsType = {
         loadingImage: "Loading image...",
         imageAlt: "All cards used in Marafon"
       },
+      playersRanking: {
+        navbar: "Players Ranking"
+      },
       errors: {
         gameNameLength: "Length must be between 4 and 20 characters",
         passwordEmpty: "Password cannot be empty",
@@ -178,6 +181,9 @@ export const translations: TranslationsType = {
           "Na koniec każdej rundy punkty są sumowane, a gracz, który rozpoczął pierwszą lewę, zostaje nowym rozdającym.",
         loadingImage: "Ładowanie obrazu...",
         imageAlt: "Wszystkie karty używane w grze Marafon",
+      },
+      playersRanking: {
+        navbar: "Ranking Graczy"
       },
       errors: {
         gameNameLength: "Długość musi wynosić od 4 do 20 znaków",
