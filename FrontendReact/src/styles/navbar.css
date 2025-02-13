@@ -10,7 +10,7 @@
 
 .custom-navbar {
   background-color: var(--navbar-bg-color);
-  height: 6vh;
+  min-height: 6vh;
 }
 
 .custom-dropdown-item:hover {
