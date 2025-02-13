@@ -9,7 +9,6 @@ import { UserProvider } from "./context/UserContext";
 import { LanguageProvider } from "./context/LanguageContext";
 import { ThemeProvider } from "./context/ThemeContext";
 
-
 // Pages
 import MainLayout from "./layouts/MainLayout";
 import GameCreation from "./pages/GameCreation";
@@ -20,7 +19,7 @@ import Register from "./pages/Register";
 import GamePlayingRoom from "./pages/GamePlayingRoom";
 import Rules from "./pages/Rules";
 import LoginSuccess from "./pages/LoginSuccess";
-
+import PlayersRanking from "./pages/PlayersRanking";
 
 export interface User {
   username: string;
@@ -34,6 +33,7 @@ function App() {
         <Route path="/" element={<MainLayout />}>
           <Route index element={<Home />} />
           <Route path="create-game" element={<GameCreation />} />
+          <Route path="players-ranking" element={<PlayersRanking />} />
         </Route>
         {/* Routes without MainLayout */}
         <Route path="/wait-for-game" element={<GameWaitingRoom />} />
@@ -47,7 +47,7 @@ function App() {
   );
 
   localStorage.removeItem("usernameValue");
-  
+
   return (
     <ThemeProvider>
       <UserProvider>

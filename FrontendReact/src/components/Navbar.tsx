@@ -43,7 +43,7 @@ const Navbar = () => {
           withCredentials: true, //  Allow cookies
         }
       );
-  
+
       if (response.status === 200) {
         setUsername(null);
         localStorage.removeItem("usernameValue");
@@ -93,7 +93,7 @@ const Navbar = () => {
     <nav className="navbar navbar-expand custom-navbar">
       <div className="container-fluid">
         <button className="navbar-toggler bg-white" type="button"></button>
-        <div className="collapse navbar-collapse">
+        <div className="collapse navbar-collapse text-center">
           <ul className="navbar-nav me-auto">
             <li className="nav-item">
               <Link to="/" className="nav-link text-white">
@@ -103,6 +103,11 @@ const Navbar = () => {
             <li className="nav-item">
               <Link to="/rules" className="nav-link text-white">
                 {t("rules.navbar")}
+              </Link>
+            </li>
+            <li>
+              <Link to="/players-ranking" className="nav-link text-white">
+                {t("playersRanking.navbar")}
               </Link>
             </li>
           </ul>
