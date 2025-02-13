@@ -106,7 +106,7 @@ const GameCreation = () => {
   };
 
   return (
-    <div className="custom-game-creation-div d-flex flex-column justify-content-center align-items-center w-75 h-75 border border-black border-opacity-50 p-3">
+    <div className="custom-game-creation-div d-flex flex-column justify-content-center align-items-center w-75 border border-black border-opacity-50">
       <p className="fs-2 fw-bold">{t("home.createGameBtn")}</p>{" "}
       {/* Use translation */}
       <form className="d-flex flex-column gap-4">

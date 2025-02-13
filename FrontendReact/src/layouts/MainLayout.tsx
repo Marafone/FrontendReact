@@ -21,7 +21,7 @@ const MainLayout = () => {
       <div
         className={`${
           isCentered ? "d-flex justify-content-center align-items-center" : ""
-        } main-layout`}
+        } main-layout p-5`}
       >
         <Outlet />
       </div>
