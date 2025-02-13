@@ -305,6 +305,9 @@ export const translations: TranslationsType = {
         loadingImage: "Caricamento immagine...",
         imageAlt: "Tutte le carte utilizzate nel Marafon"
       },
+      playersRanking: {
+        navbar: "Classifica Giocatori"
+      },
       errors: {  
         gameNameLength: "La lunghezza deve essere tra 4 e 20 caratteri",  
         passwordEmpty: "La password non può essere vuota",  
@@ -424,6 +427,9 @@ export const translations: TranslationsType = {
           "A la fin ad ogni mà, i punti i s'conten, e chi ha guidà la prima mà la dvèinta e' nôv dàl carteur.",
         loadingImage: "A s'cârica la imâggin...",
         imageAlt: "Tot i carte adoperè int la Maraffò"
+      },
+      playersRanking: {
+        navbar: "Clasifica di Giughê" 
       },
       errors: {  
         gameNameLength: "La lunghezza dvès èsar tra 4 e 20 caràter",  
