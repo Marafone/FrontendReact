@@ -11,7 +11,7 @@
 }
 
 .main-layout {
-    height: 94vh;
+    min-height: 94vh;
     background-color: var(--background-color);
     color: var(--text-color);
 }
