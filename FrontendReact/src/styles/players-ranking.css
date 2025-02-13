@@ -1,0 +1,249 @@
+:root {
+  --statistics-card-background-gradient-color-left: #81252a;
+  --statistics-card-background-gradient-color-middle: #ab2e30;
+  --statistics-card-background-gradient-color-right: #dc3939;
+  --ranking-outer-background-color: #f2eece;
+  --player-ranking-container-bg-color: #dc3545;
+  --player-ranking-container-hover-bg-color: #fd4e60;
+  --user-player-ranking-container-bg-color: #f8d7da;
+  --user-player-ranking-container-hover-bg-color: #f5dfe1;
+}
+
+@media (min-width: 0) {
+  .custom-wrapper-div {
+    padding-block: 3rem;
+    padding-inline: 0;
+  }
+}
+
+@media (min-width: 576px) {
+  .custom-wrapper-div {
+    padding: 3rem;
+  }
+}
+
+.custom-players-ranking-image {
+  width: 75px;
+}
+
+.custom-ranking-outer-div {
+  background-color: var(--ranking-outer-background-color);
+}
+
+.custom-statistics-card-image {
+  width: 90px;
+}
+
+.custom-statistics-card {
+  background-image: repeating-linear-gradient(
+    to right,
+    var(--statistics-card-background-gradient-color-left),
+    var(--statistics-card-background-gradient-color-middle),
+    var(--statistics-card-background-gradient-color-right)
+  );
+  width: 75%;
+}
+
+@media (min-width: 0) {
+  .custom-statistics-title {
+    font-size: 1.75rem;
+  }
+
+  .custom-statistics-section {
+    width: 100%;
+  }
+
+  .custom-statistics-description {
+    font-size: 1rem;
+  }
+}
+
+@media (min-width: 576px) {
+  .custom-statistics-section {
+    width: 80%;
+  }
+}
+
+@media (min-width: 768px) {
+  .custom-statistics-description {
+    padding-inline: 0;
+    font-size: 1rem;
+  }
+
+  .custom-statistics-section {
+    width: 50%;
+  }
+}
+
+@media (min-width: 992px) {
+  .custom-statistics-description {
+    font-size: 1.25rem;
+    padding-inline: 1rem;
+  }
+
+  .custom-statistics-title {
+    font-size: 2.5rem;
+  }
+}
+
+@media (min-width: 1200px) {
+  .custom-statistics-card-image {
+    width: 90px;
+  }
+}
+
+@media (min-width: 1400px) {
+  .custom-statistics-card {
+    width: 60%;
+  }
+}
+
+.custom-ranking-word {
+  margin-top: -10px;
+}
+
+.custom-players-section {
+  width: 100%;
+}
+
+@media (min-width: 0) {
+  .custom-players-ranking-section {
+    width: 75%;
+  }
+
+  .custom-player-ranking-container-username {
+    font-size: 1rem;
+  }
+
+  .custom-player-ranking-container-title {
+    font-size: 0.8rem;
+  }
+
+  .custom-player-ranking-container-position {
+    font-size: 1rem;
+    padding: 0.2rem;
+    border-radius: 0;
+  }
+
+  .custom-search-label {
+    font-size: 1.25rem;
+  }
+
+  .custom-search-input {
+    font-size: 1.125rem;
+    padding-block: 0;
+    padding-inline: 0.25rem;
+  }
+
+  .custom-search-icon {
+    font-size: 1.125rem;
+    padding-block: 0;
+    padding-inline: 0.25rem;
+  }
+
+  .custom-page-number {
+    font-size: 1rem;
+  }
+
+  .custom-page-btn {
+    font-size: 0.75rem !important;
+  }
+}
+
+@media (min-width: 576px) {
+  .custom-player-ranking-container-username {
+    font-size: 1.25rem;
+  }
+
+  .custom-player-ranking-container-title {
+    font-size: 1rem;
+  }
+
+  .custom-player-ranking-container-position {
+    font-size: 1.25rem;
+    padding: 0.25rem;
+    border-radius: 0.25rem;
+  }
+
+  .custom-search-label {
+    font-size: 1.5rem;
+  }
+
+  .custom-search-input {
+    font-size: 1.25rem;
+    padding: 0.25rem;
+  }
+
+  .custom-search-icon {
+    font-size: 1.25rem;
+    padding: 0.25rem;
+  }
+
+  .custom-page-number {
+    font-size: 1.25rem;
+  }
+
+  .custom-page-btn {
+    font-size: 1rem !important;
+  }
+}
+
+@media (min-width: 768px) {
+  .custom-players-ranking-section {
+    width: 50%;
+  }
+
+  .custom-player-ranking-container-username {
+    font-size: 1.25rem;
+  }
+
+  .custom-player-ranking-container-title {
+    font-size: 1rem;
+  }
+
+  .custom-player-ranking-container-position {
+    font-size: 1.25rem;
+    padding: 0.25rem;
+  }
+}
+
+@media (min-width: 992px) {
+  .custom-player-ranking-container-username {
+    font-size: 1.5rem;
+  }
+
+  .custom-player-ranking-container-title {
+    font-size: 1.25rem;
+  }
+
+  .custom-player-ranking-container-position {
+    font-size: 1.5rem;
+    padding: 0.5rem;
+  }
+}
+
+@media (min-width: 1200px) {
+  .custom-players-section {
+    width: 75%;
+  }
+}
+
+.custom-player-ranking-container {
+  background-color: var(--player-ranking-container-bg-color);
+}
+
+.custom-player-ranking-container:hover {
+  cursor: pointer;
+  background-color: var(--player-ranking-container-hover-bg-color);
+  box-shadow: 0 0 10px rgba(220, 53, 69, 0.7);
+}
+
+.custom-user-player-ranking-container {
+  background-color: var(--user-player-ranking-container-bg-color);
+}
+
+.custom-user-player-ranking-container:hover {
+  cursor: pointer;
+  background-color: var(--user-player-ranking-container-hover-bg-color);
+  box-shadow: 0 0 10px rgba(248, 215, 218, 0.7);
+}
