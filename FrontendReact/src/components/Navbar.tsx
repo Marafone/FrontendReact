@@ -107,7 +107,7 @@ const Navbar = () => {
             </li>
             <li>
               <Link to="/players-ranking" className="nav-link text-white">
-                {t("playersRanking.navbar")}
+                {t("ranking.navbar")}
               </Link>
             </li>
           </ul>
@@ -132,7 +132,7 @@ const Navbar = () => {
                 aria-expanded="false"
                 onClick={handleLanguagesClick}
               >
-                {t("language")} ({language})
+                {language}
               </button>
               <ul
                 className={`dropdown-menu custom-dropdown-menu border border-black border-2 ${
