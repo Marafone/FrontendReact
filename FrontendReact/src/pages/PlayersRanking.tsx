@@ -5,7 +5,7 @@ import axios from "axios";
 import ErrorModal from "../components/ErrorModal";
 import { LanguageContext } from "../context/LanguageContext";
 import { useTheme } from "../context/ThemeContext";
-
+import { useNavigate } from "react-router-dom";
 
 axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL;
 
@@ -61,6 +61,8 @@ const PlayersRanking = () => {
 
   const [errorMessage, setErrorMessage] = useState<string>("");
 
+  const navigate = useNavigate();
+
   const findPlayerTitle = (rankingPosition: number) => {
     for (let [range, title] of rangeTitles)
       if (
@@ -93,6 +95,10 @@ const PlayersRanking = () => {
           setErrorMessage(
             "The user you are searching for does not exist in the ranking. Please check the username and try again."
           );
+        else if (error.response?.status == 403) {
+          navigate("/login");
+          alert("Unauthorized! Redirecting to login...");
+        }
       });
   };
 
@@ -102,7 +108,7 @@ const PlayersRanking = () => {
     throw new Error("LanguageContext must be used within a LanguageProvider.");
   }
 
-  const { t } = context; 
+  const { t } = context;
 
   const { theme } = useTheme();
 
@@ -118,7 +124,12 @@ const PlayersRanking = () => {
         setPlayersInfo(playersRankingInfo);
         setNextPageExist(playersRankingInfo.length > 0);
       })
-      .catch((err) => console.log(err));
+      .catch((error) => {
+        if (error.response?.status == 403) {
+          navigate("/login");
+          alert("Unauthorized! Redirecting to login...");
+        }
+      });
   }, [page]);
 
   useEffect(() => {
@@ -137,7 +148,12 @@ const PlayersRanking = () => {
         setCurrentPlayerInfo(currentPlayerRankingInfo);
         setPlayerStats(playerStatsInfo);
       })
-      .catch((err) => console.log(err));
+      .catch((error) => {
+        if (error.response?.status == 403) {
+          navigate("/login");
+          alert("Unauthorized! Redirecting to login...");
+        }
+      });
   }, []);
 
   const handlePlayerNicknameChange = (
@@ -159,7 +175,9 @@ const PlayersRanking = () => {
         {/* Statistics section */}
         <div className="custom-statistics-section">
           <div className="custom-statistics-card d-flex flex-column justify-content-center gap-4 rounded-4 shadow py-5 text-center text-white m-auto">
-            <p className="custom-statistics-title fw-bold m-0">{t("ranking.statistics")}</p>
+            <p className="custom-statistics-title fw-bold m-0">
+              {t("ranking.statistics")}
+            </p>
             <div className="d-lg-flex d-none justify-content-center">
               <img
                 src={images["Coins_FOUR"]}
@@ -192,7 +210,9 @@ const PlayersRanking = () => {
           {/* Title section */}
           <div className="d-flex align-items-center gap-5">
             <p className="text-center m-0">
-              <span className="fs-1 fw-bold d-block">{t("ranking.players")}</span>
+              <span className="fs-1 fw-bold d-block">
+                {t("ranking.players")}
+              </span>
               <span className="fs-4 fw-normal d-block custom-ranking-word">
                 {t("ranking.ranking")}
               </span>
