@@ -291,6 +291,7 @@ const GamePlayingRoom = () => {
     handleStopTimer();
 
     playSound("/sounds/card_shuffle.mp3");
+    // might add delay to put cards on frontend after sound has finished playing 
 
     // clear board and move cards to last turn cards section
     handleNewTurnEvent();

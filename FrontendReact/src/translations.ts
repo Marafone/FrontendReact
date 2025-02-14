@@ -57,8 +57,17 @@ export const translations: TranslationsType = {
         loadingImage: "Loading image...",
         imageAlt: "All cards used in Marafon"
       },
-      playersRanking: {
-        navbar: "Players Ranking"
+      ranking: {
+        navbar: "Ranking",
+        player: "Player",
+        players: "Players",
+        ranking: "Ranking",
+        search: "Search",
+        wins: "Wins",
+        losses: "Losses",
+        winRatio: "Win Ratio",
+        statistics: "Statistics",
+        noPlayers: "No Players on this page"
       },
       errors: {
         gameNameLength: "Length must be between 4 and 20 characters",
@@ -182,8 +191,17 @@ export const translations: TranslationsType = {
         loadingImage: "Ładowanie obrazu...",
         imageAlt: "Wszystkie karty używane w grze Marafon",
       },
-      playersRanking: {
-        navbar: "Ranking Graczy"
+      ranking: {  
+        navbar: "Ranking",  
+        player: "Gracz",
+        players: "Gracze",  
+        ranking: "Ranking",  
+        search: "Szukaj",  
+        wins: "Wygrane",  
+        losses: "Przegrane",  
+        winRatio: "Procent wygranych",  
+        statistics: "Statystyki",  
+        noPlayers: "Brak graczy na tej stronie"  
       },
       errors: {
         gameNameLength: "Długość musi wynosić od 4 do 20 znaków",
@@ -305,6 +323,18 @@ export const translations: TranslationsType = {
         loadingImage: "Caricamento immagine...",
         imageAlt: "Tutte le carte utilizzate nel Marafon"
       },
+      ranking: {  
+        navbar: "Classifica",  
+        player: "Giocatore",
+        players: "Giocatori",  
+        ranking: "Classifica",  
+        search: "Cerca",  
+        wins: "Vittorie",  
+        losses: "Sconfitte",  
+        winRatio: "Percentuale di vittorie",  
+        statistics: "Statistiche",  
+        noPlayers: "Nessun giocatore in questa pagina"  
+      },
       errors: {  
         gameNameLength: "La lunghezza deve essere tra 4 e 20 caratteri",  
         passwordEmpty: "La password non può essere vuota",  
@@ -424,6 +454,18 @@ export const translations: TranslationsType = {
           "A la fin ad ogni mà, i punti i s'conten, e chi ha guidà la prima mà la dvèinta e' nôv dàl carteur.",
         loadingImage: "A s'cârica la imâggin...",
         imageAlt: "Tot i carte adoperè int la Maraffò"
+      },
+      ranking: {  
+        navbar: "Clasifich",  
+        player: "Zugadôr",
+        players: "Zugaadôr",  
+        ranking: "Clasifich",  
+        search: "Cérca",  
+        wins: "Vint",  
+        losses: "Pers",  
+        winRatio: "Percintéda ad vint",  
+        statistics: "Statistich",  
+        noPlayers: "Nissun zugadôr in sta pagina"  
       },
       errors: {  
         gameNameLength: "La lunghezza dvès èsar tra 4 e 20 caràter",  
