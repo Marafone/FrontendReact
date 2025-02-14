@@ -78,7 +78,12 @@ const Register = () => {
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
-
+        {/* Login Link */}
+        <p className="text-center">
+          <a href="#" onClick={() => navigate("/login")}>
+            {t("register.login")} {/* Translated Login link */}
+          </a>
+        </p>
         <div className="d-flex justify-content-between">
           <button className="btn btn-secondary" onClick={() => navigate("/")}>
             {t("register.cancel")} {/* Translated Cancel button */}

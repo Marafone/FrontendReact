@@ -29,6 +29,7 @@ export const translations: TranslationsType = {
         cancel: "Cancel",
         submit: "Submit",
         error: "Login failed. Please check your credentials.",
+        register: "Go to Register",
       },
       register: {
         title: "Register",
@@ -38,6 +39,7 @@ export const translations: TranslationsType = {
         submit: "Submit",
         cancel: "Cancel",
         error: "Registration failed. Please try again.",
+        login: "Go to Log In",
       },
       logout: "Log Out",
       language: "Language",
@@ -155,6 +157,7 @@ export const translations: TranslationsType = {
         cancel: "Anuluj",
         submit: "Zaloguj",
         error: "Logowanie nie powiodło się. Proszę sprawdzić dane logowania.",
+        register: "Przejdź do rejestracji",
       },
       register: {
         title: "Zarejestruj się",
@@ -164,6 +167,7 @@ export const translations: TranslationsType = {
         submit: "Zarejestruj",
         cancel: "Anuluj",
         error: "Rejestracja nie powiodła się. Spróbuj ponownie.",
+        login: "Przejdź do logowania",
       },
       logout: "Wyloguj się",
       language: "Język",
@@ -286,7 +290,8 @@ export const translations: TranslationsType = {
         password: "Password",
         cancel: "Annulla",
         submit: "Invia",
-        error: "Accesso fallito. Controlla le tue credenziali."
+        error: "Accesso fallito. Controlla le tue credenziali.",
+        register: "Vai alla registrazione",
       },
       register: {
         title: "Registrazione",
@@ -295,7 +300,8 @@ export const translations: TranslationsType = {
         password: "Password",
         submit: "Invia",
         cancel: "Annulla",
-        error: "Registrazione fallita. Riprova."
+        error: "Registrazione fallita. Riprova.",
+        login: "Vai al login",
       },
       logout: "Esci",
       language: "Lingua",
@@ -418,7 +424,8 @@ export const translations: TranslationsType = {
         password: "Paròla ad Pas",
         cancel: "Anulè",
         submit: "Invìa",
-        error: "Access falì. Cuntrolè i toi credenzièli."
+        error: "Access falì. Cuntrolè i toi credenzièli.",
+        register: "Va a l’iscriziò",
       },
       register: {
         title: "Registraziòun",
@@ -427,7 +434,8 @@ export const translations: TranslationsType = {
         password: "Paròla ad Pas",
         submit: "Invìa",
         cancel: "Anulè",
-        error: "Registraziòun falì. Pròva d nòv."
+        error: "Registraziòun falì. Pròva d nòv.",
+        login: "Va a la arclènta",
       },
       logout: "Sgnìs da fôra",
       language: "Léngua",
