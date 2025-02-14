@@ -95,10 +95,12 @@ const PlayersRanking = () => {
           setErrorMessage(
             "The user you are searching for does not exist in the ranking. Please check the username and try again."
           );
+          /*
         else if (error.response?.status == 403) {
           navigate("/login");
           alert("Unauthorized! Redirecting to login...");
         }
+          */
       });
   };
 
@@ -124,12 +126,14 @@ const PlayersRanking = () => {
         setPlayersInfo(playersRankingInfo);
         setNextPageExist(playersRankingInfo.length > 0);
       })
+      /*
       .catch((error) => {
         if (error.response?.status == 403) {
           navigate("/login");
           alert("Unauthorized! Redirecting to login...");
         }
       });
+      */
   }, [page]);
 
   useEffect(() => {
@@ -148,12 +152,14 @@ const PlayersRanking = () => {
         setCurrentPlayerInfo(currentPlayerRankingInfo);
         setPlayerStats(playerStatsInfo);
       })
+      /*
       .catch((error) => {
         if (error.response?.status == 403) {
           navigate("/login");
           alert("Unauthorized! Redirecting to login...");
         }
       });
+      */
   }, []);
 
   const handlePlayerNicknameChange = (

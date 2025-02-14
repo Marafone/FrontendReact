@@ -55,12 +55,6 @@ const Home = () => {
           setLobbies(Array.isArray(response.data) ? response.data : []);
           setLoading(false);
         })
-        .catch((error: AxiosError) => {
-          if (error.response?.status == 403) {
-            navigate("/login");
-            alert("Unauthorized! Redirecting to login...");
-          }
-        });
     };
 
     fetchGames();
