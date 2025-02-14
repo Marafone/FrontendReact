@@ -97,13 +97,17 @@ const PlayersRanking = () => {
 
   const context = useContext(LanguageContext);
 
-  const { theme } = useTheme();
-
   if (!context) {
     throw new Error("LanguageContext must be used within a LanguageProvider.");
   }
 
-  const { t } = context; // Now `context` is guaranteed to be defined
+  const { t } = context; 
+
+  const { theme } = useTheme();
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+  }, [theme]);
 
   useEffect(() => {
     axios
@@ -229,7 +233,7 @@ const PlayersRanking = () => {
                 className="custom-search-input border-0 w-75"
               />
               <i
-                className="custom-search-icon bi bi-search ms-0 bg-white"
+                className="custom-search-icon bi bi-search ms-0"
                 onClick={() =>
                   playerNickname && searchForPlayer(playerNickname)
                 }

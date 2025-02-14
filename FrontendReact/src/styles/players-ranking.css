@@ -7,6 +7,19 @@
   --player-ranking-container-hover-bg-color: #fd4e60;
   --user-player-ranking-container-bg-color: #f8d7da;
   --user-player-ranking-container-hover-bg-color: #f5dfe1;
+  --search-icon-background: #ffffff; 
+}
+
+[data-theme="dark"] {
+  --statistics-card-background-gradient-color-left: #3a0f11;
+  --statistics-card-background-gradient-color-middle: #551518;
+  --statistics-card-background-gradient-color-right: #731b1e;
+  --ranking-outer-background-color: #1a1a1a;
+  --player-ranking-container-bg-color: #551518;
+  --player-ranking-container-hover-bg-color: #731b1e;
+  --user-player-ranking-container-bg-color: #3e2425;
+  --user-player-ranking-container-hover-bg-color: #3d2426;
+  --search-icon-background: black;
 }
 
 @media (min-width: 0) {
@@ -139,6 +152,7 @@
     font-size: 1.125rem;
     padding-block: 0;
     padding-inline: 0.25rem;
+    background-color: var(--search-icon-background);
   }
 
   .custom-page-number {
