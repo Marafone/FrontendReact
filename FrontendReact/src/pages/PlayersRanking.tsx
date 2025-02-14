@@ -52,6 +52,7 @@ const PlayersRanking = () => {
   const [playerStats, setPlayerStats] = useState<PlayerStatsInfo>();
 
   const [page, setPage] = useState(0);
+  const [nextPageExist, setNextPageExist] = useState(true);
   const pageSize = 5;
 
   const [playerNickname, setPlayerNickname] = useState<string>();
@@ -99,6 +100,7 @@ const PlayersRanking = () => {
       .then((response) => {
         let playersRankingInfo: PlayerRankingInfo[] = response.data;
         setPlayersInfo(playersRankingInfo);
+        setNextPageExist(playersRankingInfo.length > 0);
       })
       .catch((err) => console.log(err));
   }, [page]);
@@ -244,7 +246,9 @@ const PlayersRanking = () => {
                     <div className="custom-player-ranking-container-position bg-warning text-center fw-semibold">
                       {playerInfo.position}
                     </div>
-                    <p className="custom-player-ranking-container-username m-0">{playerInfo.username}</p>
+                    <p className="custom-player-ranking-container-username m-0">
+                      {playerInfo.username}
+                    </p>
                   </div>
                   <p className="custom-player-ranking-container-title fw-bold m-0">
                     {findPlayerTitle(playerInfo.position)}
@@ -267,6 +271,7 @@ const PlayersRanking = () => {
               <button
                 className="custom-page-btn btn btn-secondary rounded-0"
                 onClick={() => setPage((page) => page + 1)}
+                disabled={!nextPageExist}
               >
                 Next Page
               </button>
@@ -280,7 +285,9 @@ const PlayersRanking = () => {
                 <div className="custom-player-ranking-container-position bg-warning text-center rounded-1">
                   {currentPlayerInfo?.position}
                 </div>
-                <p className="custom-player-ranking-container-username fw-bold m-0">You</p>
+                <p className="custom-player-ranking-container-username fw-bold m-0">
+                  You
+                </p>
               </div>
               <p className="custom-player-ranking-container-title fw-bold m-0">
                 {currentPlayerInfo?.position
