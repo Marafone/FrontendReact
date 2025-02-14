@@ -29,6 +29,7 @@ export const translations: TranslationsType = {
         cancel: "Cancel",
         submit: "Submit",
         error: "Login failed. Please check your credentials.",
+        register: "Go to Register",
       },
       register: {
         title: "Register",
@@ -38,6 +39,7 @@ export const translations: TranslationsType = {
         submit: "Submit",
         cancel: "Cancel",
         error: "Registration failed. Please try again.",
+        login: "Go to Log In",
       },
       logout: "Log Out",
       language: "Language",
@@ -56,6 +58,18 @@ export const translations: TranslationsType = {
         handConclusion: "At the end of each hand, the points are tallied, and the player who led the first trick becomes the new dealer. It is not allowed to talk during the game.",
         loadingImage: "Loading image...",
         imageAlt: "All cards used in Marafon"
+      },
+      ranking: {
+        navbar: "Ranking",
+        player: "Player",
+        players: "Players",
+        ranking: "Ranking",
+        search: "Search",
+        wins: "Wins",
+        losses: "Losses",
+        winRatio: "Win Ratio",
+        statistics: "Statistics",
+        noPlayers: "No Players on this page"
       },
       errors: {
         gameNameLength: "Length must be between 4 and 20 characters",
@@ -143,6 +157,7 @@ export const translations: TranslationsType = {
         cancel: "Anuluj",
         submit: "Zaloguj",
         error: "Logowanie nie powiodło się. Proszę sprawdzić dane logowania.",
+        register: "Przejdź do rejestracji",
       },
       register: {
         title: "Zarejestruj się",
@@ -152,6 +167,7 @@ export const translations: TranslationsType = {
         submit: "Zarejestruj",
         cancel: "Anuluj",
         error: "Rejestracja nie powiodła się. Spróbuj ponownie.",
+        login: "Przejdź do logowania",
       },
       logout: "Wyloguj się",
       language: "Język",
@@ -178,6 +194,18 @@ export const translations: TranslationsType = {
           "Na koniec każdej rundy punkty są sumowane, a gracz, który rozpoczął pierwszą lewę, zostaje nowym rozdającym.",
         loadingImage: "Ładowanie obrazu...",
         imageAlt: "Wszystkie karty używane w grze Marafon",
+      },
+      ranking: {  
+        navbar: "Ranking",  
+        player: "Gracz",
+        players: "Gracze",  
+        ranking: "Ranking",  
+        search: "Szukaj",  
+        wins: "Wygrane",  
+        losses: "Przegrane",  
+        winRatio: "Procent wygranych",  
+        statistics: "Statystyki",  
+        noPlayers: "Brak graczy na tej stronie"  
       },
       errors: {
         gameNameLength: "Długość musi wynosić od 4 do 20 znaków",
@@ -262,7 +290,8 @@ export const translations: TranslationsType = {
         password: "Password",
         cancel: "Annulla",
         submit: "Invia",
-        error: "Accesso fallito. Controlla le tue credenziali."
+        error: "Accesso fallito. Controlla le tue credenziali.",
+        register: "Vai alla registrazione",
       },
       register: {
         title: "Registrazione",
@@ -271,7 +300,8 @@ export const translations: TranslationsType = {
         password: "Password",
         submit: "Invia",
         cancel: "Annulla",
-        error: "Registrazione fallita. Riprova."
+        error: "Registrazione fallita. Riprova.",
+        login: "Vai al login",
       },
       logout: "Esci",
       language: "Lingua",
@@ -298,6 +328,18 @@ export const translations: TranslationsType = {
           "Alla fine di ogni mano, i punti vengono contati e il giocatore che ha guidato la prima presa diventa il nuovo mazziere.",
         loadingImage: "Caricamento immagine...",
         imageAlt: "Tutte le carte utilizzate nel Marafon"
+      },
+      ranking: {  
+        navbar: "Classifica",  
+        player: "Giocatore",
+        players: "Giocatori",  
+        ranking: "Classifica",  
+        search: "Cerca",  
+        wins: "Vittorie",  
+        losses: "Sconfitte",  
+        winRatio: "Percentuale di vittorie",  
+        statistics: "Statistiche",  
+        noPlayers: "Nessun giocatore in questa pagina"  
       },
       errors: {  
         gameNameLength: "La lunghezza deve essere tra 4 e 20 caratteri",  
@@ -382,7 +424,8 @@ export const translations: TranslationsType = {
         password: "Paròla ad Pas",
         cancel: "Anulè",
         submit: "Invìa",
-        error: "Access falì. Cuntrolè i toi credenzièli."
+        error: "Access falì. Cuntrolè i toi credenzièli.",
+        register: "Va a l’iscriziò",
       },
       register: {
         title: "Registraziòun",
@@ -391,7 +434,8 @@ export const translations: TranslationsType = {
         password: "Paròla ad Pas",
         submit: "Invìa",
         cancel: "Anulè",
-        error: "Registraziòun falì. Pròva d nòv."
+        error: "Registraziòun falì. Pròva d nòv.",
+        login: "Va a la arclènta",
       },
       logout: "Sgnìs da fôra",
       language: "Léngua",
@@ -418,6 +462,18 @@ export const translations: TranslationsType = {
           "A la fin ad ogni mà, i punti i s'conten, e chi ha guidà la prima mà la dvèinta e' nôv dàl carteur.",
         loadingImage: "A s'cârica la imâggin...",
         imageAlt: "Tot i carte adoperè int la Maraffò"
+      },
+      ranking: {  
+        navbar: "Clasifich",  
+        player: "Zugadôr",
+        players: "Zugaadôr",  
+        ranking: "Clasifich",  
+        search: "Cérca",  
+        wins: "Vint",  
+        losses: "Pers",  
+        winRatio: "Percintéda ad vint",  
+        statistics: "Statistich",  
+        noPlayers: "Nissun zugadôr in sta pagina"  
       },
       errors: {  
         gameNameLength: "La lunghezza dvès èsar tra 4 e 20 caràter",  
