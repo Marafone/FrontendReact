@@ -57,11 +57,10 @@ const PlayersRanking = () => {
   const [nextPageExist, setNextPageExist] = useState(true);
   const pageSize = 5;
 
-  const [playerNickname, setPlayerNickname] = useState<string>();
+  const [searchedPlayerNickname, setSearchedPlayerNickname] =
+    useState<string>();
 
   const [errorMessage, setErrorMessage] = useState<string>("");
-
-  const navigate = useNavigate();
 
   const findPlayerTitle = (rankingPosition: number) => {
     for (let [range, title] of rangeTitles)
@@ -95,12 +94,6 @@ const PlayersRanking = () => {
           setErrorMessage(
             "The user you are searching for does not exist in the ranking. Please check the username and try again."
           );
-          /*
-        else if (error.response?.status == 403) {
-          navigate("/login");
-          alert("Unauthorized! Redirecting to login...");
-        }
-          */
       });
   };
 
@@ -125,15 +118,7 @@ const PlayersRanking = () => {
         let playersRankingInfo: PlayerRankingInfo[] = response.data;
         setPlayersInfo(playersRankingInfo);
         setNextPageExist(playersRankingInfo.length > 0);
-      })
-      /*
-      .catch((error) => {
-        if (error.response?.status == 403) {
-          navigate("/login");
-          alert("Unauthorized! Redirecting to login...");
-        }
       });
-      */
   }, [page]);
 
   useEffect(() => {
@@ -152,20 +137,15 @@ const PlayersRanking = () => {
         setCurrentPlayerInfo(currentPlayerRankingInfo);
         setPlayerStats(playerStatsInfo);
       })
-      /*
-      .catch((error) => {
-        if (error.response?.status == 403) {
-          navigate("/login");
-          alert("Unauthorized! Redirecting to login...");
-        }
+      .catch((err) => {
+        console.log("Error occurred:", err);
       });
-      */
   }, []);
 
-  const handlePlayerNicknameChange = (
+  const handleSearchedPlayerNicknameChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
-    setPlayerNickname(event.target.value);
+    setSearchedPlayerNickname(event.target.value);
   };
 
   return (
@@ -257,13 +237,14 @@ const PlayersRanking = () => {
                 id="username"
                 name="username"
                 placeholder="Nickname"
-                onChange={handlePlayerNicknameChange}
+                onChange={handleSearchedPlayerNicknameChange}
                 className="custom-search-input border-0 w-75"
               />
               <i
                 className="custom-search-icon bi bi-search ms-0"
                 onClick={() =>
-                  playerNickname && searchForPlayer(playerNickname)
+                  searchedPlayerNickname &&
+                  searchForPlayer(searchedPlayerNickname)
                 }
               ></i>
             </div>
@@ -325,7 +306,7 @@ const PlayersRanking = () => {
             >
               <div className="d-flex align-items-center gap-2">
                 <div className="custom-player-ranking-container-position bg-warning text-center rounded-1">
-                  {currentPlayerInfo?.position}
+                  {currentPlayerInfo?.position ?? "?"}
                 </div>
                 <p className="custom-player-ranking-container-username fw-bold m-0">
                   You
