@@ -5,6 +5,7 @@ import "../styles/home-page.css";
 import { LanguageContext } from "../context/LanguageContext";
 import { useTheme } from "../context/ThemeContext";
 import ErrorModal from "../components/ErrorModal";
+import RedirectErrorModal from "../components/RedirectErrorModal";
 
 axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL;
 
@@ -34,6 +35,7 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   // error modal
   const [error, setError] = useState(false);
+  const [redirectError, setRedirectError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
   const context = useContext(LanguageContext);
@@ -49,12 +51,10 @@ const Home = () => {
   useEffect(() => {
     const fetchGames = () => {
       setLoading(true);
-      axios
-        .get("/game/waiting")
-        .then((response) => {
-          setLobbies(Array.isArray(response.data) ? response.data : []);
-          setLoading(false);
-        })
+      axios.get("/game/waiting").then((response) => {
+        setLobbies(response.data);
+        setLoading(false);
+      });
     };
 
     fetchGames();
@@ -84,11 +84,12 @@ const Home = () => {
         handleNavigation(gameData);
       })
       .catch((err: AxiosError<JoinGameResponse>) => {
-        if (err.response) {
-          handleRequestError(err.response.data.message);
-        } else {
-          handleRequestError(err.message);
+        if (err.status == 403) {
+          handleRedirectError("Login required to join the game.");
+          return;
         }
+
+        handleRequestError(err.message);
       });
   };
 
@@ -97,15 +98,32 @@ const Home = () => {
     setError(true);
   };
 
+  const handleRedirectError = (errorMessage: string) => {
+    setErrorMessage(errorMessage);
+    setRedirectError(true);
+  };
+
+  const resetErrorMessage = () => {
+    setErrorMessage("");
+  };
+
+  const resetError = () => {
+    setError(false);
+    resetErrorMessage();
+  };
+
+  const resetRedirectError = () => {
+    setRedirectError(false);
+    resetErrorMessage();
+  };
+
   return (
     <>
-      {error && (
-        <ErrorModal
+      {error && <ErrorModal message={errorMessage} onClose={resetError} />}
+      {redirectError && (
+        <RedirectErrorModal
           message={errorMessage}
-          onClose={() => {
-            setError(false);
-            setErrorMessage("");
-          }}
+          onClose={resetRedirectError}
         />
       )}
       <div className="container-fluid d-flex flex-column align-items-center h-100 p-3 w-100">
@@ -146,6 +164,10 @@ const Home = () => {
                 <div className="d-flex justify-content-center align-items-center container-fluid border-bottom border-black border-opacity-25 border-1 p-2">
                   <p className="m-0">{t("home.loading")}</p>{" "}
                   {/* Translated Loading */}
+                </div>
+              ) : lobbies.length == 0 ? (
+                <div className="border-bottom border-black border-opacity-25 border-1 p-2">
+                  No games available
                 </div>
               ) : (
                 lobbies.map((l) => (

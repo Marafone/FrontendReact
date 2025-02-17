@@ -20,7 +20,7 @@
 .custom-game-creation-div {
   background-color: var(--lobby-color);
   color: var(--text-color);
-  min-height: 75vh;
+  min-height: 65vh;
 }
 
 .form-check-input:focus {
