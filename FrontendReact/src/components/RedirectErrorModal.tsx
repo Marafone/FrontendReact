@@ -18,12 +18,14 @@ const RedirectErrorModal = ({ message, onClose }: RedirectErrorModalProps) => {
         <p>{message}</p>
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="primary" onClick={() => navigate("/login")}>
-          Go to Login
-        </Button>
-        <Button variant="danger" onClick={onClose}>
-          Close
-        </Button>
+        <div className="w-100 d-flex justify-content-between">
+          <Button variant="primary" onClick={() => navigate("/login")}>
+            Go to Login
+          </Button>
+          <Button variant="danger" onClick={onClose}>
+            Close
+          </Button>
+        </div>
       </Modal.Footer>
     </Modal>
   );
