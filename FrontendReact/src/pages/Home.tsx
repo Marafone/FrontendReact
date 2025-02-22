@@ -37,6 +37,11 @@ const Home = () => {
   const [error, setError] = useState(false);
   const [redirectError, setRedirectError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  // reconnection option
+  const [isReconnectionPossible, setIsReconnectionPossible] = useState(false);
+  const [reconnectableGameId, setReconnectableGameId] = useState<bigint>(
+    BigInt(0)
+  );
 
   const context = useContext(LanguageContext);
 
@@ -47,6 +52,20 @@ const Home = () => {
   }
 
   const { t } = context; // Now `context` is guaranteed to be defined
+
+  useEffect(() => {
+    axios
+      .get("/game/reconnectable", {
+        transformResponse: [(data) => data], // disable automatic parsing
+      })
+      .then((response) => {
+        if (response.data) {
+          setIsReconnectionPossible(true);
+          setReconnectableGameId(response.data);
+        }
+      })
+      .catch((error) => console.log(error));
+  }, []);
 
   useEffect(() => {
     const fetchGames = () => {
@@ -84,12 +103,14 @@ const Home = () => {
         handleNavigation(gameData);
       })
       .catch((err: AxiosError<JoinGameResponse>) => {
+        console.log(err);
         if (err.status == 403) {
           handleRedirectError("Login required to join the game.");
           return;
         }
 
-        handleRequestError(err.message);
+        if (err.response) handleRequestError(err.response.data.message);
+        else handleRequestError(err.message);
       });
   };
 
@@ -117,6 +138,13 @@ const Home = () => {
     resetErrorMessage();
   };
 
+  const handleReconnect = (gameId: bigint) => {
+    setIsReconnectionPossible(false);
+    navigate("/play-game", {
+      state: { gameId: BigInt(gameId) },
+    });
+  };
+
   return (
     <>
       {error && <ErrorModal message={errorMessage} onClose={resetError} />}
@@ -127,6 +155,16 @@ const Home = () => {
         />
       )}
       <div className="container-fluid d-flex flex-column align-items-center h-100 p-3 w-100">
+        {isReconnectionPossible && (
+          <div className="w-50 mb-1 mt-2">
+            <button
+              className="btn btn-success w-100 fw-bold"
+              onClick={() => handleReconnect(reconnectableGameId)}
+            >
+              Reconnect
+            </button>
+          </div>
+        )}
         {/* Create Game Button */}
         <div className="w-50 mb-4 mt-2">
           <Link
