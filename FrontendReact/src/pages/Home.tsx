@@ -55,7 +55,7 @@ const Home = () => {
 
   useEffect(() => {
     axios
-      .get("/game/reconnectable", {
+      .get("/game/active", {
         transformResponse: [(data) => data], // disable automatic parsing
       })
       .then((response) => {
