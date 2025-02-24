@@ -26,6 +26,9 @@ import ResultModal from "../components/ResultModal";
 import { LanguageContext } from "../context/LanguageContext";
 import { useTheme } from "../context/ThemeContext";
 import { playSound } from "../soundEffects";
+import InfoModal from "../components/InfoModal";
+import RedirectErrorModal from "../components/LoginRedirectionModal";
+import LeaveGameModal from "../components/LeaveGameModal";
 
 var client: Client;
 
@@ -94,6 +97,8 @@ const GamePlayingRoom = () => {
   // result of the game modal
   const [showResultModal, setShowResultModal] = useState(false);
   const [winnerTeam, setWinnerTeam] = useState<string>("");
+  // info modal
+  const [showLeaveGameModal, setShowLeaveGameModal] = useState(false);
   // cards played last turn part
   const [playerCardMapLastTurn, setPlayerCardMapLastTurn] = useState<
     Map<string, string | null>
@@ -523,6 +528,20 @@ const GamePlayingRoom = () => {
     }
   }, [currentPlayer]);
 
+  // refresh page useEffect, inform user that changes may not be saved
+
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, []);
+
   // Dark mode
 
   const { theme } = useTheme();
@@ -596,6 +615,7 @@ const GamePlayingRoom = () => {
           }}
         />
       )}
+
       {/* Call Modal */}
       {showCallModal && (
         <CallModal
@@ -607,6 +627,7 @@ const GamePlayingRoom = () => {
           }}
         />
       )}
+
       {/* Result Modal */}
       {showResultModal && (
         <ResultModal
@@ -617,6 +638,10 @@ const GamePlayingRoom = () => {
         />
       )}
 
+      {showLeaveGameModal && (
+        <LeaveGameModal onClose={() => setShowLeaveGameModal(false)} />
+      )}
+
       {/* Main page content */}
       <div className="custom-outer-div d-flex flex-column justify-content-between p-2 min-vw-100 min-vh-100">
         {/* upper part */}
@@ -624,7 +649,7 @@ const GamePlayingRoom = () => {
           <div className="custom-exit-container">
             <button
               className="btn btn-danger fw-bold custom-exit-button"
-              onClick={handleQuitGame}
+              onClick={() => setShowLeaveGameModal(true)}
             >
               {t("exit")}
             </button>
