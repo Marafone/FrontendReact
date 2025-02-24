@@ -1,11 +1,11 @@
 import axios, { AxiosError } from "axios";
-import { useEffect, useState, useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import "../styles/home-page.css";
+import ErrorModal from "../components/ErrorModal";
+import LoginRedirectionModal from "../components/LoginRedirectionModal";
 import { LanguageContext } from "../context/LanguageContext";
 import { useTheme } from "../context/ThemeContext";
-import ErrorModal from "../components/ErrorModal";
-import RedirectErrorModal from "../components/RedirectErrorModal";
+import "../styles/home-page.css";
 
 axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL;
 
@@ -149,7 +149,7 @@ const Home = () => {
     <>
       {error && <ErrorModal message={errorMessage} onClose={resetError} />}
       {redirectError && (
-        <RedirectErrorModal
+        <LoginRedirectionModal
           message={errorMessage}
           onClose={resetRedirectError}
         />

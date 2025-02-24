@@ -4,8 +4,9 @@ import "../styles/game-creation-form.css";
 import { useNavigate } from "react-router-dom";
 import { LanguageContext } from "../context/LanguageContext";
 import { useTheme } from "../context/ThemeContext";
-import RedirectErrorModal from "../components/RedirectErrorModal";
+import RedirectErrorModal from "../components/LoginRedirectionModal";
 import ErrorModal from "../components/ErrorModal";
+import LoginRedirectionModal from "../components/LoginRedirectionModal";
 
 axios.defaults.withCredentials = true;
 axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL;
@@ -125,7 +126,7 @@ const GameCreation = () => {
     <>
       {error && <ErrorModal onClose={resetError} message={errorMessage} />}
       {redirectError && (
-        <RedirectErrorModal
+        <LoginRedirectionModal
           message={errorMessage}
           onClose={resetRedirectError}
         />
