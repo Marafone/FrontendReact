@@ -6,7 +6,10 @@ interface RedirectErrorModalProps {
   onClose: () => void;
 }
 
-const RedirectErrorModal = ({ message, onClose }: RedirectErrorModalProps) => {
+const LoginRedirectionModal = ({
+  message,
+  onClose,
+}: RedirectErrorModalProps) => {
   const navigate = useNavigate();
 
   return (
@@ -20,7 +23,7 @@ const RedirectErrorModal = ({ message, onClose }: RedirectErrorModalProps) => {
       <Modal.Footer>
         <div className="w-100 d-flex justify-content-between">
           <Button variant="primary" onClick={() => navigate("/login")}>
-            Go to Login
+            Go To Login
           </Button>
           <Button variant="danger" onClick={onClose}>
             Close
@@ -31,4 +34,4 @@ const RedirectErrorModal = ({ message, onClose }: RedirectErrorModalProps) => {
   );
 };
 
-export default RedirectErrorModal;
+export default LoginRedirectionModal;
