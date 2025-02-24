@@ -88,6 +88,17 @@ export const translations: TranslationsType = {
         briscola: "Briscola",
         tresette: "Tresette",
       },   
+      leaveGame: {
+        title: "Warning: Leaving the Game",
+        message: "Leaving the game now may result in lost progress. Do you really want to exit?",
+        leave: "Leave Game",
+        stay: "Stay in Game",
+      },
+      loginRedirection: {
+        title: "Login Needed",
+        goToLogin: "Go To Login",
+        close: "Close",
+      },
       gameWaitingRoom: {
         events: {
           defaultMessage: "Have fun!",
@@ -224,6 +235,17 @@ export const translations: TranslationsType = {
         briscola: "Briscola",
         tresette: "Tresette"
       },
+      leaveGame: {
+        title: "Uwaga: Opuszczasz Grę",
+        message: "Opuszczenie gry teraz może spowodować utratę postępów. Czy na pewno chcesz wyjść?",
+        leave: "Opuść Grę",
+        stay: "Zostań w Grze",
+      },
+      loginRedirection: {
+        title: "Wymagane Logowanie",
+        goToLogin: "Przejdź do Logowania",
+        close: "Zamknij",
+      },
       gameWaitingRoom: {  
         events: {  
             defaultMessage: "Baw się dobrze!",  
@@ -358,6 +380,17 @@ export const translations: TranslationsType = {
           briscola: "Briscola",  
           tresette: "Tresette",  
       },  
+      leaveGame: {
+        title: "Attenzione: Uscita dal Gioco",
+        message: "Lasciare il gioco ora potrebbe comportare la perdita dei progressi. Sei sicuro di voler uscire?",
+        leave: "Esci dal Gioco",
+        stay: "Rimani nel Gioco",
+      },
+      loginRedirection: {
+        title: "Accesso Necessario",
+        goToLogin: "Vai al Login",
+        close: "Chiudi",
+      },
       gameWaitingRoom: {  
         events: {  
             defaultMessage: "Divertiti!",  
@@ -492,6 +525,17 @@ export const translations: TranslationsType = {
           briscola: "Briscola",  
           tresette: "Tresette",  
       },  
+      leaveGame: {
+        title: "Atensiò: T'vai fòra dal Zóch",
+        message: "Si es t'vai fòra adès, at pudarès pierder i progress. T'vò propi andér via?",
+        leave: "Vò fòra dal Zóch",
+        stay: "Staga in Zóch",
+      },
+      loginRedirection: {
+        title: "A Serv l'Acsé",
+        goToLogin: "Va a l'Acsé",
+        close: "Séra",
+      },
       gameWaitingRoom: {  
         events: {  
             defaultMessage: "Divartit!",  
