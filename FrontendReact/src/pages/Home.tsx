@@ -1,11 +1,11 @@
 import axios, { AxiosError } from "axios";
-import { useEffect, useState, useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import "../styles/home-page.css";
+import ErrorModal from "../components/ErrorModal";
+import LoginRedirectionModal from "../components/LoginRedirectionModal";
 import { LanguageContext } from "../context/LanguageContext";
 import { useTheme } from "../context/ThemeContext";
-import ErrorModal from "../components/ErrorModal";
-import RedirectErrorModal from "../components/RedirectErrorModal";
+import "../styles/home-page.css";
 
 axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL;
 
@@ -37,6 +37,11 @@ const Home = () => {
   const [error, setError] = useState(false);
   const [redirectError, setRedirectError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  // reconnection option
+  const [isReconnectionPossible, setIsReconnectionPossible] = useState(false);
+  const [reconnectableGameId, setReconnectableGameId] = useState<bigint>(
+    BigInt(0)
+  );
 
   const context = useContext(LanguageContext);
 
@@ -47,6 +52,20 @@ const Home = () => {
   }
 
   const { t } = context; // Now `context` is guaranteed to be defined
+
+  useEffect(() => {
+    axios
+      .get("/game/active", {
+        transformResponse: [(data) => data], // disable automatic parsing
+      })
+      .then((response) => {
+        if (response.data) {
+          setIsReconnectionPossible(true);
+          setReconnectableGameId(response.data);
+        }
+      })
+      .catch((error) => console.log(error));
+  }, []);
 
   useEffect(() => {
     const fetchGames = () => {
@@ -84,12 +103,14 @@ const Home = () => {
         handleNavigation(gameData);
       })
       .catch((err: AxiosError<JoinGameResponse>) => {
+        console.log(err);
         if (err.status == 403) {
           handleRedirectError("Login required to join the game.");
           return;
         }
 
-        handleRequestError(err.message);
+        if (err.response) handleRequestError(err.response.data.message);
+        else handleRequestError(err.message);
       });
   };
 
@@ -117,16 +138,33 @@ const Home = () => {
     resetErrorMessage();
   };
 
+  const handleReconnect = (gameId: bigint) => {
+    setIsReconnectionPossible(false);
+    navigate("/play-game", {
+      state: { gameId: BigInt(gameId) },
+    });
+  };
+
   return (
     <>
       {error && <ErrorModal message={errorMessage} onClose={resetError} />}
       {redirectError && (
-        <RedirectErrorModal
+        <LoginRedirectionModal
           message={errorMessage}
           onClose={resetRedirectError}
         />
       )}
       <div className="container-fluid d-flex flex-column align-items-center h-100 p-3 w-100">
+        {isReconnectionPossible && (
+          <div className="w-50 mb-1 mt-2">
+            <button
+              className="btn btn-success w-100 fw-bold"
+              onClick={() => handleReconnect(reconnectableGameId)}
+            >
+              Reconnect
+            </button>
+          </div>
+        )}
         {/* Create Game Button */}
         <div className="w-50 mb-4 mt-2">
           <Link

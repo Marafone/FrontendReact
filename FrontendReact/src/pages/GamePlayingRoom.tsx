@@ -26,6 +26,9 @@ import ResultModal from "../components/ResultModal";
 import { LanguageContext } from "../context/LanguageContext";
 import { useTheme } from "../context/ThemeContext";
 import { playSound } from "../soundEffects";
+import InfoModal from "../components/InfoModal";
+import RedirectErrorModal from "../components/LoginRedirectionModal";
+import LeaveGameModal from "../components/LeaveGameModal";
 
 var client: Client;
 
@@ -94,6 +97,8 @@ const GamePlayingRoom = () => {
   // result of the game modal
   const [showResultModal, setShowResultModal] = useState(false);
   const [winnerTeam, setWinnerTeam] = useState<string>("");
+  // info modal
+  const [showLeaveGameModal, setShowLeaveGameModal] = useState(false);
   // cards played last turn part
   const [playerCardMapLastTurn, setPlayerCardMapLastTurn] = useState<
     Map<string, string | null>
@@ -211,7 +216,7 @@ const GamePlayingRoom = () => {
     });
 
     // Sorting by ID in ascending order
-    const sortById = (a: [bigint, string], b: [bigint, string]) => 
+    const sortById = (a: [bigint, string], b: [bigint, string]) =>
       Number(a[0]) - Number(b[0]);
 
     clubsCards.sort(sortById);
@@ -291,7 +296,7 @@ const GamePlayingRoom = () => {
     handleStopTimer();
 
     playSound("/sounds/card_shuffle.mp3");
-    // might add delay to put cards on frontend after sound has finished playing 
+    // might add delay to put cards on frontend after sound has finished playing
 
     // clear board and move cards to last turn cards section
     handleNewTurnEvent();
@@ -332,10 +337,9 @@ const GamePlayingRoom = () => {
   ) => {
     setCurrentPlayer(playerName); // Track whose turn it is
 
-    if (usernameRef.current === playerName && isFirstPlayer){
+    if (usernameRef.current === playerName && isFirstPlayer) {
       setDisplayCallSelection(true);
-    }
-    else {
+    } else {
       setDisplayCallSelection(false);
     }
 
@@ -400,6 +404,12 @@ const GamePlayingRoom = () => {
     }
   };
 
+  const onErrorMessageReceived = (msg: IMessage) => {
+    const error = msg.body;
+    setShowErrorModal(true);
+    setErrorModalMessage(error);
+  };
+
   // USE EFFECT HOOKS
 
   useEffect(() => {
@@ -424,6 +434,7 @@ const GamePlayingRoom = () => {
           onMessageReceived
         );
         client.subscribe(`/user/queue/game`, onMessageReceived);
+        client.subscribe(`/user/queue/errors`, onErrorMessageReceived);
         client.publish({
           destination: `/app/game/${gameContent.gameId}/reconnect`,
         });
@@ -485,42 +496,59 @@ const GamePlayingRoom = () => {
     else setLoading(true);
   }, [redTeamRef.current, blueTeamRef.current]);
 
-  // Trigger automatic AI moves 
+  // Trigger automatic AI moves
 
   useEffect(() => {
     var time;
     // when a new turn begins the ai cannot play too quickly because the card wont be shown
-    if(currentPlayer == firstPlayer){
+    if (currentPlayer == firstPlayer) {
       time = 4000;
-    }
-    else{
+    } else {
       time = 2000;
     }
     // current player can be set asynchronously so we are not really sure if it's the correct one
     if (currentPlayer.startsWith("AI_")) {
       const timeoutId = setTimeout(() => {
         axios
-          .post(`${baseUrl}/game/${gameContent.gameId}/ai-move`, currentPlayer, {
-            headers: {
-              "Content-Type": "text/plain",
-            },
-          })
+          .post(
+            `${baseUrl}/game/${gameContent.gameId}/ai-move`,
+            currentPlayer,
+            {
+              headers: {
+                "Content-Type": "text/plain",
+              },
+            }
+          )
           .catch((error) => console.log(error));
 
-          playSound("/sounds/card_play.mp3");
-      }, time); 
+        playSound("/sounds/card_play.mp3");
+      }, time);
 
       return () => clearTimeout(timeoutId); // Cleanup if currentPlayer changes before timeout
     }
   }, [currentPlayer]);
 
+  // refresh page useEffect, inform user that changes may not be saved
+
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, []);
+
   // Dark mode
 
   const { theme } = useTheme();
-  
+
   useEffect(() => {
-      document.documentElement.setAttribute("data-theme", theme);
-    }, [theme]);
+    document.documentElement.setAttribute("data-theme", theme);
+  }, [theme]);
 
   // WIDGET FUNCTIONS
 
@@ -587,6 +615,7 @@ const GamePlayingRoom = () => {
           }}
         />
       )}
+
       {/* Call Modal */}
       {showCallModal && (
         <CallModal
@@ -598,6 +627,7 @@ const GamePlayingRoom = () => {
           }}
         />
       )}
+
       {/* Result Modal */}
       {showResultModal && (
         <ResultModal
@@ -608,6 +638,10 @@ const GamePlayingRoom = () => {
         />
       )}
 
+      {showLeaveGameModal && (
+        <LeaveGameModal onClose={() => setShowLeaveGameModal(false)} />
+      )}
+
       {/* Main page content */}
       <div className="custom-outer-div d-flex flex-column justify-content-between p-2 min-vw-100 min-vh-100">
         {/* upper part */}
@@ -615,7 +649,7 @@ const GamePlayingRoom = () => {
           <div className="custom-exit-container">
             <button
               className="btn btn-danger fw-bold custom-exit-button"
-              onClick={handleQuitGame}
+              onClick={() => setShowLeaveGameModal(true)}
             >
               {t("exit")}
             </button>
@@ -758,7 +792,9 @@ const GamePlayingRoom = () => {
               </p>
             </div>
             <p className="fw-bold fs-4 mt-3">{t("trumpSuit")}</p>
-            <p className="fw-bold">{displayedSuit ? t(displayedSuit.toLowerCase()) : t("none")}</p>
+            <p className="fw-bold">
+              {displayedSuit ? t(displayedSuit.toLowerCase()) : t("none")}
+            </p>
             {displayTrumpSuitSelection && (
               <div className="mt-2">
                 <p className="mb-2">{t("trumpSuit")}</p>

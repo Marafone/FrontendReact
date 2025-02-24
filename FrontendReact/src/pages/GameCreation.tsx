@@ -4,7 +4,9 @@ import "../styles/game-creation-form.css";
 import { useNavigate } from "react-router-dom";
 import { LanguageContext } from "../context/LanguageContext";
 import { useTheme } from "../context/ThemeContext";
-import RedirectErrorModal from "../components/RedirectErrorModal";
+import RedirectErrorModal from "../components/LoginRedirectionModal";
+import ErrorModal from "../components/ErrorModal";
+import LoginRedirectionModal from "../components/LoginRedirectionModal";
 
 axios.defaults.withCredentials = true;
 axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL;
@@ -18,10 +20,6 @@ interface FormData {
   pointsToWin: number;
 }
 
-interface Errors {
-  [key: string]: string;
-}
-
 const GameCreation = () => {
   const [isGamePrivate, setIsGamePrivate] = useState(false);
   const [formData, setFormData] = useState<FormData>({
@@ -31,8 +29,8 @@ const GameCreation = () => {
     pointsToWin: 21,
   });
 
-  const [errors, setErrors] = useState<Errors>({});
   const [redirectError, setRedirectError] = useState(false);
+  const [error, setError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
   const navigate = useNavigate();
@@ -56,30 +54,31 @@ const GameCreation = () => {
   };
 
   const validateFormData = (): boolean => {
-    const newErrors: { [key: string]: string } = {};
-
     const gameNameTrimmed = formData.gameName.trim();
     const minGameNameLength = 4;
     const maxGameNameLength = 20;
+    let errorOccurred = false;
 
     if (
       gameNameTrimmed.length < minGameNameLength ||
       gameNameTrimmed.length > maxGameNameLength
     ) {
-      newErrors.gameName = t("errors.gameNameLength"); // Use translation for error message
+      errorOccurred = true;
+      setErrorMessage(t("errors.gameNameLength"));
     }
 
     if (isGamePrivate && !formData.password) {
-      newErrors.password = t("errors.passwordEmpty"); // Use translation for error message
+      errorOccurred = true;
+      setErrorMessage(t("errors.passwordEmpty"));
     }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    setError(errorOccurred);
+    return errorOccurred ? false : true;
   };
 
   function createGame() {
     if (!validateFormData()) return;
-    // send request
+
     axios
       .post<string>("/game/create", formData, {
         transformResponse: [(data) => data], // disable automatic parsing
@@ -88,49 +87,57 @@ const GameCreation = () => {
         const gameId = BigInt(response.data);
         handleNavigation(gameId);
       })
-      .catch((e: AxiosError) => {
-        if (e.response?.status == 403) {
+      .catch((error: AxiosError<string>) => {
+        if (error.response?.status == 403) {
           setRedirectError(true);
           setErrorMessage("Please log in to create a game.");
+          return;
         }
 
-        const errorResponse = e.response?.data;
-        if (errorResponse === "GAME_NAME_TAKEN") {
-          setErrors({
-            gameName: t("errors.gameNameTaken"), // Use translation for error message
-          });
+        if (error.response) {
+          let errorMessage: string = error.response.data;
+          setErrorMessage(errorMessage);
+          setError(true);
         }
       });
   }
 
   const handleNavigation = (gameId: bigint) => {
-    // navigate to waiting lobby
     navigate("/wait-for-game", {
       state: { gameId, ...formData, joinedPlayersAmount: 1 },
     });
   };
 
+  const resetErrorMessage = () => {
+    setErrorMessage("");
+  };
+
+  const resetError = () => {
+    setError(false);
+    resetErrorMessage();
+  };
+
   const resetRedirectError = () => {
     setRedirectError(false);
-    setErrorMessage("");
+    resetErrorMessage();
   };
 
   return (
     <>
+      {error && <ErrorModal onClose={resetError} message={errorMessage} />}
       {redirectError && (
-        <RedirectErrorModal
+        <LoginRedirectionModal
           message={errorMessage}
           onClose={resetRedirectError}
         />
       )}
       <div className="custom-game-creation-div d-flex flex-column justify-content-center align-items-center w-75 border border-black border-opacity-50 p-4">
         <p className="fs-2 fw-bold">{t("home.createGameBtn")}</p>{" "}
-        {/* Use translation */}
         <form className="d-flex flex-column gap-4">
           {/* Game Name input group */}
           <div className="input-group position-relative">
             <span className="fw-medium input-group-text border border-black border-opacity-50 custom-form-element">
-              {t("home.lobbyName")} {/* Use translation */}
+              {t("home.lobbyName")}
             </span>
             <input
               type="text"
@@ -141,16 +148,11 @@ const GameCreation = () => {
               onChange={handleChange}
               required
             />
-            {errors.gameName && (
-              <div className="text-white bg-danger custom-error-msg rounded mw-100 z-3 px-2 py-1">
-                {errors.gameName}
-              </div>
-            )}
           </div>
           {/* Game Type input group */}
           <div className="input-group">
             <span className="fw-medium input-group-text border border-black border-opacity-50 custom-form-element">
-              {t("home.gameType")} {/* Use translation */}
+              {t("home.gameType")}
             </span>
             <select
               id="gameType"
@@ -160,17 +162,14 @@ const GameCreation = () => {
               onChange={handleChange}
             >
               <option value="MARAFFA">{t("gameTypes.marafone")}</option>{" "}
-              {/* Use translation */}
               <option value="BRISCOLLA">{t("gameTypes.briscola")}</option>{" "}
-              {/* Use translation */}
               <option value="TRISETTE">{t("gameTypes.tresette")}</option>{" "}
-              {/* Use translation */}
             </select>
           </div>
           {/* PointsToWin input group */}
           <div className="input-group position-relative">
             <span className="fw-medium input-group-text border border-black border-opacity-50 custom-form-element">
-              {t("home.points")} {/* Use translation */}
+              {t("home.points")}
             </span>
             <select
               id="pointsToWin"
@@ -192,14 +191,14 @@ const GameCreation = () => {
               onClick={() => setIsGamePrivate(!isGamePrivate)}
             />
             <label className="fw-medium form-check-label">
-              {t("labels.private")} {/* Use translation */}
+              {t("labels.private")}
             </label>
           </div>
           {/* Password input group */}
           {isGamePrivate && (
             <div className="input-group">
               <span className="fw-medium input-group-text border border-black border-opacity-50 custom-form-element">
-                {t("login.password")} {/* Use translation */}
+                {t("login.password")}
               </span>
               <input
                 id="joinGameCode"
@@ -210,11 +209,6 @@ const GameCreation = () => {
                 value={formData?.password}
                 onChange={handleChange}
               />
-              {errors.password && (
-                <div className="text-white bg-danger custom-error-msg rounded mw-100 z-3 px-2 py-1">
-                  {errors.password}
-                </div>
-              )}
             </div>
           )}
           {/* Create Game button */}
@@ -226,7 +220,7 @@ const GameCreation = () => {
                 createGame();
               }}
             >
-              {t("home.createGameBtn")} {/* Use translation */}
+              {t("home.createGameBtn")}
             </button>
           </div>
         </form>

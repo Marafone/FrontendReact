@@ -72,7 +72,7 @@ export const translations: TranslationsType = {
         noPlayers: "No Players on this page"
       },
       errors: {
-        gameNameLength: "Length must be between 4 and 20 characters",
+        gameNameLength: "Name length must be between 4 and 20 characters",
         passwordEmpty: "Password cannot be empty",
         gameNameTaken: "Game name already taken. Try with the other name.",
       },
@@ -208,7 +208,7 @@ export const translations: TranslationsType = {
         noPlayers: "Brak graczy na tej stronie"  
       },
       errors: {
-        gameNameLength: "Długość musi wynosić od 4 do 20 znaków",
+        gameNameLength: "Długość nazwy musi wynosić od 4 do 20 znaków",
         passwordEmpty: "Hasło nie może być puste",
         gameNameTaken: "Nazwa gry jest już zajęta. Spróbuj inną nazwę."
       },
@@ -342,7 +342,7 @@ export const translations: TranslationsType = {
         noPlayers: "Nessun giocatore in questa pagina"  
       },
       errors: {  
-        gameNameLength: "La lunghezza deve essere tra 4 e 20 caratteri",  
+        gameNameLength: "La lunghezza del nome deve essere compresa tra 4 e 20 caratteri",  
         passwordEmpty: "La password non può essere vuota",  
         gameNameTaken: "Nome della partita già preso. Prova con un altro nome.",  
       },  
@@ -476,7 +476,7 @@ export const translations: TranslationsType = {
         noPlayers: "Nissun zugadôr in sta pagina"  
       },
       errors: {  
-        gameNameLength: "La lunghezza dvès èsar tra 4 e 20 caràter",  
+        gameNameLength: "La lunghezza dla nóm duvés èsar tra 4 e 20 caràter.",  
         passwordEmpty: "La parola segreta la pò n'èsar vòida",  
         gameNameTaken: "Al nóm dla zógh l'é zà ciapê. Pròva un nóm diffarènt.",  
       },  
