@@ -54,7 +54,7 @@ const Home = () => {
   const { t } = context; // Now `context` is guaranteed to be defined
 
   useEffect(() => {
-    axios
+      axios
       .get("/game/active", {
         transformResponse: [(data) => data], // disable automatic parsing
       })
@@ -69,14 +69,18 @@ const Home = () => {
 
   useEffect(() => {
     const fetchGames = () => {
-      setLoading(true);
       axios.get("/game/waiting").then((response) => {
         setLobbies(response.data);
-        setLoading(false);
       });
     };
+    setLoading(true);
+    fetchGames()
+    setLoading(false);
 
-    fetchGames();
+    //keep refreshing games
+    const intervalID = setInterval(fetchGames, 4000);
+
+    return () => clearInterval(intervalID)
   }, []);
 
   useEffect(() => {
