@@ -489,9 +489,9 @@ const GamePlayingRoom = () => {
     var time;
     // when a new turn begins the ai cannot play too quickly because the card wont be shown
     if (currentPlayer == firstPlayer) {
-      time = 4000;
+      time = 5000;
     } else {
-      time = 2000;
+      time = 3000;
     }
     // current player can be set asynchronously so we are not really sure if it's the correct one
     if (currentPlayer.startsWith("AI_")) {

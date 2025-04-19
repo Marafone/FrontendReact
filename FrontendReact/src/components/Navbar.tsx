@@ -100,7 +100,7 @@ const Navbar = () => {
           </ul>
           <div
             className="user-info"
-            style={{ color: "#ffffff", fontSize: "1.5rem", marginRight: "10px" }}
+            style={{ color: "#ffffff", fontSize: "1.2rem", marginRight: "10px" }}
           >
             {username != null ? (
               username
