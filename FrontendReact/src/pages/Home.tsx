@@ -1,13 +1,11 @@
-import axios, { AxiosError } from "axios";
+import axiosWithLogout from "../axios";
+import axios from "axios";
 import { useContext, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import ErrorModal from "../components/ErrorModal";
-import LoginRedirectionModal from "../components/LoginRedirectionModal";
 import { LanguageContext } from "../context/LanguageContext";
 import { useTheme } from "../context/ThemeContext";
 import "../styles/home-page.css";
-
-axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL;
+import { useUserContext } from "../context/UserContext";
 
 enum GameType {
   Maraffa = "Maraffa",
@@ -22,21 +20,12 @@ interface GameData {
   joinedPlayersAmount: number;
 }
 
-interface JoinGameResponse {
-  code: string;
-  message: string;
-}
-
 const Home = () => {
   const navigate = useNavigate();
   const playersAmount = 4;
   const [page, setPage] = useState(1);
   const [lobbies, setLobbies] = useState<GameData[]>([]);
   const [loading, setLoading] = useState(true);
-  // error modal
-  const [error, setError] = useState(false);
-  const [redirectError, setRedirectError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
   // reconnection option
   const [isReconnectionPossible, setIsReconnectionPossible] = useState(false);
   const [reconnectableGameId, setReconnectableGameId] = useState<bigint>(
@@ -44,6 +33,7 @@ const Home = () => {
   );
 
   const context = useContext(LanguageContext);
+  const { username, setUsername } = useUserContext();
 
   const { theme } = useTheme();
 
@@ -51,10 +41,13 @@ const Home = () => {
     throw new Error("LanguageContext must be used within a LanguageProvider.");
   }
 
-  const { t } = context; // Now `context` is guaranteed to be defined
+  const { translate } = context; // Now `context` is guaranteed to be defined
 
   useEffect(() => {
-      axios
+      if (username == null) // only send request to get active games when user is logged in
+        return
+    
+      axios // use standard axios to not redirect to login on 401 http status code received
       .get("/game/active", {
         transformResponse: [(data) => data], // disable automatic parsing
       })
@@ -63,15 +56,19 @@ const Home = () => {
           setIsReconnectionPossible(true);
           setReconnectableGameId(response.data);
         }
-      })
-      .catch((error) => console.log(error));
+      }).catch((error) => {
+        if(error.response.status == 401){
+          setUsername(null)
+        }
+        console.log(error)
+      });
   }, []);
 
   useEffect(() => {
     const fetchGames = () => {
-      axios.get("/game/waiting").then((response) => {
+      axiosWithLogout.get("/game/waiting").then((response) => {
         setLobbies(response.data);
-      });
+      }).catch(() => console.log("wTF"));
     };
     setLoading(true);
     fetchGames()
@@ -101,45 +98,11 @@ const Home = () => {
       joinGameCode: joinGameCode,
     };
 
-    axios
+    axiosWithLogout
       .post(`/game/${gameData.gameId}/join`, joinGameRequestData)
       .then(() => {
         handleNavigation(gameData);
-      })
-      .catch((err: AxiosError<JoinGameResponse>) => {
-        console.log(err);
-        if (err.status == 403) {
-          handleRedirectError("Login required to join the game.");
-          return;
-        }
-
-        if (err.response) handleRequestError(err.response.data.message);
-        else handleRequestError(err.message);
       });
-  };
-
-  const handleRequestError = (errorMessage: string) => {
-    setErrorMessage(errorMessage);
-    setError(true);
-  };
-
-  const handleRedirectError = (errorMessage: string) => {
-    setErrorMessage(errorMessage);
-    setRedirectError(true);
-  };
-
-  const resetErrorMessage = () => {
-    setErrorMessage("");
-  };
-
-  const resetError = () => {
-    setError(false);
-    resetErrorMessage();
-  };
-
-  const resetRedirectError = () => {
-    setRedirectError(false);
-    resetErrorMessage();
   };
 
   const handleReconnect = (gameId: bigint) => {
@@ -151,13 +114,6 @@ const Home = () => {
 
   return (
     <>
-      {error && <ErrorModal message={errorMessage} onClose={resetError} />}
-      {redirectError && (
-        <LoginRedirectionModal
-          message={errorMessage}
-          onClose={resetRedirectError}
-        />
-      )}
       <div className="container-fluid d-flex flex-column align-items-center h-100 p-3 w-100">
         {isReconnectionPossible && (
           <div className="w-50 mb-1 mt-2">
@@ -175,7 +131,7 @@ const Home = () => {
             to="/create-game"
             className="custom-create-game-btn btn btn-primary border border-black border-opacity-25 w-100 w-md-auto fw-bold"
           >
-            {t("home.createGameBtn")} {/* Translated Create Game Button */}
+            {translate("home.createGameBtn")} {/* Create Game Button */}
           </Link>
         </div>
 
@@ -184,8 +140,8 @@ const Home = () => {
           <div className="col-12 col-md-4 mb-3">
             {/* News Section */}
             <div>
-              <h1>{t("home.newsTitle")}</h1> {/* Translated News Title */}
-              <p>{t("home.newsContent")}</p> {/* Translated News Content */}
+              <h1>{translate("home.newsTitle")}</h1> {/* News Title */}
+              <p>{translate("home.newsContent")}</p> {/* News Content */}
             </div>
           </div>
 
@@ -194,18 +150,18 @@ const Home = () => {
             <div className="custom-lobby-div d-flex flex-column w-100 border border-black border-opacity-25 border-2">
               {/* Header */}
               <div className="d-flex justify-content-between align-items-center container-fluid border-bottom border-black border-opacity-25 border-1 p-2">
-                <p className="fw-bold m-0">{t("home.lobbyName")}</p>{" "}
-                {/* Translated Lobby Name */}
-                <p className="fw-bold m-0">{t("home.gameType")}</p>{" "}
-                {/* Translated Game Type */}
-                <p className="fw-bold m-0">{t("home.players")}</p>{" "}
-                {/* Translated Players */}
+                <p className="fw-bold m-0">{translate("home.lobbyName")}</p>{" "}
+                {/* Lobby Name */}
+                <p className="fw-bold m-0">{translate("home.gameType")}</p>{" "}
+                {/* Game Type */}
+                <p className="fw-bold m-0">{translate("home.players")}</p>{" "}
+                {/* Players */}
               </div>
               {/* Lobbies Info */}
               {loading ? (
                 <div className="d-flex justify-content-center align-items-center container-fluid border-bottom border-black border-opacity-25 border-1 p-2">
-                  <p className="m-0">{t("home.loading")}</p>{" "}
-                  {/* Translated Loading */}
+                  <p className="m-0">{translate("home.loading")}</p>{" "}
+                  {/* Loading */}
                 </div>
               ) : lobbies.length == 0 ? (
                 <div className="border-bottom border-black border-opacity-25 border-1 p-2">
@@ -244,13 +200,13 @@ const Home = () => {
                   }}
                 >
                   <i className="bi bi-arrow-left"></i>
-                  <p className="m-0">{t("home.prevPage")}</p>{" "}
-                  {/* Translated Prev */}
+                  <p className="m-0">{translate("home.prevPage")}</p>{" "}
+                  {/* Prev */}
                 </div>
                 <p className="fw-bold m-0">
-                  {t("home.pageText")} {page}
+                  {translate("home.pageText")} {page}
                 </p>{" "}
-                {/* Translated Page Text */}
+                {/* Page Text */}
                 <div
                   className="d-flex align-items-center gap-2 fw-bold"
                   style={{ cursor: "pointer" }}
@@ -258,8 +214,8 @@ const Home = () => {
                     setPage(page + 1);
                   }}
                 >
-                  <p className="m-0">{t("home.nextPage")}</p>{" "}
-                  {/* Translated Next */}
+                  <p className="m-0">{translate("home.nextPage")}</p>{" "}
+                  {/* Next */}
                   <i className="bi bi-arrow-right"></i>
                 </div>
               </div>

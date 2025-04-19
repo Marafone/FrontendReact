@@ -1,8 +1,7 @@
 import {
-  createBrowserRouter,
-  createRoutesFromElements,
+  BrowserRouter,
   Route,
-  RouterProvider,
+  Routes,
 } from "react-router-dom";
 
 import { UserProvider } from "./context/UserContext";
@@ -26,36 +25,30 @@ export interface User {
 }
 
 function App() {
-  const router = createBrowserRouter(
-    createRoutesFromElements(
-      <>
-        {/* Routes using MainLayout */}
-        <Route path="/" element={<MainLayout />}>
-          <Route index element={<Home />} />
-          <Route path="create-game" element={<GameCreation />} />
-          <Route path="players-ranking" element={<PlayersRanking />} />
-        </Route>
-        {/* Routes without MainLayout */}
-        <Route path="/wait-for-game" element={<GameWaitingRoom />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/login-success" element={<LoginSuccess />} />
-        <Route path="/play-game" element={<GamePlayingRoom />} />
-        <Route path="/rules" element={<Rules />} />
-      </>
-    )
-  );
-
-  localStorage.removeItem("usernameValue");
-
   return (
-    <ThemeProvider>
-      <UserProvider>
-        <LanguageProvider>
-          <RouterProvider router={router} />
-        </LanguageProvider>
-      </UserProvider>
-    </ThemeProvider>
+    <BrowserRouter>
+      <ThemeProvider>
+        <UserProvider>
+          <LanguageProvider>
+            <Routes>
+              {/* Routes using MainLayout */}
+              <Route path="/" element={<MainLayout />}>
+                <Route index element={<Home />} />
+                <Route path="create-game" element={<GameCreation />} />
+                <Route path="players-ranking" element={<PlayersRanking />} />
+              </Route>
+              {/* Routes without MainLayout */}
+              <Route path="/wait-for-game" element={<GameWaitingRoom />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/login-success" element={<LoginSuccess />} />
+              <Route path="/play-game" element={<GamePlayingRoom />} />
+              <Route path="/rules" element={<Rules />} />
+            </Routes>
+          </LanguageProvider>
+        </UserProvider>
+      </ThemeProvider>
+    </BrowserRouter>
   );
 }
 

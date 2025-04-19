@@ -1,12 +1,12 @@
 import React, { useContext, useEffect, useState } from "react";
 import images from "../cards/cards_importer";
 import "../styles/players-ranking.css";
+import axiosWithLogout from "../axios";
 import axios from "axios";
-import ErrorModal from "../components/ErrorModal";
 import { LanguageContext } from "../context/LanguageContext";
 import { useTheme } from "../context/ThemeContext";
-
-axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL;
+import { toast } from 'react-toastify';
+import { useUserContext } from "../context/UserContext";
 
 interface PlayerRankingInfo {
   position: number;
@@ -59,8 +59,6 @@ const PlayersRanking = () => {
   const [searchedPlayerNickname, setSearchedPlayerNickname] =
     useState<string>();
 
-  const [errorMessage, setErrorMessage] = useState<string>("");
-
   const findPlayerTitle = (rankingPosition: number) => {
     for (let [range, title] of rangeTitles)
       if (
@@ -79,7 +77,7 @@ const PlayersRanking = () => {
   };
 
   const searchForPlayer = (nickname: string) => {
-    axios
+    axiosWithLogout
       .get(`/users/${nickname}/ranking?pageSize=${pageSize}`)
       .then((response) => {
         const rankingPage: RankingPage = response.data;
@@ -89,12 +87,13 @@ const PlayersRanking = () => {
         setPage(rankingPage.pageNumber);
       })
       .catch((error) => {
-        if (error.status == 404)
-          setErrorMessage(
-            "The user you are searching for does not exist in the ranking. Please check the username and try again."
-          );
+        if (error.status == 404){
+          toast.error("The user you are searching for does not exist in the ranking. Please check the username and try again.")
+        }
       });
   };
+
+  const { username, setUsername } = useUserContext();
 
   const context = useContext(LanguageContext);
 
@@ -102,7 +101,7 @@ const PlayersRanking = () => {
     throw new Error("LanguageContext must be used within a LanguageProvider.");
   }
 
-  const { t } = context;
+  const { translate } = context;
 
   const { theme } = useTheme();
 
@@ -111,7 +110,7 @@ const PlayersRanking = () => {
   }, [theme]);
 
   useEffect(() => {
-    axios
+    axiosWithLogout
       .get(`/users/ranking?page=${page}&size=${pageSize}`)
       .then((response) => {
         let playersRankingInfo: PlayerRankingInfo[] = response.data;
@@ -121,6 +120,9 @@ const PlayersRanking = () => {
   }, [page]);
 
   useEffect(() => {
+    if (username == null) // only send request to get active games when user is logged in
+    return
+
     axios
       .get("/user/ranking")
       .then((response) => {
@@ -135,9 +137,11 @@ const PlayersRanking = () => {
         };
         setCurrentPlayerInfo(currentPlayerRankingInfo);
         setPlayerStats(playerStatsInfo);
-      })
-      .catch((err) => {
-        console.log("Error occurred:", err);
+      }).catch((error) => {
+        if(error.response.status == 401){
+          setUsername(null)
+        }
+        console.log("Error occurred:", error);
       });
   }, []);
 
@@ -149,19 +153,12 @@ const PlayersRanking = () => {
 
   return (
     <>
-      {errorMessage && (
-        <ErrorModal
-          title="User not found"
-          message={errorMessage}
-          onClose={() => setErrorMessage("")}
-        />
-      )}
       <div className="custom-wrapper-div d-flex flex-column flex-md-row justify-content-between align-items-center custom-ranking-outer-div gap-4 w-100 rounded-3">
         {/* Statistics section */}
         <div className="custom-statistics-section">
           <div className="custom-statistics-card d-flex flex-column justify-content-center gap-4 rounded-4 shadow py-5 text-center text-white m-auto">
             <p className="custom-statistics-title fw-bold m-0">
-              {t("ranking.statistics")}
+              {translate("ranking.statistics")}
             </p>
             <div className="d-lg-flex d-none justify-content-center">
               <img
@@ -172,19 +169,19 @@ const PlayersRanking = () => {
             </div>
             <div className="custom-statistics-description">
               <div className="d-flex justify-content-between px-5 gap-3">
-                <p className="fw-bold">{t("ranking.player")}</p>
+                <p className="fw-bold">{translate("ranking.player")}</p>
                 <p>{playerStats?.playerRankingInfo.username ?? "-"}</p>
               </div>
               <div className="d-flex justify-content-between px-5 gap-3">
-                <p className="fw-bold">{t("ranking.wins")}</p>
+                <p className="fw-bold">{translate("ranking.wins")}</p>
                 <p>{playerStats?.playerRankingInfo.wins ?? "-"}</p>
               </div>
               <div className="d-flex justify-content-between px-5 gap-3">
-                <p className="fw-bold">{t("ranking.losses")}</p>
+                <p className="fw-bold">{translate("ranking.losses")}</p>
                 <p>{playerStats?.playerRankingInfo.losses ?? "-"}</p>
               </div>
               <div className="d-flex justify-content-between px-5 gap-3">
-                <p className="fw-bold">{t("ranking.winRatio")}</p>
+                <p className="fw-bold">{translate("ranking.winRatio")}</p>
                 <p>{playerStats?.winRatio ?? "-"}</p>
               </div>
             </div>
@@ -196,10 +193,10 @@ const PlayersRanking = () => {
           <div className="d-flex align-items-center gap-5">
             <p className="text-center m-0">
               <span className="fs-1 fw-bold d-block">
-                {t("ranking.players")}
+                {translate("ranking.players")}
               </span>
               <span className="fs-4 fw-normal d-block custom-ranking-word">
-                {t("ranking.ranking")}
+                {translate("ranking.ranking")}
               </span>
             </p>
             <div className="custom-title-images d-xxl-flex d-none gap-3">
@@ -228,7 +225,7 @@ const PlayersRanking = () => {
           {/* Search section */}
           <div className="d-flex align-items-center gap-2">
             <label htmlFor="username" className="custom-search-label fw-bold">
-              {t("ranking.search")}
+              {translate("ranking.search")}
             </label>
             <div className="d-flex justify-content-center">
               <input
@@ -254,7 +251,7 @@ const PlayersRanking = () => {
             {playersInfo.length == 0 ? (
               <div className="bg-danger px-3 py-2 rounded-3 mb-3">
                 <p className="text-white text-center fw-bold m-0">
-                  {t("ranking.noPlayers")}
+                  {translate("ranking.noPlayers")}
                 </p>
               </div>
             ) : (
@@ -285,7 +282,7 @@ const PlayersRanking = () => {
                 onClick={() => setPage((page) => page - 1)}
                 disabled={page === 0}
               >
-                {t("home.prevPage")}
+                {translate("home.prevPage")}
               </button>
               <p className="custom-page-number bg-secondary m-0 px-2 py-1 text-white border ">
                 {page + 1}
@@ -295,7 +292,7 @@ const PlayersRanking = () => {
                 onClick={() => setPage((page) => page + 1)}
                 disabled={!nextPageExist}
               >
-                {t("home.nextPage")}
+                {translate("home.nextPage")}
               </button>
             </div>
             {/* current player ranking */}

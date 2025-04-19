@@ -1,14 +1,14 @@
 import React, {useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import axios from "axios"; // use axios instead of axiosApi to avoid calling interceptor
 import "../styles/register-login-page.css";
 import { LanguageContext } from "../context/LanguageContext";
 import { useTheme } from "../context/ThemeContext";
+import { useUserContext } from "../context/UserContext";
 
-axios.defaults.withCredentials = true;
+axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL;
 
 const Login = () => {
-  const baseUrl = import.meta.env.VITE_API_BASE_URL;
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -16,42 +16,42 @@ const Login = () => {
 
   const context = useContext(LanguageContext);
 
+  const { setUsername: setUsernameContext } = useUserContext();
+
   if (!context) {
     throw new Error("LanguageContext must be used within a LanguageProvider.");
   }
 
-  const { t } = context; // Now `context` is guaranteed to be defined
+  const { translate } = context; // Now `context` is guaranteed to be defined
 
   const { theme } = useTheme();
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
   }, [theme]);
-
-  axios.defaults.withCredentials = true;
     
   // Login request
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       const response = await axios.post(
-        `${baseUrl}/auth/login`,
+        "/auth/login",
         { username, password },
         {
           headers: {
             "Content-Type": "application/json",
           },
-          withCredentials: true, //  Allow cookies
+          withCredentials: true,
         }
       );
   
       if (response.status === 200) {
-        setUsername(username);
-        localStorage.setItem("usernameValue", JSON.stringify(username));
+        const response = await axios.get("/user/info");
+        setUsernameContext(response.data.username);
         navigate("/login-success");
       }
     } catch (error) {
-      setErrorMessage(t("login.error")); // Translated error message
+      setErrorMessage(translate("login.error"));
       console.log("Error:", error);
     }
   };
@@ -62,13 +62,13 @@ const Login = () => {
         className="custom-user-info-window w-100 p-4 border border-black border-opacity-25 rounded shadow-lg"
         style={{ maxWidth: "400px" }}
       >
-        <h3 className="text-center mb-4">{t("login.title")}</h3> {/* Translated Login Title */}
+        <h3 className="text-center mb-4">{translate("login.title")}</h3> {/* Login Title */}
         {errorMessage && (
           <p className="text-danger text-center">{errorMessage}</p> 
         )}
         <form id="form" onSubmit={handleLogin}>
           <div className="mb-3">
-            <label className="form-label">{t("login.username")}</label> {/* Translated Username label */}
+            <label className="form-label">{translate("login.username")}</label> {/* Username label */}
             <input
               id="username"
               type="text"
@@ -78,7 +78,7 @@ const Login = () => {
             />
           </div>
           <div className="mb-3">
-            <label className="form-label">{t("login.password")}</label> {/* Translated Password label */}
+            <label className="form-label">{translate("login.password")}</label> {/* Password label */}
             <input
               id="password"
               type="password"
@@ -90,15 +90,15 @@ const Login = () => {
           {/* Register Link */}
           <p className="text-center">
             <a href="#" onClick={() => navigate("/register")}>
-              {t("login.register")} {/* Translated Register link */}
+              {translate("login.register")} {/* Register link */}
             </a>
           </p>
           <div className="d-flex justify-content-between">
-            <button className="btn btn-secondary" onClick={() => navigate("/")}>
-              {t("login.cancel")} {/* Translated Cancel button */}
+            <button className="btn btn-secondary" type="button" onClick={() => navigate("/")}>
+              {translate("login.cancel")} {/* Cancel button */}
             </button>
             <button className="btn btn-primary" type="submit">
-              {t("login.submit")} {/* Translated Submit button */}
+              {translate("login.submit")} {/* Submit button */}
             </button>
           </div>
         </form>

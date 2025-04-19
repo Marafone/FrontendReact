@@ -16,25 +16,25 @@ const LeaveGameModal = ({ onClose }: LeaveGameProps) => {
     throw new Error("LanguageContext must be used within a LanguageProvider.");
   }
 
-  const { t } = languageContext; 
+  const { translate } = languageContext; 
 
   return (
     <Modal show onHide={onClose}>
       <Modal.Header closeButton>
-        <Modal.Title>{t("leaveGame.title")}</Modal.Title>
+        <Modal.Title>{translate("leaveGame.title")}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <p>{t("leaveGame.message")}</p>
+        <p>{translate("leaveGame.message")}</p>
       </Modal.Body>
       <Modal.Footer className="w-100 d-flex justify-content-between">
         <Button
           variant="danger"
           onClick={() => navigate("/", { replace: true })}
         >
-          {t("leaveGame.leave")}
+          {translate("leaveGame.leave")}
         </Button>
         <Button variant="primary" onClick={onClose}>
-          {t("leaveGame.stay")}
+          {translate("leaveGame.stay")}
         </Button>
       </Modal.Footer>
     </Modal>

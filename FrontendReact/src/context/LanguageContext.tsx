@@ -1,10 +1,14 @@
 import { createContext, useState, ReactNode } from "react";
 import { translations } from "../translations";
 
+/*
+  Language context to easily translate UI to multiple languages.
+*/
+
 export interface LanguageContextType {
   language: string;
   setLanguage: (lang: string) => void;
-  t: (key: string) => string; // Translation function
+  translate: (key: string) => string; // Translation function
 }
 
 export const LanguageContext = createContext<LanguageContextType | undefined>(
@@ -21,7 +25,7 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem("language", lang);
   };
 
-  const t = (key: string) => {
+  const translate = (key: string) => {
     // Split the key into path segments (e.g., 'home.title' -> ['home', 'title'])
     const keys = key.split(".");
     let result: any = translations[language];
@@ -40,7 +44,7 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage: changeLanguage, t }}>
+    <LanguageContext.Provider value={{ language, setLanguage: changeLanguage, translate }}>
       {children}
     </LanguageContext.Provider>
   );

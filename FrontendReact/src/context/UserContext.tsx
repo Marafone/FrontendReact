@@ -1,4 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
+import axiosWithLogout from "../axios";
+import { toast } from 'react-toastify';
+import { useNavigate } from "react-router-dom";
 
 interface UserData {
   username: string | null;
@@ -19,13 +22,33 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Save username to localStorage every time it changes
   useEffect(() => {
-    if (username) {
-      localStorage.setItem("usernameValue", JSON.stringify(username));
-      console.log(localStorage.usernameValue);
-    } else {
-      localStorage.removeItem("usernameValue"); // Ensure it's removed on logout
-    }
+    username == null ? localStorage.removeItem("usernameValue") : localStorage.setItem("usernameValue", JSON.stringify(username))
   }, [username]);
+
+
+  const navigate = useNavigate();
+
+  // set interceptor to automatically remove user from context and redirect him to login page on 401 received from backend
+  useEffect(() => {
+    axiosWithLogout.interceptors.response.use(
+      response => response,
+      error => {
+        const message = error.response.data || 'Something went wrong';
+    
+        if (error.response.status === 401) {
+          setUsername(null)
+          navigate("/login")
+          toast.error("You need to login first to do that action. If you already logged in then your session expired", {
+            toastId: "not-logged-in"
+          })
+        }else{
+          toast.error(message)
+        }
+
+        return Promise.reject(error);
+      }
+    );
+  }, [])
 
   return (
     <UserContext.Provider value={{ username, setUsername }}>

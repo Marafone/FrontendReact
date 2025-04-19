@@ -1,10 +1,8 @@
 import { Client, IMessage } from "@stomp/stompjs";
-import axios from "axios";
+import axiosWithLogout from "../axios";
 import { ChangeEvent, useEffect, useRef, useState, useContext } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import images from "../cards/cards_importer";
-import CallModal from "../components/CallModal";
-import ErrorModal from "../components/ErrorModal";
 import {
   Call,
   CallState,
@@ -26,9 +24,8 @@ import ResultModal from "../components/ResultModal";
 import { LanguageContext } from "../context/LanguageContext";
 import { useTheme } from "../context/ThemeContext";
 import { playSound } from "../soundEffects";
-import InfoModal from "../components/InfoModal";
-import RedirectErrorModal from "../components/LoginRedirectionModal";
 import LeaveGameModal from "../components/LeaveGameModal";
+import { toast } from 'react-toastify';
 
 var client: Client;
 
@@ -83,10 +80,6 @@ const GamePlayingRoom = () => {
   // call part
   const [call, setCall] = useState<string>("");
   const [displayCallSelection, setDisplayCallSelection] = useState(false);
-  const [showCallModal, setShowCallModal] = useState(false);
-  // errors part
-  const [errorModalMessage, setErrorModalMessage] = useState<string>("");
-  const [showErrorModal, setShowErrorModal] = useState<boolean>(false);
   // timer part
   const totalTime = 20;
   const [isTimerRunning, setIsTimerRunning] = useState<boolean>(false);
@@ -111,8 +104,7 @@ const GamePlayingRoom = () => {
   const [currentPlayer, setCurrentPlayer] = useState<string>("");
   const [firstPlayer, setFirstPlayer] = useState<string>("");
 
-  // Use the LanguageContext
-  const { t } = useContext(LanguageContext)!;
+  const { translate } = useContext(LanguageContext)!;
 
   // HELPER FUNCTIONS
 
@@ -322,8 +314,7 @@ const GamePlayingRoom = () => {
   };
 
   const handleErrorEvent = (errorMessage: string) => {
-    setErrorModalMessage(errorMessage);
-    setShowErrorModal(true);
+    toast(errorMessage);
   };
 
   const handleTeamStateEvent = (redTeam: string[], blueTeam: string[]) => {
@@ -348,8 +339,8 @@ const GamePlayingRoom = () => {
   };
 
   const handleCallStateEvent = (call: Call) => {
-    setCall(call);
-    setShowCallModal(true);
+    if (call)
+      toast.info(`${translate("call")} ${translate(call.toLowerCase())}`)
   };
 
   const onMessageReceived = async (msg: IMessage) => {
@@ -406,8 +397,7 @@ const GamePlayingRoom = () => {
 
   const onErrorMessageReceived = (msg: IMessage) => {
     const error = msg.body;
-    setShowErrorModal(true);
-    setErrorModalMessage(error);
+    toast(error)
   };
 
   // USE EFFECT HOOKS
@@ -455,15 +445,12 @@ const GamePlayingRoom = () => {
   // user data hook
 
   useEffect(() => {
-    axios
+    axiosWithLogout
       .get(`${baseUrl}/user/info`)
       .then((response) => {
         usernameRef.current = response.data.username;
-      })
-      .catch((error) => console.log(error));
+      });
   }, []);
-
-  // time use effect
 
   useEffect(() => {
     let timer: NodeJS.Timeout | undefined;
@@ -509,7 +496,7 @@ const GamePlayingRoom = () => {
     // current player can be set asynchronously so we are not really sure if it's the correct one
     if (currentPlayer.startsWith("AI_")) {
       const timeoutId = setTimeout(() => {
-        axios
+        axiosWithLogout
           .post(
             `${baseUrl}/game/${gameContent.gameId}/ai-move`,
             currentPlayer,
@@ -518,9 +505,7 @@ const GamePlayingRoom = () => {
                 "Content-Type": "text/plain",
               },
             }
-          )
-          .catch((error) => console.log(error));
-
+          );
         playSound("/sounds/card_play.mp3");
       }, time);
 
@@ -598,41 +583,18 @@ const GamePlayingRoom = () => {
   if (loading) {
     return (
       <div className="d-flex justify-content-center align-items-center min-vh-100">
-        <p className="fs-4 fw-bold">{t("loading")}</p>
+        <p className="fs-4 fw-bold">{translate("loading")}</p>
       </div>
     );
   }
 
   return (
     <>
-      {/* Error Modal */}
-      {showErrorModal && (
-        <ErrorModal
-          message={errorModalMessage}
-          onClose={() => {
-            setShowErrorModal(false);
-            setErrorModalMessage("");
-          }}
-        />
-      )}
-
-      {/* Call Modal */}
-      {showCallModal && (
-        <CallModal
-          title={`${players[0]} ${t("call")}`}
-          message={call ? t(call.toLowerCase()) : t("none")}
-          onClose={() => {
-            setShowCallModal(false);
-            setCall("");
-          }}
-        />
-      )}
-
       {/* Result Modal */}
       {showResultModal && (
         <ResultModal
-          title={t("gameOver")}
-          message={`${capitalizeWord(winnerTeam)} ${t("teamWon")}`}
+          title={translate("gameOver")}
+          message={`${capitalizeWord(winnerTeam)} ${translate("teamWon")}`}
           winnerTeam={winnerTeam}
           onClose={handleQuitGame}
         />
@@ -651,7 +613,7 @@ const GamePlayingRoom = () => {
               className="btn btn-danger fw-bold custom-exit-button"
               onClick={() => setShowLeaveGameModal(true)}
             >
-              {t("exit")}
+              {translate("exit")}
             </button>
           </div>
           <div className="d-flex justify-content-start align-items-center custom-players-container">
@@ -694,7 +656,7 @@ const GamePlayingRoom = () => {
             setIsPlayerCardMapLastTurnVisible(!isPlayerCardMapLastTurnVisible)
           }
         >
-          {isPlayerCardMapLastTurnVisible ? t("hide") : t("show")}
+          {isPlayerCardMapLastTurnVisible ? translate("hide") : translate("show")}
         </button>
 
         {/* Cards Played In Last Turn */}
@@ -703,7 +665,7 @@ const GamePlayingRoom = () => {
             isPlayerCardMapLastTurnVisible ? "visible" : "hidden"
           }`}
         >
-          <p className="fs-5 fw-bold text-center">{t("lastTurnCards")}</p>
+          <p className="fs-5 fw-bold text-center">{translate("lastTurnCards")}</p>
           <div className="d-flex flex-wrap justify-content-center gap-3">
             {Array.from(playerCardMapLastTurn).map(
               ([playerName, src]) =>
@@ -754,7 +716,7 @@ const GamePlayingRoom = () => {
           }}
           onClick={toggleOptionsVisibility}
         >
-          {isOptionsVisible ? t("hide") : t("show")}
+          {isOptionsVisible ? translate("hide") : translate("show")}
         </button>
 
         {/* Points and other options */}
@@ -764,11 +726,11 @@ const GamePlayingRoom = () => {
           }`}
         >
           <div className="d-flex flex-column align-items-center rounded-4 p-2">
-            <p className="fw-bold fs-4">{t("points")}</p>
+            <p className="fw-bold fs-4">{translate("points")}</p>
             <div className="d-flex flex-row align-items-center justify-content-end w-100 px-2">
               <p className="me-auto text-danger fw-bold">
                 {redTeamRef.current[0]}{" "}
-                <span className="fw-normal">{t("and")}</span>{" "}
+                <span className="fw-normal">{translate("and")}</span>{" "}
                 {redTeamRef.current[1]}:{" "}
               </p>
               <p
@@ -781,7 +743,7 @@ const GamePlayingRoom = () => {
             <div className="d-flex flex-row align-items-center justify-content-end w-100 px-2">
               <p className="me-auto text-primary fw-bold">
                 {blueTeamRef.current[0]}{" "}
-                <span className="fw-normal">{t("and")}</span>{" "}
+                <span className="fw-normal">{translate("and")}</span>{" "}
                 {blueTeamRef.current[1]}:{" "}
               </p>
               <p
@@ -791,39 +753,39 @@ const GamePlayingRoom = () => {
                 {blueTeamPoints}
               </p>
             </div>
-            <p className="fw-bold fs-4 mt-3">{t("trumpSuit")}</p>
+            <p className="fw-bold fs-4 mt-3">{translate("trumpSuit")}</p>
             <p className="fw-bold">
-              {displayedSuit ? t(displayedSuit.toLowerCase()) : t("none")}
+              {displayedSuit ? translate(displayedSuit.toLowerCase()) : translate("none")}
             </p>
             {displayTrumpSuitSelection && (
               <div className="mt-2">
-                <p className="mb-2">{t("trumpSuit")}</p>
+                <p className="mb-2">{translate("trumpSuit")}</p>
                 <select
                   className="form-select"
                   value={suit}
                   onChange={handleSuitChange}
                 >
-                  <option value="COINS">{t("coins")}</option>
-                  <option value="CUPS">{t("cups")}</option>
-                  <option value="CLUBS">{t("clubs")}</option>
-                  <option value="SWORDS">{t("swords")}</option>
+                  <option value="COINS">{translate("coins")}</option>
+                  <option value="CUPS">{translate("cups")}</option>
+                  <option value="CLUBS">{translate("clubs")}</option>
+                  <option value="SWORDS">{translate("swords")}</option>
                 </select>
               </div>
             )}
             {/* Call select section */}
             {displayCallSelection && (
               <div className="mt-2">
-                <p className="mb-2">{t("call")}</p>
+                <p className="mb-2">{translate("call")}</p>
                 <select
                   className="form-select"
                   value={call}
                   onChange={handleCallChange}
                 >
-                  <option value="">{t("none")}</option>
-                  <option value="KNOCK">{t("knock")}</option>
-                  <option value="FLY">{t("fly")}</option>
-                  <option value="SLITHER">{t("slither")}</option>
-                  <option value="RESLITHER">{t("reslither")}</option>
+                  <option value="">{translate("none")}</option>
+                  <option value="KNOCK">{translate("knock")}</option>
+                  <option value="FLY">{translate("fly")}</option>
+                  <option value="SLITHER">{translate("slither")}</option>
+                  <option value="RESLITHER">{translate("reslither")}</option>
                 </select>
               </div>
             )}
