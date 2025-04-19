@@ -36,7 +36,7 @@ var client: Client;
 const GameWaitingRoom = () => {
 
   // Use the LanguageContext
-  const { translate : translate } = useContext(LanguageContext)!;
+  const { translate } = useContext(LanguageContext)!;
 
   var maxPlayersAmount = 4;
   const location = useLocation();

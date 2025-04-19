@@ -68,7 +68,7 @@ const Home = () => {
     const fetchGames = () => {
       axiosWithLogout.get("/game/waiting").then((response) => {
         setLobbies(response.data);
-      }).catch(() => console.log("wTF"));
+      });
     };
     setLoading(true);
     fetchGames()

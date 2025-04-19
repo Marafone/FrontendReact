@@ -1,6 +1,6 @@
 import React, {useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios"; // use axios instead of axiosApi to avoid calling interceptor
+import axios from "axios";
 import "../styles/register-login-page.css";
 import { LanguageContext } from "../context/LanguageContext";
 import { useTheme } from "../context/ThemeContext";
