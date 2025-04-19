@@ -13,7 +13,7 @@ const Rules: React.FC = () => {
     throw new Error("LanguageContext must be used within a LanguageProvider.");
   }
 
-  const { t } = context; // Now `context` is guaranteed to be defined
+  const { translate } = context; // Now `context` is guaranteed to be defined
 
   const { theme } = useTheme();
 
@@ -26,34 +26,34 @@ const Rules: React.FC = () => {
       <Navbar />
       <div className="rules-page d-flex justify-content-center align-items-center container-fluid h-100">
         <div className="rules-content">
-          <h1 className="text-center">{t("rules.title")}</h1> {/* Translated Rules Title */}
+          <h1 className="text-center">{translate("rules.title")}</h1> {/* Rules Title */}
           
           <p>
-            <strong>{t("rules.gameName")}</strong>, {t("rules.gameAlias")} 
-            {t("rules.description")}
+            <strong>{translate("rules.gameName")}</strong>, {translate("rules.gameAlias")} 
+            {translate("rules.description")}
           </p>
 
-          <p>{t("rules.deckDescription")}</p>
+          <p>{translate("rules.deckDescription")}</p>
           
-          <p>{t("rules.pointsDescription")}</p>
+          <p>{translate("rules.pointsDescription")}</p>
           
-          <p>{t("rules.teamDescription")}</p>
+          <p>{translate("rules.teamDescription")}</p>
           
-          <p>{t("rules.firstHand")}</p>
+          <p>{translate("rules.firstHand")}</p>
           
-          <p>{t("rules.maraffaBonus")}</p>
+          <p>{translate("rules.maraffaBonus")}</p>
           
-          <p>{t("rules.trickRules")}</p>
+          <p>{translate("rules.trickRules")}</p>
           
-          <p>{t("rules.handConclusion")}</p>
+          <p>{translate("rules.handConclusion")}</p>
 
           <div className="image-container">
             {loading ? (
-              <p>{t("rules.loadingImage")}</p>
+              <p>{translate("rules.loadingImage")}</p>
             ) : (
               <img
                 src="/images/cards.png"
-                alt={t("rules.imageAlt")} // Corrected usage of the alt attribute
+                alt={translate("rules.imageAlt")} // Corrected usage of the alt attribute
                 className="rules-image"
               />
             )}

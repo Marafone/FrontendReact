@@ -118,8 +118,7 @@ export const translations: TranslationsType = {
           players: "Players",
         },
         info: {
-          newOwnerTitle: "New Game Owner Selected",
-          newOwnerMessage: "{{ownerName}} is now the owner. The previous owner has left the game.",
+          newOwnerMessageSuffix: " is now the owner. The previous owner has left the game.",
         },
       },
      

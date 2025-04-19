@@ -1,5 +1,5 @@
 import { Client, IMessage } from "@stomp/stompjs";
-import axios from "axios";
+import axiosWithLogout from "../axios";
 import { useEffect, useState, useContext } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
@@ -11,11 +11,10 @@ import {
   TeamStateEvent,
 } from "../events/game-waiting-room/WebSocketEventTypes";
 import "../styles/game-waiting-room.css";
-import ErrorModal from "../components/ErrorModal";
-import InfoModal from "../components/InfoModal";
 import { LanguageContext } from "../context/LanguageContext";
 import { useTheme } from "../context/ThemeContext";
 import { playSound } from "../soundEffects";
+import { toast } from 'react-toastify';
 
 interface waitingRoomContent {
   gameId: bigint;
@@ -36,8 +35,8 @@ var client: Client;
 
 const GameWaitingRoom = () => {
 
-    // Use the LanguageContext
-    const { t } = useContext(LanguageContext)!;
+  // Use the LanguageContext
+  const { translate } = useContext(LanguageContext)!;
 
   var maxPlayersAmount = 4;
   const location = useLocation();
@@ -47,19 +46,12 @@ const GameWaitingRoom = () => {
   const [teamBlue, setTeamBlue] = useState<string[]>([]);
   const [playersAmount, setPlayersAmount] = useState(1);
   const [eventMessages, setEventMessages] = useState<string[]>([
-    t("gameWaitingRoom.events.defaultMessage"), // Use translation
+    translate("gameWaitingRoom.events.defaultMessage"),
   ]);
   const [username, setUsername] = useState<string>();
   const navigate = useNavigate();
   // owner info
   const [ownerName, setOwnerName] = useState("");
-  // error modal
-  const [error, setError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-  // information modal
-  const [info, setInfo] = useState(false);
-  const [infoTitle, setInfoTitle] = useState("");
-  const [infoMessage, setInfoMessage] = useState("");
 
   // HELPER FUNCTIONS
 
@@ -68,34 +60,35 @@ const GameWaitingRoom = () => {
   };
 
   const handleLeaveGame = () => {
-    axios
+    //unsubcribe first to not get notification about new onwer of lobby
+    client.unsubscribe(`/topic/game/${gameContent.gameId}`);
+    client.unsubscribe(`/user/queue/game`);
+    client.deactivate();
+
+    axiosWithLogout
       .post(`${baseUrl}/game/${gameContent.gameId}/leave`)
       .then(() => {
         navigate("/", { replace: true });
-      })
-      .catch((error) => console.log(error));
-
+      });
       playSound("/sounds/ui-leave.mp3");
   };
 
   const handleChangeTeam = (team: string) => {
-    axios
+    axiosWithLogout
       .post(`${baseUrl}/game/${gameContent.gameId}/team/change`, team, {
         headers: {
           "Content-Type": "text/plain",
         },
-      })
-      .catch((error) => console.log(error));
+      });
   };
 
   const handleAddAI = (team: string) => {
-    axios
+    axiosWithLogout
       .post(`${baseUrl}/game/${gameContent.gameId}/add-ai`, team, {
         headers: {
           "Content-Type": "text/plain",
         },
-      })
-      .catch((error) => console.log(error));
+      });
   };
 
 
@@ -137,8 +130,8 @@ const GameWaitingRoom = () => {
   }
 
   function handlePlayerJoinedEvent(event: PlayerJoinedEvent) {
-    // Append player name to the translated message
-    const newEventMessage = `${event.playerName} ${t("gameWaitingRoom.events.playerJoined")}`;
+    // Append player name to the message
+    const newEventMessage = `${event.playerName} ${translate("gameWaitingRoom.events.playerJoined")}`;
     setEventMessages((prevMessages) => [...prevMessages, newEventMessage]);
     // edit amount of players
     setPlayersAmount((prevAmount) => prevAmount + 1);
@@ -162,8 +155,8 @@ const GameWaitingRoom = () => {
   };
 
   function handlePlayerLeftEvent(playerName: string) {
-    // Append player name to the translated message
-    const newEventMessage = `${playerName} ${t("gameWaitingRoom.events.playerLeft")}`;
+    // Append player name to the message
+    const newEventMessage = `${playerName} ${translate("gameWaitingRoom.events.playerLeft")}`;
     setEventMessages((prevMessages) => [...prevMessages, newEventMessage]);
     // edit amount of players
     setPlayersAmount((prev) => prev - 1);
@@ -181,18 +174,13 @@ const GameWaitingRoom = () => {
   }
 
   const handleErrorEvent = (errorMessage: string) => {
-    setError(true);
-    setErrorMessage(errorMessage);
+    toast.warn(errorMessage);
   };
 
   const handleOwnerEvent = (newOwnerName: string, isNew: boolean) => {
     setOwnerName(newOwnerName);
     if (!isNew) return;
-    setInfo(true);
-    setInfoTitle(t("gameWaitingRoom.info.newOwnerTitle")); // Use translation
-    setInfoMessage(
-      '${ownerName} ${t("gameWaitingRoom.info.newOwnerMessage")}' // Use translation with dynamic value
-    );
+    toast.info(`${newOwnerName} ${translate("gameWaitingRoom.info.newOwnerMessageSuffix")}`)
   };
 
   // USE EFFECT HOOK
@@ -240,12 +228,11 @@ const GameWaitingRoom = () => {
   // user data hook
 
   useEffect(() => {
-    axios
+    axiosWithLogout
       .get(`${baseUrl}/user/info`)
       .then((response) => {
         setUsername(response.data.username);
-      })
-      .catch((error) => console.log(error));
+      });
   }, []);
 
   // dark mode effect
@@ -258,26 +245,6 @@ const GameWaitingRoom = () => {
 
   return (
     <>
-      {error && (
-        <ErrorModal
-          message={errorMessage}
-          onClose={() => {
-            setErrorMessage("");
-            setError(false);
-          }}
-        />
-      )}
-      {info && (
-        <InfoModal
-          title={infoTitle}
-          message={infoMessage}
-          onClose={() => {
-            setInfoTitle("");
-            setInfoMessage("");
-            setInfo(false);
-          }}
-        />
-      )}
       <div
         className="main-container d-flex flex-column justify-content-evenly align-items-center min-vh-100 min-vw-100"
       >
@@ -291,7 +258,7 @@ const GameWaitingRoom = () => {
                 className="btn btn-danger fw-bold"
                 onClick={handleLeaveGame}
               >
-                {t("gameWaitingRoom.buttons.exit")} {/* Use translation */}
+                {translate("gameWaitingRoom.buttons.exit")} {/* Use translation */}
               </button>
             </div>
             <hr className="border border-black border-2 opacity-50 mt-0 mx-3" />
@@ -303,7 +270,7 @@ const GameWaitingRoom = () => {
                 className="btn btn-danger fw-bold mb-4"
                 onClick={() => handleChangeTeam("RED")}
               >
-                {t("gameWaitingRoom.buttons.redTeam")} {/* Use translation */}
+                {translate("gameWaitingRoom.buttons.redTeam")} {/* Use translation */}
               </button>
               {/* Add AI to Red Team */}
               <button
@@ -311,7 +278,7 @@ const GameWaitingRoom = () => {
                 onClick={() => handleAddAI("RED")}
               >
                 <i className="bi bi-pc-display-horizontal rounded me-1" /> 
-                {t("gameWaitingRoom.buttons.addAI")}
+                {translate("gameWaitingRoom.buttons.addAI")}
               </button>
               {teamRed.map((player) => (
                 <p
@@ -332,7 +299,7 @@ const GameWaitingRoom = () => {
                 className="btn btn-primary fw-bold mb-4"
                 onClick={() => handleChangeTeam("BLUE")}
               >
-                {t("gameWaitingRoom.buttons.blueTeam")} {/* Use translation */}
+                {translate("gameWaitingRoom.buttons.blueTeam")} {/* Use translation */}
               </button>
               {/* Add AI to Blue Team */}
               <button
@@ -340,7 +307,7 @@ const GameWaitingRoom = () => {
                 onClick={() => handleAddAI("BLUE")}
               >
                 <i className="bi bi-pc-display-horizontal me-1" />
-                {t("gameWaitingRoom.buttons.addAI")}
+                {translate("gameWaitingRoom.buttons.addAI")}
               </button>
               {teamBlue.map((player) => (
                 <p
@@ -360,24 +327,24 @@ const GameWaitingRoom = () => {
           {/* game info */}
           <div className="d-flex flex-column align-items-center mt-3">
             <p>
-              <span className="fw-bold">{t("gameWaitingRoom.labels.gameType")}: </span> {/* Use translation */}
+              <span className="fw-bold">{translate("gameWaitingRoom.labels.gameType")}: </span> {/* Use translation */}
               {gameContent.gameType}
             </p>
             <p>
-              <span className="fw-bold">{t("gameWaitingRoom.labels.players")}: </span> {/* Use translation */}
+              <span className="fw-bold">{translate("gameWaitingRoom.labels.players")}: </span> {/* Use translation */}
               {playersAmount}/{maxPlayersAmount}
             </p>
             <button
               className="btn btn-success fw-bold border border-black border-opacity-25"
               onClick={handleStartGame}
             >
-              {t("gameWaitingRoom.buttons.startGame")} {/* Use translation */}
+              {translate("gameWaitingRoom.buttons.startGame")} {/* Use translation */}
             </button>
           </div>
         </div>
         {/* Events */}
         <div className="custom-events d-flex flex-column align-items-center w-50 px-3 py-2">
-          <h2>{t("gameWaitingRoom.events.title")}</h2> {/* Use translation */}
+          <h2>{translate("gameWaitingRoom.events.title")}</h2> {/* Use translation */}
           <hr className="border border-black border-2 opacity-50 mt-0 w-100" />
           <div className="custom-event-messages-container w-100 overflow-auto">
             {eventMessages.map((message, index) => (

@@ -21,7 +21,7 @@ const Register = () => {
     throw new Error("LanguageContext must be used within a LanguageProvider.");
   }
 
-  const { t } = context; // Now `context` is guaranteed to be defined
+  const { translate } = context; // Now `context` is guaranteed to be defined
 
   const { theme } = useTheme();
   
@@ -34,11 +34,13 @@ const Register = () => {
       .post(`${baseUrl}/auth/register`, { username, email, password })
       .then((response) => {
         if (response.status === 201) {
-          navigate("/");
+          navigate("/login");
+        }else{
+          setErrorMessage(translate("register.error"));
         }
       })
       .catch((error) => {
-        setErrorMessage(t("register.error")); // Translated error message
+        setErrorMessage(translate("register.error"));
         console.log("Error:", error);
       });
   };
@@ -46,11 +48,11 @@ const Register = () => {
   return (
     <div className="register-login-page custom-outer-div d-flex justify-content-center align-items-center min-vw-100 min-vh-100 p-3">
       <div className="custom-user-info-window w-100 p-4 border border-black border-opacity-25 rounded shadow-lg" style={{ maxWidth: "400px" }}>
-        <h3 className="text-center mb-4">{t("register.title")}</h3> {/* Translated Register Title */}
-        {errorMessage && <p className="text-danger text-center">{errorMessage}</p>} {/* Translated Error Message */}
+        <h3 className="text-center mb-4">{translate("register.title")}</h3> {/* Register Title */}
+        {errorMessage && <p className="text-danger text-center">{errorMessage}</p>} {/* Error Message */}
         
         <div className="mb-3">
-          <label className="form-label">{t("register.username")}</label> {/* Translated Username label */}
+          <label className="form-label">{translate("register.username")}</label> {/* Username label */}
           <input
             type="text"
             className="form-control"
@@ -60,7 +62,7 @@ const Register = () => {
         </div>
 
         <div className="mb-3">
-          <label className="form-label">{t("register.email")}</label> {/* Translated Email label */}
+          <label className="form-label">{translate("register.email")}</label> {/* Email label */}
           <input
             type="email"
             className="form-control"
@@ -70,7 +72,7 @@ const Register = () => {
         </div>
 
         <div className="mb-3">
-          <label className="form-label">{t("register.password")}</label> {/* Translated Password label */}
+          <label className="form-label">{translate("register.password")}</label> {/* Password label */}
           <input
             type="password"
             className="form-control"
@@ -81,15 +83,15 @@ const Register = () => {
         {/* Login Link */}
         <p className="text-center">
           <a href="#" onClick={() => navigate("/login")}>
-            {t("register.login")} {/* Translated Login link */}
+            {translate("register.login")} {/* Login link */}
           </a>
         </p>
         <div className="d-flex justify-content-between">
           <button className="btn btn-secondary" onClick={() => navigate("/")}>
-            {t("register.cancel")} {/* Translated Cancel button */}
+            {translate("register.cancel")} {/* Cancel button */}
           </button>
           <button className="btn btn-primary" onClick={handleRegister}>
-            {t("register.submit")} {/* Translated Submit button */}
+            {translate("register.submit")} {/* Submit button */}
           </button>
         </div>
       </div>

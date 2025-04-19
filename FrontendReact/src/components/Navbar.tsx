@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useUserContext } from "../context/UserContext";
 import { LanguageContext } from "../context/LanguageContext";
 import { useTheme } from "../context/ThemeContext";
-import axios from "axios";
+import axiosWithLogout from "../axios";
 
 const Navbar = () => {
   const [displayLanguages, setDisplayLanguages] = useState(false);
@@ -15,26 +15,17 @@ const Navbar = () => {
     throw new Error("LanguageContext must be used within a LanguageProvider.");
   }
 
-  const { setUsername } = useUserContext();
+  const { username, setUsername } = useUserContext();
   const { language, setLanguage } = languageContext;
   const { theme, toggleTheme } = useTheme();
 
-  const storedUsername = localStorage.getItem("usernameValue");
-  storedUsername ? JSON.parse(storedUsername) : null;
-
-  const { t } = languageContext; // Now `context` is guaranteed to be defined
+  const { translate : translate } = languageContext; // Now `context` is guaranteed to be defined
 
   const languagesMenuColor = "#a0091b";
 
-  const baseUrl = import.meta.env.VITE_API_BASE_URL;
-
-  axios.defaults.withCredentials = true;
-
   // Logout request
   const handleLogout = async () => {
-    try {
-      const response = await axios.post(
-        `${baseUrl}/auth/logout`,
+      const response = await axiosWithLogout.post("/auth/logout",
         {},
         {
           headers: {
@@ -46,12 +37,8 @@ const Navbar = () => {
 
       if (response.status === 200) {
         setUsername(null);
-        localStorage.removeItem("usernameValue");
         console.log("User logged out");
       }
-    } catch (error) {
-      console.log("Error:", error);
-    }
   };
 
   const closeDropdowns = () => {
@@ -102,15 +89,25 @@ const Navbar = () => {
             </li>
             <li className="nav-item">
               <Link to="/rules" className="nav-link text-white">
-                {t("rules.navbar")}
+                {translate("rules.navbar")}
               </Link>
             </li>
             <li>
               <Link to="/players-ranking" className="nav-link text-white">
-                {t("ranking.navbar")}
+                {translate("ranking.navbar")}
               </Link>
             </li>
           </ul>
+          <div
+            className="user-info"
+            style={{ color: "#ffffff", fontSize: "1.2rem", marginRight: "10px" }}
+          >
+            {username != null ? (
+              username
+            ) : (
+              ""
+            )}
+          </div>
           <div
             className="dark-button"
             role="button"
@@ -156,7 +153,7 @@ const Navbar = () => {
               {/* Change icon dynamically based on login state */}
               <i
                 className={`bi ${
-                  storedUsername ? "bi-person-circle" : "bi-door-open"
+                  username ? "bi-person-circle" : "bi-door-open"
                 } text-white fs-4`}
                 onClick={handleUserMenuClick}
                 style={{ cursor: "pointer" }}
@@ -171,14 +168,14 @@ const Navbar = () => {
                   left: "auto",
                 }}
               >
-                {!storedUsername ? (
+                {!username ? (
                   <>
                     <li>
                       <Link
                         to="/register"
                         className="dropdown-item text-white custom-dropdown-item"
                       >
-                        {t("register.title")}
+                        {translate("register.title")}
                       </Link>
                     </li>
                     <li>
@@ -186,7 +183,7 @@ const Navbar = () => {
                         to="/login"
                         className="dropdown-item text-white custom-dropdown-item"
                       >
-                        {t("login.title")}
+                        {translate("login.title")}
                       </Link>
                     </li>
                   </>
@@ -196,7 +193,7 @@ const Navbar = () => {
                       onClick={handleLogout}
                       className="dropdown-item text-white custom-dropdown-item"
                     >
-                      {t("logout")}
+                      {translate("logout")}
                     </button>
                   </li>
                 )}
