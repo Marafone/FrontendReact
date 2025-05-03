@@ -9,6 +9,8 @@ import {useUserContext} from "../context/UserContext";
 import {toast} from "react-toastify";
 import JoinGameModal from "../components/JoinGameModal.tsx";
 import GameData from "../types/game.ts";
+import JoinByCodeModal from "../components/JoinByCodeModal.tsx";
+import {PageChangeDirection} from "../types/pagination.ts";
 
 const Home = () => {
     const navigate = useNavigate();
@@ -23,12 +25,13 @@ const Home = () => {
     );
 
     const [selectedGame, setSelectedGame] = useState<GameData | null>(null);
-
     const context = useContext(LanguageContext);
     const {username, setUsername} = useUserContext();
 
     const {theme} = useTheme();
 
+    const [showJoinGameByCodeModal, setShowJoinGameByCodeModal] = useState(false);
+  
     if (!context) {
         throw new Error("LanguageContext must be used within a LanguageProvider.");
     }
@@ -76,6 +79,12 @@ const Home = () => {
         document.documentElement.setAttribute("data-theme", theme);
     }, [theme]);
 
+    useEffect(() => {
+        document.addEventListener("keydown", handleKeyDown);
+
+        return () => document.removeEventListener("keydown", handleKeyDown);
+    })
+  
     const handleNavigation = (gameData: GameData) => {
         navigate("/wait-for-game", {state: gameData});
     };
@@ -84,6 +93,7 @@ const Home = () => {
         gameData: GameData,
         joinGameCode: string
     ) => {
+          
         const joinGameRequestData = {
             joinGameCode: joinGameCode,
         };
@@ -132,6 +142,21 @@ const Home = () => {
 
         return lobbies.map((gameData) => renderLobby(gameData));
     }
+        
+    const changePage = (direction: PageChangeDirection) => {
+      if (direction === PageChangeDirection.LEFT && page > 1)
+          setPage(page - 1);
+      else if (direction === PageChangeDirection.RIGHT)
+          setPage(page + 1);
+    }
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const key = e.key;
+      if (key === "ArrowLeft")
+          changePage(PageChangeDirection.LEFT);
+      else if (key === "ArrowRight")
+          changePage(PageChangeDirection.RIGHT);
+    }
 
     function renderLobby(gameData: GameData) {
         return (
@@ -155,6 +180,13 @@ const Home = () => {
         <>
             {selectedGame &&
                 <JoinGameModal onHide={() => setSelectedGame(null)} onJoin={handleJoinGame} gameData={selectedGame}/>}
+          
+            {showJoinGameByCodeModal &&
+                <JoinByCodeModal
+                    onHide={() => setShowJoinGameByCodeModal(false)}
+                    handleJoinGame={handleJoinGame}
+                />}
+          
             <div className="container-fluid d-flex flex-column align-items-center h-100 p-3 w-100">
                 {isReconnectionPossible && (
                     <div className="w-50 mb-1 mt-2">
@@ -210,10 +242,7 @@ const Home = () => {
                                     <button
                                         disabled={page <= 1}
                                         className="custom-lobby-change-page-btn fw-bold border-0"
-                                        onClick={() => {
-                                            if (page > 1)
-                                                setPage(page - 1);
-                                        }}
+                                        onClick={() => changePage(PageChangeDirection.LEFT)}
                                     >
                                         <i className="bi bi-arrow-left me-1"></i>
                                         <span className="m-0">{translate("home.prevPage")}</span>{" "}
@@ -229,9 +258,7 @@ const Home = () => {
                                 <div className="col-5 d-flex justify-content-start">
                                     <button
                                         className="custom-lobby-change-page-btn gap-2 fw-bold border-0 text-start"
-                                        onClick={() => {
-                                            setPage(page + 1);
-                                        }}
+                                        onClick={() => changePage(PageChangeDirection.RIGHT)}
                                     >
                                         <span className="m-0">{translate("home.nextPage")}</span>{" "}
                                         <i className="bi bi-arrow-right ms-1"></i>
@@ -240,6 +267,13 @@ const Home = () => {
                             </div>
                         </div>
                     </div>
+                </div>
+                
+                {/* Join Friend Game Button */}
+                <div className="w-50 mb-4 mt-2 d-flex justify-content-center">
+                    <button className="btn btn-success w-50" onClick={() => setShowJoinGameByCodeModal(true)}>
+                        {translate("home.joinGameBtn")}
+                    </button>
                 </div>
             </div>
         </>
