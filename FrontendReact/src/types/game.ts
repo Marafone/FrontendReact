@@ -9,4 +9,5 @@ export interface GameData {
     gameName: string;
     gameType: GameType;
     joinedPlayersAmount: number;
+    isPrivate: boolean;
 }
