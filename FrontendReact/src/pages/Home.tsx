@@ -10,6 +10,7 @@ import {toast} from "react-toastify";
 import JoinGameModal from "../components/JoinGameModal.tsx";
 import GameData from "../types/game.ts";
 import JoinByCodeModal from "../components/JoinByCodeModal.tsx";
+import GameData from "../types/game.ts";
 import {PageChangeDirection} from "../types/pagination.ts";
 
 const Home = () => {

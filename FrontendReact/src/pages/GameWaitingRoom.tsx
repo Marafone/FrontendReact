@@ -15,7 +15,7 @@ import {LanguageContext} from "../context/LanguageContext";
 import {useTheme} from "../context/ThemeContext";
 import {playSound} from "../soundEffects";
 import {toast} from 'react-toastify';
-import {GameData} from "../types/game.ts";
+import GameData from "../types/game.ts";
 import axios from "axios";
 import GameCodeModal from "../components/GameCodeModal.tsx";
 
@@ -191,7 +191,16 @@ const GameWaitingRoom = () => {
 
     const handleOwnerEvent = (newOwnerName: string, isNew: boolean) => {
         setOwnerName(newOwnerName);
-        if (username === newOwnerName)
+        if (username === null || username === undefined) {
+            axiosWithLogout
+                .get("/user/info")
+                .then(response => {
+                    const username = response.data.username;
+                    if (username === newOwnerName)
+                        setShowGameCodeButton(true);
+                    setUsername(response.data.username);
+                })
+        } else if (username === newOwnerName)
             setShowGameCodeButton(true);
         if (!isNew) return;
         toast.info(`${newOwnerName} ${translate("gameWaitingRoom.info.newOwnerMessageSuffix")}`)
@@ -259,126 +268,126 @@ const GameWaitingRoom = () => {
         <>
             {showGameCodeModal &&
                 <GameCodeModal gameCode={gameData.gameId} onHide={() => setShowGameCodeModal(false)}/>}
-                <div
-                    className="main-container d-flex flex-column justify-content-evenly align-items-center min-vh-100 min-vw-100"
-                >
-                    {/* Lobby */}
-                    <div className="custom-lobby w-75 p-3">
-                        {/* header */}
-                        <div>
-                            <div className="d-flex flex-row justify-content-between align-items-center px-3 py-2">
-                                <h2>{gameData.gameName}</h2>
-                                <div>
-                                    {showGameCodeButton && <button className="btn btn-success fw-bold me-1"
-                                                                   onClick={() => setShowGameCodeModal(true)}>
-                                        {translate("gameWaitingRoom.buttons.getGameCode")}
-                                    </button>}
-                                    <button
-                                        className="btn btn-danger fw-bold"
-                                        onClick={handleLeaveGame}
-                                    >
-                                        {translate("gameWaitingRoom.buttons.exit")}
-                                    </button>
-                                </div>
-                            </div>
-                            <hr className="border border-black border-2 opacity-50 mt-0 mx-3"/>
-                        </div>
-                        {/* teams */}
-                        <div className="d-flex justify-content-evenly">
-                            <div className="d-flex flex-column align-items-center">
+            <div
+                className="main-container d-flex flex-column justify-content-evenly align-items-center min-vh-100 min-vw-100"
+            >
+                {/* Lobby */}
+                <div className="custom-lobby w-75 p-3">
+                    {/* header */}
+                    <div>
+                        <div className="d-flex flex-row justify-content-between align-items-center px-3 py-2">
+                            <h2>{gameData.gameName}</h2>
+                            <div>
+                                {showGameCodeButton && <button className="btn btn-success fw-bold me-1"
+                                                               onClick={() => setShowGameCodeModal(true)}>
+                                    {translate("gameWaitingRoom.buttons.getGameCode")}
+                                </button>}
                                 <button
-                                    className="btn btn-danger fw-bold mb-4"
-                                    onClick={() => handleChangeTeam("RED")}
+                                    className="btn btn-danger fw-bold"
+                                    onClick={handleLeaveGame}
                                 >
-                                    {translate("gameWaitingRoom.buttons.redTeam")}
+                                    {translate("gameWaitingRoom.buttons.exit")}
                                 </button>
-                                {/* Add AI to Red Team */}
-                                <button
-                                    className="btn fw-bold text-danger mb-2"
-                                    onClick={() => handleAddAI("RED")}
-                                >
-                                    <i className="bi bi-pc-display-horizontal rounded me-1"/>
-                                    {translate("gameWaitingRoom.buttons.addAI")}
-                                </button>
-                                {loading && <p>Loading Data...</p>}
-                                {teamRed.map((player) => (
-                                    <p
-                                        key={player}
-                                        className={`custom-player text-danger px-3 py-1 rounded-4 ${
-                                            username === player ? "fw-bold" : ""
-                                        }`}
-                                    >
-                                        {player == ownerName && (
-                                            <i className="bi bi-person-badge px-1"/>
-                                        )}
-                                        {player}
-                                    </p>
-                                ))}
-                            </div>
-                            <div className="d-flex flex-column align-items-center">
-                                <button
-                                    className="btn btn-primary fw-bold mb-4"
-                                    onClick={() => handleChangeTeam("BLUE")}
-                                >
-                                    {translate("gameWaitingRoom.buttons.blueTeam")}
-                                </button>
-                                {/* Add AI to Blue Team */}
-                                <button
-                                    className="btn fw-bold text-primary mb-2"
-                                    onClick={() => handleAddAI("BLUE")}
-                                >
-                                    <i className="bi bi-pc-display-horizontal me-1"/>
-                                    {translate("gameWaitingRoom.buttons.addAI")}
-                                </button>
-                                {loading && <p>Loading Data...</p>}
-                                {teamBlue.map((player) => (
-                                    <p
-                                        key={player}
-                                        className={`custom-player text-primary px-3 py-1 rounded-4 ${
-                                            username === player ? "fw-bold" : ""
-                                        }`}
-                                    >
-                                        {player == ownerName && (
-                                            <i className="bi bi-person-badge px-1"/>
-                                        )}
-                                        {player}
-                                    </p>
-                                ))}
                             </div>
                         </div>
-                        {/* game info */}
-                        <div className="d-flex flex-column align-items-center mt-3">
-                            <p>
-                            <span
-                                className="fw-bold">{translate("gameWaitingRoom.labels.gameType")}: </span>
-                                {gameData.gameType}
-                            </p>
-                            <p>
-                            <span
-                                className="fw-bold">{translate("gameWaitingRoom.labels.players")}: </span>
-                                {playersAmount}/{maxPlayersAmount}
-                            </p>
-                            <button
-                                className="btn btn-success fw-bold border border-black border-opacity-25"
-                                onClick={handleStartGame}
-                            >
-                                {translate("gameWaitingRoom.buttons.startGame")}
-                            </button>
-                        </div>
+                        <hr className="border border-black border-2 opacity-50 mt-0 mx-3"/>
                     </div>
-                    {/* Events */}
-                    <div className="custom-events d-flex flex-column align-items-center w-50 px-3 py-2">
-                        <h2>{translate("gameWaitingRoom.events.title")}</h2>
-                        <hr className="border border-black border-2 opacity-50 mt-0 w-100"/>
-                        <div className="custom-event-messages-container w-100 overflow-auto">
-                            {eventMessages.map((message, index) => (
-                                <p key={index} className="me-auto">
-                                    {message}
+                    {/* teams */}
+                    <div className="d-flex justify-content-evenly">
+                        <div className="d-flex flex-column align-items-center">
+                            <button
+                                className="btn btn-danger fw-bold mb-4"
+                                onClick={() => handleChangeTeam("RED")}
+                            >
+                                {translate("gameWaitingRoom.buttons.redTeam")}
+                            </button>
+                            {/* Add AI to Red Team */}
+                            <button
+                                className="btn fw-bold text-danger mb-2"
+                                onClick={() => handleAddAI("RED")}
+                            >
+                                <i className="bi bi-pc-display-horizontal rounded me-1"/>
+                                {translate("gameWaitingRoom.buttons.addAI")}
+                            </button>
+                            {loading && <p>Loading Data...</p>}
+                            {teamRed.map((player) => (
+                                <p
+                                    key={player}
+                                    className={`custom-player text-danger px-3 py-1 rounded-4 ${
+                                        username === player ? "fw-bold" : ""
+                                    }`}
+                                >
+                                    {player == ownerName && (
+                                        <i className="bi bi-person-badge px-1"/>
+                                    )}
+                                    {player}
+                                </p>
+                            ))}
+                        </div>
+                        <div className="d-flex flex-column align-items-center">
+                            <button
+                                className="btn btn-primary fw-bold mb-4"
+                                onClick={() => handleChangeTeam("BLUE")}
+                            >
+                                {translate("gameWaitingRoom.buttons.blueTeam")}
+                            </button>
+                            {/* Add AI to Blue Team */}
+                            <button
+                                className="btn fw-bold text-primary mb-2"
+                                onClick={() => handleAddAI("BLUE")}
+                            >
+                                <i className="bi bi-pc-display-horizontal me-1"/>
+                                {translate("gameWaitingRoom.buttons.addAI")}
+                            </button>
+                            {loading && <p>Loading Data...</p>}
+                            {teamBlue.map((player) => (
+                                <p
+                                    key={player}
+                                    className={`custom-player text-primary px-3 py-1 rounded-4 ${
+                                        username === player ? "fw-bold" : ""
+                                    }`}
+                                >
+                                    {player == ownerName && (
+                                        <i className="bi bi-person-badge px-1"/>
+                                    )}
+                                    {player}
                                 </p>
                             ))}
                         </div>
                     </div>
+                    {/* game info */}
+                    <div className="d-flex flex-column align-items-center mt-3">
+                        <p>
+                            <span
+                                className="fw-bold">{translate("gameWaitingRoom.labels.gameType")}: </span>
+                            {gameData.gameType}
+                        </p>
+                        <p>
+                            <span
+                                className="fw-bold">{translate("gameWaitingRoom.labels.players")}: </span>
+                            {playersAmount}/{maxPlayersAmount}
+                        </p>
+                        <button
+                            className="btn btn-success fw-bold border border-black border-opacity-25"
+                            onClick={handleStartGame}
+                        >
+                            {translate("gameWaitingRoom.buttons.startGame")}
+                        </button>
+                    </div>
                 </div>
+                {/* Events */}
+                <div className="custom-events d-flex flex-column align-items-center w-50 px-3 py-2">
+                    <h2>{translate("gameWaitingRoom.events.title")}</h2>
+                    <hr className="border border-black border-2 opacity-50 mt-0 w-100"/>
+                    <div className="custom-event-messages-container w-100 overflow-auto">
+                        {eventMessages.map((message, index) => (
+                            <p key={index} className="me-auto">
+                                {message}
+                            </p>
+                        ))}
+                    </div>
+                </div>
+            </div>
         </>
     );
 };
