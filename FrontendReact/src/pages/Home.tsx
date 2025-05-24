@@ -7,7 +7,7 @@ import {useTheme} from "../context/ThemeContext";
 import "../styles/home-page.css";
 import {useUserContext} from "../context/UserContext";
 import JoinByCodeModal from "../components/JoinByCodeModal.tsx";
-import {GameData} from "../types/game.ts";
+import GameData from "../types/game.ts";
 import {PageChangeDirection} from "../types/pagination.ts";
 
 const Home = () => {
