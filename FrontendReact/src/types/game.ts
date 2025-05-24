@@ -4,7 +4,7 @@ enum GameType {
     Trisette = "Trisette",
 }
 
-export interface GameData {
+export default interface GameData {
     gameId: bigint;
     gameName: string;
     gameType: GameType;
